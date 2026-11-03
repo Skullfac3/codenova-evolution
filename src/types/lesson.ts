@@ -1,0 +1,85 @@
+/**
+ * Modelo de datos de las microlecciones de CodeNova Evolution.
+ *
+ * Las lecciones son DATOS, no componentes: así se pueden revisar por
+ * docentes, traducir y validar automáticamente sin tocar la interfaz.
+ *
+ * Estructura pedagógica (siempre en este orden):
+ *   1. intro  2. concept  3. example  4. exercise
+ *   5. feedback  6. reward  7. next
+ */
+
+export type EraId = 1 | 2 | 3 | 4 | 5;
+export type LessonKind = 'lesson' | 'evaluation';
+export type DurationMinutes = 5 | 10 | 15;
+
+/** Resultado de ejecutar código del estudiante en el sandbox. */
+export interface RunResult {
+  /** Cada llamada a console.log, ya formateada como texto. */
+  logs: string[];
+  /** Error no capturado, si lo hubo. */
+  error?: { name: string; message: string };
+  /** true si la ejecución superó el tiempo límite. */
+  timedOut?: boolean;
+}
+
+/**
+ * Comprobaciones declarativas. Cada una lleva el mensaje que Proto-0
+ * dirá si falla, escrito en lenguaje sencillo.
+ */
+export type Check =
+  | { type: 'no-error'; message: string }
+  | { type: 'output-equals'; expected: string[]; message: string }
+  | { type: 'output-matches'; line: number; pattern: string; message: string }
+  | { type: 'code-matches'; pattern: string; message: string }
+  | { type: 'code-not-matches'; pattern: string; message: string };
+
+export interface Exercise {
+  id: string;
+  /** Qué debe hacer el estudiante. */
+  prompt: string;
+  /** Código inicial que aparece en el editor. */
+  starterCode: string;
+  /** Solución de referencia (la usan las pruebas automáticas, nunca se muestra de entrada). */
+  solution: string;
+  checks: Check[];
+  /** Pistas progresivas de Proto-0: de la más general a la más concreta. */
+  hints: string[];
+}
+
+export interface QuizQuestion {
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+export interface Lesson {
+  id: string;
+  era: EraId;
+  order: number;
+  kind: LessonKind;
+  title: string;
+  /** Conceptos que cubre (para el mapa de aprendizaje). */
+  topics: string[];
+
+  /** 1. Introducción narrativa breve. */
+  intro: string;
+  /** 2. Explicación del concepto (Markdown sencillo). */
+  concept: string;
+  /** 3. Ejemplo práctico con su salida esperada. */
+  example: { code: string; output: string[] };
+  /** 4. Ejercicio principal (obligatorio en cualquier duración). */
+  exercise: Exercise;
+  /** Retos extra: 10 min = primero; 15 min = ambos. */
+  extraChallenges: Exercise[];
+  /** Solo en evaluaciones: máximo 5 preguntas. */
+  quiz?: QuizQuestion[];
+
+  /** 5. Retroalimentación de Proto-0. */
+  feedback: { success: string; retry: string };
+  /** 6. Recompensa. Valor de referencia: la fuente de verdad es la tabla `lessons` en Supabase. */
+  reward: { xp: number; coins: number };
+  /** 7. Siguiente desafío. */
+  next: string | null;
+}
