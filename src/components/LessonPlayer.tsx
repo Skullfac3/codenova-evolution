@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { DurationMinutes, Lesson } from '../types/lesson';
 import { exercisesFor, scoreEvaluation, scoreLesson } from '../learning/validate';
 import { useProgress, type CompletionOutcome } from '../store/progress';
+import { ERAS } from '../learning/lessons';
 import { ExerciseRunner } from './ExerciseRunner';
 import { Markdown } from './Markdown';
 import { Quiz } from './Quiz';
@@ -121,7 +122,7 @@ export function LessonPlayer({ lesson, onExit, onNext }: Props) {
 
       {step.kind === 'reward' && (
         <section className="reward" data-testid="reward" data-awarded={step.outcome.awarded}>
-          <p className="big-emoji">{step.outcome.eraUnlocked ? '🏛️' : '⭐'}</p>
+          <p className="big-emoji">{step.outcome.eraUnlocked ? ERAS.find((e) => e.id === step.outcome.eraUnlocked)?.icon : '⭐'}</p>
           <h3>{isEval ? '¡Evaluación aprobada!' : '¡Lección completada!'}</h3>
           <p>Calificación: <strong data-testid="reward-score">{step.score}</strong> / 100</p>
           {step.outcome.awarded ? (
@@ -129,8 +130,10 @@ export function LessonPlayer({ lesson, onExit, onNext }: Props) {
           ) : (
             <p className="muted">Ya habías completado esta lección: practicar de nuevo no da recompensa extra.</p>
           )}
-          {step.outcome.eraUnlocked && (
-            <p className="unlock" data-testid="era-unlocked">¡Desbloqueaste la Era 2: Civilizaciones antiguas!</p>
+          {step.outcome.eraUnlocked !== null && (
+            <p className="unlock" data-testid="era-unlocked" data-era={step.outcome.eraUnlocked}>
+              ¡Desbloqueaste la Era {step.outcome.eraUnlocked}: {ERAS.find((e) => e.id === step.outcome.eraUnlocked)?.name}!
+            </p>
           )}
           <button className="btn primary big" onClick={() => onNext(lesson.next)} data-testid="btn-next-lesson">
             {lesson.next ? 'Siguiente lección →' : 'Volver al mapa'}

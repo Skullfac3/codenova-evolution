@@ -1,19 +1,21 @@
 import { create } from 'zustand';
 import { createEmptySave, loadSave, writeSave, type Save } from '../services/storage/save';
-import { era1Lessons } from '../learning/lessons/era1';
+import { ERAS, findLesson, lessonsOfEra } from '../learning/lessons';
 
 /** Igual que public.level_for_xp() en Supabase. */
 export const levelForXp = (xp: number) => Math.floor(Math.sqrt(Math.max(xp, 0) / 100)) + 1;
 
 export interface CompletionOutcome {
   awarded: boolean;
-  eraUnlocked: boolean;
+  /** Era desbloqueada con esta lección, si hubo una. */
+  eraUnlocked: number | null;
 }
 
 interface ProgressStore {
   save: Save;
   completeLesson: (lessonId: string, score: number, reward: { xp: number; coins: number }) => CompletionOutcome;
   isLessonUnlocked: (lessonId: string) => boolean;
+  isEraComplete: (era: number) => boolean;
   resetProgress: () => void;
 }
 
@@ -22,13 +24,18 @@ const persist = (save: Save) => {
   return save;
 };
 
+const eraDone = (save: Save, era: number) => {
+  const lessons = lessonsOfEra(era);
+  return lessons.length > 0 && lessons.every((l) => save.completedLessons[l.id]);
+};
+
 export const useProgress = create<ProgressStore>((set, get) => ({
   save: loadSave(),
 
   completeLesson: (lessonId, score, reward) => {
     const { save } = get();
     // Misma regla que complete_lesson(): una recompensa por lección.
-    if (save.completedLessons[lessonId]) return { awarded: false, eraUnlocked: false };
+    if (save.completedLessons[lessonId]) return { awarded: false, eraUnlocked: null };
 
     const eventId = crypto.randomUUID();
     let next: Save = {
@@ -43,15 +50,16 @@ export const useProgress = create<ProgressStore>((set, get) => ({
     };
 
     // Misma regla que unlock_next_era(): todo lo publicado de la era debe estar completo.
-    let eraUnlocked = false;
-    const eraDone = era1Lessons.every((l) => next.completedLessons[l.id]);
-    if (eraDone && !next.unlockedEras.includes(2)) {
-      eraUnlocked = true;
+    let eraUnlocked: number | null = null;
+    const era = findLesson(lessonId)?.era;
+    const nextEra = ERAS.find((e) => e.id === (era ?? 0) + 1);
+    if (era && nextEra && eraDone(next, era) && !next.unlockedEras.includes(nextEra.id)) {
+      eraUnlocked = nextEra.id;
       next = {
         ...next,
-        unlockedEras: [...next.unlockedEras, 2],
-        currentEra: 2,
-        worlds: { ...next.worlds, 2: next.worlds[2] ?? { objects: [] } },
+        unlockedEras: [...next.unlockedEras, nextEra.id],
+        currentEra: nextEra.id,
+        worlds: { ...next.worlds, [nextEra.id]: next.worlds[nextEra.id] ?? { objects: [] } },
       };
     }
 
@@ -60,10 +68,16 @@ export const useProgress = create<ProgressStore>((set, get) => ({
   },
 
   isLessonUnlocked: (lessonId) => {
-    const index = era1Lessons.findIndex((l) => l.id === lessonId);
-    if (index <= 0) return index === 0;
-    return Boolean(get().save.completedLessons[era1Lessons[index - 1]!.id]);
+    const lesson = findLesson(lessonId);
+    if (!lesson) return false;
+    const { save } = get();
+    if (!save.unlockedEras.includes(lesson.era)) return false;
+    const siblings = lessonsOfEra(lesson.era);
+    const index = siblings.findIndex((l) => l.id === lessonId);
+    return index === 0 || Boolean(save.completedLessons[siblings[index - 1]!.id]);
   },
+
+  isEraComplete: (era) => eraDone(get().save, era),
 
   resetProgress: () => set({ save: persist(createEmptySave()) }),
 }));

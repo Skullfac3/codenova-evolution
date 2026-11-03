@@ -98,5 +98,5 @@ console.log("Recursos: " + recursos);`,
     retry: 'Casi. Repasa las lecciones marcadas y vuelve al fuego del consejo cuando quieras.',
   },
   reward: { xp: 50, coins: 30 },
-  next: null, // primera lección de la Era 2
+  next: 'e2-01-condicionales',
 };

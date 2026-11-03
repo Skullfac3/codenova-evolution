@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { Exercise, RunResult } from '../types/lesson';
-import { validate, type ValidationResult } from '../learning/validate';
+import { validateWithTests, type ValidationResult } from '../learning/validate';
 import { CodeSandbox } from '../editor/sandbox';
 import { CodeEditor } from './CodeEditor';
 
@@ -25,7 +25,7 @@ export function ExerciseRunner({ exercise, label, messages, onPassed }: Props) {
     setRunning(true);
     const r = await sandbox.run(code);
     setResult(r);
-    setValidation(validate(exercise, code, r));
+    setValidation(await validateWithTests(exercise, code, r, (c) => sandbox.run(c)));
     setRunning(false);
   }, [code, exercise]);
 

@@ -48,6 +48,31 @@ export function validate(exercise: Exercise, code: string, result: RunResult): V
   return { passed: failures.length === 0, failures };
 }
 
+/**
+ * Validación completa: comprobaciones visibles + pruebas ocultas.
+ * `run` ejecuta código (sandbox en el navegador, vm en las pruebas).
+ */
+export async function validateWithTests(
+  exercise: Exercise,
+  code: string,
+  result: RunResult,
+  run: (code: string) => Promise<RunResult>,
+): Promise<ValidationResult> {
+  const base = validate(exercise, code, result);
+  if (!base.passed || !exercise.tests?.length) return base;
+
+  for (const test of exercise.tests) {
+    const r = await run(`${code}\n;\n${test.code}`);
+    if (r.timedOut || r.error) {
+      return { passed: false, failures: [explainError(r.error ?? { name: 'Timeout', message: '' })] };
+    }
+    const tail = r.logs.slice(-test.expected.length);
+    const ok = tail.length === test.expected.length && test.expected.every((line, i) => tail[i]?.trim() === line);
+    if (!ok) return { passed: false, failures: [test.message] };
+  }
+  return base;
+}
+
 /** Traduce errores de JavaScript a explicaciones amables de Proto-0. */
 export function explainError(error: { name: string; message: string }): string {
   const { name, message } = error;

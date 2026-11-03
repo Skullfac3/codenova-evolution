@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import vm from 'node:vm';
-import { era1Lessons } from './lessons/era1';
-import { formatValue, scoreEvaluation, validate } from './validate';
+import { ERAS, allLessons } from './lessons';
+import { formatValue, scoreEvaluation, validateWithTests } from './validate';
 import type { Exercise, RunResult } from '../types/lesson';
 
 /** Ejecutor de pruebas en Node (en el navegador se usa el sandbox de iframe). */
@@ -19,48 +19,83 @@ function runInNode(code: string): RunResult {
     return { logs, error: { name: err.name, message: err.message } };
   }
 }
+const run = async (code: string) => runInNode(code);
+const check = (ex: Exercise, code: string) => validateWithTests(ex, code, runInNode(code), run);
 
-const allExercises: Array<[string, Exercise]> = era1Lessons.flatMap((lesson) =>
+const publishedEras = ERAS.filter((e) => e.lessons.length > 0);
+const allExercises: Array<[string, Exercise]> = allLessons.flatMap((lesson) =>
   [lesson.exercise, ...lesson.extraChallenges].map((ex) => [`${lesson.id} › ${ex.id}`, ex] as [string, Exercise]),
 );
 
-describe('Era 1 — estructura', () => {
-  it('tiene 7 lecciones con ids únicos y encadenadas por "next"', () => {
-    expect(era1Lessons).toHaveLength(7);
-    const ids = era1Lessons.map((l) => l.id);
+describe('estructura de las eras', () => {
+  it('ids únicos en todas las eras', () => {
+    const ids = allLessons.map((l) => l.id);
     expect(new Set(ids).size).toBe(ids.length);
-    era1Lessons.slice(0, -1).forEach((l, i) => expect(l.next).toBe(ids[i + 1]));
   });
 
-  it('cada lección normal tiene 2 retos extra (10 y 15 min) y al menos una pista', () => {
-    for (const l of era1Lessons.filter((l) => l.kind === 'lesson')) {
+  it('las 15 microlecciones de la Fase 3 están publicadas', () => {
+    expect(allLessons).toHaveLength(15);
+  });
+
+  it.each(publishedEras.map((e) => [e.name, e] as const))('%s: orden, encadenado y una evaluación al final', (_n, era) => {
+    era.lessons.forEach((l, i) => {
+      expect(l.era).toBe(era.id);
+      expect(l.order).toBe(i + 1);
+    });
+    era.lessons.slice(0, -1).forEach((l, i) => expect(l.next).toBe(era.lessons[i + 1]!.id));
+    expect(era.lessons.at(-1)!.kind).toBe('evaluation');
+  });
+
+  it('la Era 1 lleva a la Era 2', () => {
+    expect(ERAS[0]!.lessons.at(-1)!.next).toBe(ERAS[1]!.lessons[0]!.id);
+  });
+
+  it('cada lección normal tiene 2 retos extra y pistas', () => {
+    for (const l of allLessons.filter((l) => l.kind === 'lesson')) {
       expect(l.extraChallenges, l.id).toHaveLength(2);
       for (const ex of [l.exercise, ...l.extraChallenges]) expect(ex.hints.length, ex.id).toBeGreaterThan(0);
     }
   });
 
-  it('la evaluación tiene máximo 5 preguntas con respuesta válida', () => {
-    const evaluation = era1Lessons.find((l) => l.kind === 'evaluation')!;
-    expect(evaluation.quiz!.length).toBeLessThanOrEqual(5);
-    for (const q of evaluation.quiz!) expect(q.options[q.correctIndex]).toBeDefined();
+  it('las evaluaciones tienen máximo 5 preguntas con respuesta válida', () => {
+    for (const ev of allLessons.filter((l) => l.kind === 'evaluation')) {
+      expect(ev.quiz!.length).toBeLessThanOrEqual(5);
+      for (const q of ev.quiz!) expect(q.options[q.correctIndex], ev.id).toBeDefined();
+    }
   });
 
   it('los ejemplos producen exactamente la salida documentada', () => {
-    for (const l of era1Lessons.filter((l) => l.example.code)) {
+    for (const l of allLessons.filter((l) => l.example.code)) {
       expect(runInNode(l.example.code).logs, l.id).toEqual(l.example.output);
     }
   });
 });
 
 describe.each(allExercises)('%s', (_name, exercise) => {
-  it('la solución aprueba', () => {
-    const result = validate(exercise, exercise.solution, runInNode(exercise.solution));
-    expect(result.failures).toEqual([]);
+  it('la solución aprueba (incluidas las pruebas ocultas)', async () => {
+    expect((await check(exercise, exercise.solution)).failures).toEqual([]);
   });
 
-  it('el código inicial NO aprueba', () => {
-    const result = validate(exercise, exercise.starterCode, runInNode(exercise.starterCode));
-    expect(result.passed).toBe(false);
+  it('el código inicial NO aprueba', async () => {
+    expect((await check(exercise, exercise.starterCode)).passed).toBe(false);
+  });
+});
+
+describe('pruebas ocultas', () => {
+  const find = (id: string) => allExercises.find(([, e]) => e.id === id)![1];
+
+  it('rechazan una función que imprime la respuesta a mano', async () => {
+    const ex = find('e2-05-ex-main');
+    const tramposo = 'function area(base, altura) {\n  return 20;\n}\nconsole.log(area(4, 5));';
+    const r = await check(ex, tramposo);
+    expect(r.passed).toBe(false);
+    expect(r.failures[0]).toContain('otros valores');
+  });
+
+  it('detectan "mayor o igual" cuando se pedía "mayor que"', async () => {
+    const ex = find('e2-08-ex-practical');
+    const casi = ex.solution.replace('n > limite', 'n >= limite');
+    expect((await check(ex, casi)).passed).toBe(false);
   });
 });
 

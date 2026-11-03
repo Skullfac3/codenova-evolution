@@ -147,3 +147,9 @@ h3 { font-size: 14px; }
 .unlock { background: #2c3a2e; border: 2px solid var(--moss); padding: 10px; font-weight: 800; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Eras en el mapa */
+.greeting { margin: 16px 0 0; }
+.era { margin-bottom: 8px; }
+.era-locked h1 { color: var(--muted); }
+.locked-note { background: var(--panel); border: 2px dashed var(--line); padding: 12px; color: var(--muted); margin: 0 0 24px; }
