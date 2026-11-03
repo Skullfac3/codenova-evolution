@@ -4,7 +4,7 @@
 
 CodeNova Evolution es una plataforma educativa que convierte el aprendizaje de programación en una aventura Pixel Art de 16 bits. Empiezas en la Prehistoria con un robot rudimentario, **Proto-0**, y cada concepto que dominas hace evolucionar tu civilización hasta la era futurista.
 
-**Estado:** 🧪 Prototipo / beta interactiva · **Modelo:** gratuito · **Demo:** GitHub Pages
+**Estado:** 🧪 MVP educativo (Eras 1 y 2 jugables) · **Modelo:** gratuito · **Pruébalo:** [skullfac3.github.io/codenova-evolution](https://skullfac3.github.io/codenova-evolution/)
 
 ---
 
@@ -58,8 +58,8 @@ Las **eras** son la ruta oficial: cada una corresponde a un **nivel** de conteni
 
 | Era | Nivel | Mundo | Qué aprendes | Estado |
 |---|---|---|---|---|
-| 🪨 **1. Prehistoria** | Fundamentos I | Fogatas, rocas, primer refugio | Qué es programar, instrucciones, consola, variables, constantes, tipos de datos, operadores | ✅ Demo |
-| 🏛️ **2. Civilizaciones antiguas** | Fundamentos II | Arquitectura antigua, herramientas | Condicionales, ciclos, funciones, arreglos, objetos, resolución de problemas | ✅ Demo |
+| 🪨 **1. Prehistoria** | Fundamentos I | Fogatas, rocas, primer refugio | Qué es programar, instrucciones, consola, variables, constantes, tipos de datos, operadores | ✅ 7 lecciones |
+| 🏛️ **2. Civilizaciones antiguas** | Fundamentos II | Arquitectura antigua, herramientas | Condicionales, ciclos, funciones, arreglos, objetos, resolución de problemas | ✅ 8 lecciones |
 | ⚙️ **3. Era industrial** | JavaScript intermedio + Web | Fábricas, máquinas | Métodos de arreglos, scope, funciones flecha, HTML, CSS, DOM, eventos, formularios, JSON, APIs, promesas, async/await | 🗺️ Planeada |
 | 💻 **4. Era digital** | Herramientas profesionales + React | Computadoras, redes, centros de datos | Terminal, Git, GitHub, depuración, Postman, buenas prácticas, React, TypeScript | 🗺️ Planeada |
 | 🚀 **5. Era futurista** | Full stack y más allá | Ciudades futuristas, IA | Next.js, Node.js, bases de datos, backend, Python, integración con IA, arquitectura de aplicaciones | 🗺️ Planeada |
@@ -161,7 +161,14 @@ VITE_SUPABASE_URL=...
 VITE_SUPABASE_ANON_KEY=...
 ```
 
-> Mientras dure la migración, el prototipo HTML original sigue disponible en `legacy/`.
+> El prototipo HTML original se conservará en `legacy/` mientras se migra el mundo del juego.
+
+**Pruebas:**
+
+```bash
+npm test           # 99 pruebas: lecciones, validador y guardado
+npm run test:e2e   # recorrido completo de las Eras 1 y 2 en móvil y escritorio
+```
 
 ---
 
@@ -172,30 +179,33 @@ VITE_SUPABASE_ANON_KEY=...
 - [x] Refugio prehistórico, primera lección, XP y NovaCoins
 - [x] Decoración interactiva, Pixel Art y guardado local
 
-**Fase 2 — Beta interactiva** 🔄
+**Fase 2 — Beta interactiva** ✅ *(salvo animaciones)*
 - [x] Editor JavaScript, movimiento del explorador, animación de Proto-0
 - [x] Dos eras de demostración y transferencia de mascota
-- [ ] Validar en navegadores móviles
-- [ ] Perfeccionar editor y animaciones
-- [ ] Migración del progreso entre versiones
+- [x] Validar en navegadores móviles (Android emulado + iPhone real)
+- [x] Perfeccionar el editor (CodeMirror con números de línea y resaltado)
+- [ ] Mejorar las animaciones *(llega con la migración del mundo)*
+- [x] Migración del progreso entre versiones *(falta ajustar al formato del prototipo)*
 
-**Fase 3 — MVP educativo** ⏭️ *siguiente objetivo*
-- [ ] Migrar a React + Vite + TypeScript
-- [ ] Sistema modular de lecciones
-- [ ] Laboratorio con sandbox seguro
-- [ ] 15 microlecciones (Era 1 y Era 2) con ejercicios de código real
-- [ ] Evaluaciones de módulo
+**Fase 3 — MVP educativo** 🔄 *en curso*
+- [ ] Migrar a React + Vite + TypeScript *(lecciones ✅ · mundo del juego pendiente)*
+- [x] Sistema modular de lecciones
+- [x] Laboratorio con sandbox seguro
+- [x] 15 microlecciones (Era 1 y Era 2) con ejercicios de código real y pruebas ocultas
+- [x] Evaluaciones de módulo
+- [ ] Mundo del juego que evoluciona con el nivel
+- [ ] Tienda de NovaCoins y retos diarios
 
-> **Definición del MVP:** una persona sin experiencia puede completar la Era 1 de principio a fin en un navegador móvil, con progreso guardado localmente, sin necesidad de cuenta.
+> **Definición del MVP:** una persona sin experiencia puede completar la Era 1 de principio a fin en un navegador móvil, con progreso guardado localmente, sin necesidad de cuenta. ✅ *Cumplido el 3 de noviembre de 2026.*
 
 **Fase 4 — Cuentas y persistencia**
 - [ ] Proyecto Supabase, registro por correo, Google y GitHub
-- [ ] Base de datos y políticas RLS
+- [ ] Base de datos y políticas RLS *(esquema listo y probado en `supabase/migrations/`)*
 - [ ] Sincronización y recuperación de partidas
 
 **Fase 5 — Experiencia completa**
 - [ ] Retos diarios, inventario avanzado, más escenarios y animaciones
-- [ ] PWA y modo offline con sincronización sin duplicar recompensas
+- [ ] PWA y modo offline con sincronización sin duplicar recompensas *(app instalable con ícono ✅)*
 - [ ] Accesibilidad y pruebas de usabilidad
 
 **Fase 6 — Lanzamiento**

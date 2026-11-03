@@ -34,8 +34,22 @@ export type Check =
   | { type: 'code-matches'; pattern: string; message: string }
   | { type: 'code-not-matches'; pattern: string; message: string };
 
+/**
+ * Prueba oculta: se agrega `code` al final del código del estudiante y se
+ * comparan las últimas líneas de la consola con `expected`. Sirve para
+ * comprobar que una función funciona con OTROS valores, no solo con los
+ * del enunciado (evita que se imprima la respuesta a mano).
+ */
+export interface HiddenTest {
+  code: string;
+  expected: string[];
+  message: string;
+}
+
 export interface Exercise {
   id: string;
+  /** Pruebas ocultas que se ejecutan solo si las comprobaciones visibles pasan. */
+  tests?: HiddenTest[];
   /** Qué debe hacer el estudiante. */
   prompt: string;
   /** Código inicial que aparece en el editor. */
