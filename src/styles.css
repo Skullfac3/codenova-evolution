@@ -45,6 +45,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   font-family: var(--pixel); font-size: 11px;
 }
 .hud .brand { color: var(--fire); margin-right: auto; font-size: 12px; }
+.hud-btn { background: var(--panel); border: 2px solid var(--line); min-width: 40px; min-height: 36px; cursor: pointer; font-size: 16px; }
+.hud-btn:focus-visible { outline: 3px solid var(--fire-2); }
+.app-version { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
 .hud span:not(.brand) { background: var(--panel); padding: 6px 8px; border: 2px solid var(--line); }
 
 h1, h2, h3 { font-family: var(--pixel); line-height: 1.5; font-weight: 400; }
@@ -258,3 +261,7 @@ h3 { font-size: 14px; }
 .shop-item { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 2px solid var(--line); padding: 10px; }
 .shop-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .shop-item .btn { flex: none; min-width: 84px; }
+
+/* Evolución de Proto-0 */
+.proto-bot.evolving canvas { animation: proto-evolve .3s ease-in-out 8; }
+@keyframes proto-evolve { 50% { transform: translateY(-8px) scale(1.15); filter: drop-shadow(0 0 10px #ffd97a); } }

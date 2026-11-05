@@ -1,13 +1,34 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { drawProto, type ProtoFrame, type ProtoLook } from '../game/proto';
 import { tipFor, useProto } from '../store/proto';
 import { useProgress } from '../store/progress';
+import { lessonsOfEra } from '../learning/lessons';
+import { play } from '../game/sound';
 
 const LOOKS: ProtoLook[] = ['center', 'left', 'right', 'up', 'center'];
+const SEEN_KEY = 'codenova:proto-version';
+const EVOLVE_MS = 2400;
+
+function readSeen(): number {
+  try {
+    return Number(localStorage.getItem(SEEN_KEY)) || 1;
+  } catch {
+    return 1;
+  }
+}
+function writeSeen(v: number) {
+  try {
+    localStorage.setItem(SEEN_KEY, String(v));
+  } catch {
+    /* sin almacenamiento: se volverá a mostrar la evolución */
+  }
+}
 
 /**
  * Proto-0 vive abajo a la derecha: parpadea, mira a su alrededor,
- * reacciona a lo que haces y da consejos al tocarlo.
+ * reacciona a lo que haces, da consejos y EVOLUCIONA contigo:
+ *  - Era 1: empieza oxidado y se repara con cada lección.
+ *  - Era 2 (v2): bronce, ojos azules, gemas y laureles que crecen por lección.
  */
 export function ProtoDock() {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -16,17 +37,35 @@ export function ProtoDock() {
   const message = useProto((s) => s.message);
   const messageId = useProto((s) => s.messageId);
   const say = useProto((s) => s.say);
-  const era = useProgress((s) => Math.max(...s.save.unlockedEras.filter((e) => e <= 2)));
+  const save = useProgress((s) => s.save);
 
-  const moodRef = useRef(mood);
-  moodRef.current = mood;
-  const eraRef = useRef(era);
-  eraRef.current = era;
+  const era = Math.max(...save.unlockedEras.filter((e) => e <= 2));
+  const eraLessons = lessonsOfEra(era);
+  const progress = eraLessons.length ? eraLessons.filter((l) => save.completedLessons[l.id]).length / eraLessons.length : 0;
+  const [evolvingUntil, setEvolvingUntil] = useState(0);
+
+  const live = useRef({ mood, era, progress, evolvingUntil });
+  live.current = { mood, era, progress, evolvingUntil };
+
+  // Evolución: si la era es mayor que la última versión que vio la persona.
+  useEffect(() => {
+    if (era > readSeen()) {
+      const until = performance.now() + EVOLVE_MS;
+      setEvolvingUntil(until);
+      play('evolve');
+      say(`¡Evolucioné! Ahora soy Proto-0 v${era}.`, 'surprised', 5000);
+      writeSeen(era);
+      const t = setTimeout(() => setEvolvingUntil(0), EVOLVE_MS);
+      return () => clearTimeout(t);
+    }
+    if (era < readSeen()) writeSeen(era); // progreso borrado: vuelve a v1
+    return undefined;
+  }, [era, say]);
 
   useEffect(() => {
     const ctx = canvas.current!.getContext('2d')!;
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const state: ProtoFrame = { mood: 'idle', look: 'center', blinking: false, antennaOn: true, tick: 0, era: 1 };
+    const state: ProtoFrame = { mood: 'idle', look: 'center', blinking: false, antennaOn: true, tick: 0, era: 1, progress: 0 };
     let nextBlink = performance.now() + 2500;
     let blinkUntil = 0;
     let nextLook = performance.now() + 1800;
@@ -37,13 +76,18 @@ export function ProtoDock() {
       raf = requestAnimationFrame(loop);
       if (now - last < 120) return; // ~8 fps: suficiente para pixel art y ahorra batería
       last = now;
-      state.mood = moodRef.current;
-      state.era = eraRef.current;
+      const { mood: m, era: e, progress: p, evolvingUntil: ev } = live.current;
+      const evolving = now < ev;
+      state.mood = evolving ? 'surprised' : m;
+      state.progress = p;
       state.tick++;
+      // Durante la evolución alterna destellos y muestra la forma nueva al final.
+      state.flash = evolving && !reduced && state.tick % 2 === 0;
+      state.era = evolving && now < ev - EVOLVE_MS / 2 && state.tick % 4 < 2 ? Math.max(1, e - 1) : e;
 
       if (!reduced) {
         if (now > nextBlink) { blinkUntil = now + 140; nextBlink = now + 2500 + Math.random() * 3500; }
-        state.blinking = now < blinkUntil;
+        state.blinking = !evolving && now < blinkUntil;
         if (now > nextLook) {
           state.look = LOOKS[Math.floor(Math.random() * LOOKS.length)]!;
           nextLook = now + 1200 + Math.random() * 2500;
@@ -56,15 +100,20 @@ export function ProtoDock() {
       if (el) {
         el.dataset.mood = state.mood;
         el.dataset.look = state.look;
-        el.dataset.era = String(state.era);
+        el.dataset.era = String(e);
+        el.dataset.evolving = String(evolving);
       }
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  const parts = era === 1
+    ? `${Math.round(progress * 100)}% reparado`
+    : `${Math.round(progress * 8)} de 8 laureles`;
+
   return (
-    <div className="proto-dock" ref={root} data-testid="proto-dock">
+    <div className="proto-dock" ref={root} data-testid="proto-dock" data-progress={progress.toFixed(2)}>
       {message && (
         <div className="proto-bubble" key={messageId} role="status" data-testid="proto-bubble">
           {message}
@@ -72,10 +121,13 @@ export function ProtoDock() {
       )}
       <button
         type="button"
-        className={`proto-bot mood-${mood}`}
-        aria-label="Proto-0: tócame para un consejo"
+        className={`proto-bot mood-${mood} ${evolvingUntil ? 'evolving' : ''}`}
+        aria-label={`Proto-0 versión ${era}, ${parts}. Tócame para un consejo.`}
         data-testid="proto-bot"
-        onClick={() => say(tipFor(era), 'talking', 5000)}
+        onClick={() => {
+          play('blip');
+          say(tipFor(era), 'talking', 5000);
+        }}
       >
         <canvas ref={canvas} width={32} height={32} />
         <span className="proto-name">Proto-0 · v{era}</span>

@@ -5,6 +5,7 @@ import { buyItem } from '../game/economy';
 import { OUTFIT_COLORS } from '../game/sprites';
 import { ERAS } from '../learning/lessons';
 import { SpriteIcon } from './SpriteIcon';
+import { play } from '../game/sound';
 
 const KIND_LABEL: Record<ItemKind, string> = { decoration: 'Adorno', outfit: 'Atuendo', pet: 'Mascota' };
 
@@ -48,6 +49,7 @@ export function Shop({ onGoToHabitat }: { onGoToHabitat: () => void }) {
                       data-testid={`buy-${item.id}`}
                       onClick={() => {
                         const r = act((s) => buyItem(s, item.id));
+                        play(r.ok ? 'coin' : 'alert');
                         if (r.ok) {
                           const where = item.kind === 'pet' ? 'Ya pasea por tu refugio.' : item.kind === 'outfit' ? 'Póntelo en tu refugio.' : 'Colócalo en modo Decorar.';
                           protoSay(`¡${item.name}! ${where}`, 'happy', 3500);

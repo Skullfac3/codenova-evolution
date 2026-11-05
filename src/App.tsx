@@ -5,6 +5,8 @@ import { LessonPlayer } from './components/LessonPlayer';
 import { Habitat } from './components/Habitat';
 import { Shop } from './components/Shop';
 import { ProtoDock } from './components/ProtoDock';
+import { isMuted, play, setMuted } from './game/sound';
+import { checkForUpdate } from './pwa';
 
 type Tab = 'refugio' | 'lecciones' | 'tienda';
 const TABS: Array<{ id: Tab; icon: string; label: string }> = [
@@ -19,6 +21,8 @@ export default function App() {
   const isEraComplete = useProgress((s) => s.isEraComplete);
   const resetProgress = useProgress((s) => s.resetProgress);
   const [tab, setTab] = useState<Tab>('refugio');
+  const [muted, setMutedState] = useState(isMuted());
+  const [updateMsg, setUpdateMsg] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const lesson = openId ? findLesson(openId) : undefined;
@@ -34,6 +38,15 @@ export default function App() {
         <span data-testid="hud-level">Nv {levelForXp(save.xp)}</span>
         <span data-testid="hud-xp">{save.xp} XP</span>
         <span data-testid="hud-coins">🪙 {save.novacoins}</span>
+        <button
+          className="hud-btn"
+          onClick={() => { setMuted(!muted); setMutedState(!muted); if (muted) play('blip'); }}
+          aria-label={muted ? 'Activar sonido' : 'Silenciar'}
+          aria-pressed={muted}
+          data-testid="btn-sound"
+        >
+          {muted ? '🔇' : '🔊'}
+        </button>
       </header>
 
       <main>
@@ -108,6 +121,18 @@ export default function App() {
                 Borrar progreso
               </button>
             )}
+
+            <footer className="app-version" data-testid="app-version">
+              <span>CodeNova v{__APP_VERSION__} · {__BUILD_DATE__}</span>
+              <button
+                className="btn ghost small"
+                onClick={async () => { setUpdateMsg('Buscando…'); setUpdateMsg(await checkForUpdate()); }}
+                data-testid="btn-check-update"
+              >
+                Buscar actualización
+              </button>
+              {updateMsg && <span className="muted" role="status">{updateMsg}</span>}
+            </footer>
           </div>
         ))}
       </main>

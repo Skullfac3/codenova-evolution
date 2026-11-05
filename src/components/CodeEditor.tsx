@@ -12,6 +12,7 @@ import {
   type CompletionContext,
 } from '@codemirror/autocomplete';
 import { snippetsForEra, type Snippet } from '../learning/snippets';
+import { play } from '../game/sound';
 
 interface Props {
   value: string;
@@ -95,10 +96,19 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era }: Props) {
     if (!v) return;
     const { from, to } = v.state.selection.main;
     snippet(s.template)(v, null, from, to);
+    play('tick');
     v.focus();
   };
 
-  // pointerdown + preventDefault: el editor no pierde el foco y el teclado del celular no se cierra.
+  /**
+   * Toque vs. deslizamiento: el atajo se inserta solo si el dedo se levanta
+   * cerca de donde tocó y en poco tiempo. Si la persona desliza la cinta para
+   * buscar otro atajo, no se inserta nada.
+   */
+  const press = useRef<{ id: string; x: number; y: number; t: number } | null>(null);
+  const TAP_SLOP = 10; // px
+  const TAP_TIME = 700; // ms
+
   const chip = (s: Snippet) => (
     <button
       key={s.id}
@@ -107,15 +117,34 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era }: Props) {
       title={s.detail}
       aria-label={`Insertar ${s.detail}`}
       data-testid={`snip-${s.id}`}
+      // Evita que el editor pierda el foco (y que se cierre el teclado del celular).
+      onMouseDown={(e) => e.preventDefault()}
       onPointerDown={(e) => {
-        e.preventDefault();
-        insert(s);
+        press.current = { id: s.id, x: e.clientX, y: e.clientY, t: performance.now() };
       }}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+      onPointerMove={(e) => {
+        const p = press.current;
+        if (p && Math.hypot(e.clientX - p.x, e.clientY - p.y) > TAP_SLOP) press.current = null;
+      }}
+      onPointerCancel={() => {
+        press.current = null; // el navegador tomó el gesto para desplazar la cinta
+      }}
+      onPointerLeave={() => {
+        press.current = null;
+      }}
+      onPointerUp={(e) => {
+        const p = press.current;
+        press.current = null;
+        if (!p || p.id !== s.id) return;
+        const moved = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+        if (moved <= TAP_SLOP && performance.now() - p.t <= TAP_TIME) {
           e.preventDefault();
           insert(s);
         }
+      }}
+      onClick={(e) => {
+        // Teclado (Enter o Espacio): el clic llega sin coordenadas de puntero.
+        if (e.detail === 0) insert(s);
       }}
     >
       {s.label}

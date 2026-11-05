@@ -2,10 +2,13 @@ import { expect, test, type Page } from '@playwright/test';
 import { era1Lessons } from '../src/learning/lessons/era1';
 
 /** Partida como la de una persona que acaba de terminar la Era 1: 170 XP y 90 NovaCoins. */
-async function seedEra1Done(page: Page) {
+async function seedEra1Done(page: Page, opts: { protoSeen?: number } = { protoSeen: 2 }) {
   const ids = era1Lessons.map((l) => l.id);
-  await page.addInitScript((ids) => {
+  await page.addInitScript(({ ids, protoSeen }) => {
+    (window as unknown as { __codenovaSounds: string[] }).__codenovaSounds = [];
     if (localStorage.getItem('codenova:save')) return;
+    // Proto-0 ya evolucionado a v2 (salvo que la prueba quiera ver la evolución).
+    if (protoSeen) localStorage.setItem('codenova:proto-version', String(protoSeen));
     localStorage.setItem(
       'codenova:save',
       JSON.stringify({
@@ -15,8 +18,17 @@ async function seedEra1Done(page: Page) {
         worlds: { 1: { objects: [] }, 2: { objects: [] } }, inventory: {}, pets: [], pendingSync: [], updatedAt: '2026-11-05T00:00:00Z',
       }),
     );
-  }, ids);
+  }, { ids, protoSeen: opts.protoSeen ?? 0 });
 }
+
+const sounds = (page: Page) => page.evaluate(() => (window as unknown as { __codenovaSounds: string[] }).__codenovaSounds);
+
+/** Color de un píxel del dibujo de Proto-0 (cuadrícula de 32x32). */
+const protoPixel = (page: Page, x: number, y: number) =>
+  page.locator('[data-testid="proto-bot"] canvas').evaluate((c: HTMLCanvasElement, [x, y]) => {
+    const [r, g, b] = c.getContext('2d')!.getImageData(x!, y!, 1, 1).data;
+    return `#${[r, g, b].map((v) => v!.toString(16).padStart(2, '0')).join('')}`;
+  }, [x, y]);
 
 async function shot(page: Page, name: string) {
   await page.screenshot({ path: `e2e-results/${test.info().project.name}/${name}.png` });
@@ -156,11 +168,11 @@ test.describe('Refugio, tienda y Proto-0', () => {
     await page.keyboard.insertText('const antorchas = 3;\n');
 
     // if/else con dos toques: solo se escribe la condición y los textos.
-    await page.getByTestId('snip-ifelse').dispatchEvent('pointerdown');
+    await page.getByTestId('snip-ifelse').click();
     await page.keyboard.type('antorchas >= 2');
     await page.keyboard.press('Tab');
-    await page.getByTestId('snip-log').dispatchEvent('pointerdown');
-    await page.getByTestId('snip-texto').dispatchEvent('pointerdown');
+    await page.getByTestId('snip-log').click();
+    await page.getByTestId('snip-texto').click();
     await page.keyboard.type('La cueva está iluminada');
     // Ir a la línea vacía del else (penúltima línea) con el teclado.
     await page.keyboard.press('ControlOrMeta+End');
@@ -169,10 +181,11 @@ test.describe('Refugio, tienda y Proto-0', () => {
 
     // Autocompletado: escribir "log" y elegir de la lista.
     await page.keyboard.type('log');
-    await expect(page.locator('.cm-tooltip-autocomplete li[aria-selected]')).toContainText('console.log');
-    // CodeMirror ignora a propósito un Enter en los primeros 75 ms (evita aceptar por accidente).
-    await page.waitForTimeout(150);
-    await page.keyboard.press('Enter');
+    // En el celular se elige tocando la opción de la lista.
+    const option = page.locator('.cm-tooltip-autocomplete li', { hasText: 'console.log' });
+    await expect(option).toBeVisible();
+    await option.click();
+    await expect(page.locator('.cm-tooltip-autocomplete')).toHaveCount(0);
     await page.keyboard.type('"Está muy oscuro"');
 
     await expect(editor).toContainText('if (antorchas >= 2) {');
@@ -185,5 +198,92 @@ test.describe('Refugio, tienda y Proto-0', () => {
     await expect(page.getByTestId('console')).toContainText('La cueva está iluminada');
     await expect(page.getByTestId('feedback')).toHaveAttribute('data-status', 'pass');
     await expect(page.getByTestId('proto-dock')).toHaveAttribute('data-mood', 'happy');
+  });
+
+  test('deslizar la cinta de atajos NO inserta nada; tocar sí', async ({ page }) => {
+    await seedEra1Done(page);
+    await page.goto('/');
+    await page.getByTestId('tab-lecciones').click();
+    await page.getByTestId('lesson-e2-01-condicionales').click();
+    await page.getByTestId('btn-start').click();
+    const editor = page.locator('.cm-content');
+    const before = await editor.innerText();
+
+    // Deslizar: el dedo baja sobre "if" y se mueve 60 px antes de levantarse.
+    const box = (await page.getByTestId('snip-if').boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 - 60, box.y + box.height / 2, { steps: 6 });
+    await page.mouse.up();
+    expect(await editor.innerText()).toBe(before);
+
+    // Tocar: sí inserta.
+    await page.getByTestId('snip-log').click();
+    await expect(editor).toContainText('console.log()');
+  });
+
+  test('sonidos de 8 bits: error, pista, aprobado, compra; y se pueden silenciar', async ({ page }) => {
+    await seedEra1Done(page);
+    await page.goto('/');
+    await page.getByTestId('tab-lecciones').click();
+    await page.getByTestId('lesson-e2-01-condicionales').click();
+    await page.getByTestId('btn-start').click();
+
+    await page.getByTestId('btn-run').click();
+    await expect.poll(() => sounds(page)).toContain('error');
+    await page.getByTestId('btn-hint').click();
+    await expect.poll(() => sounds(page)).toContain('hint');
+
+    const editor = page.locator('.cm-content');
+    await editor.click();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('Delete');
+    await page.keyboard.insertText('const antorchas = 3;\nif (antorchas >= 2) {\n  console.log("La cueva está iluminada");\n} else {\n  console.log("Está muy oscuro");\n}');
+    await page.getByTestId('btn-run').click();
+    await expect.poll(() => sounds(page)).toContain('success');
+
+    await page.getByTestId('tab-tienda').click();
+    await page.getByTestId('buy-deco-roca-musgo').click();
+    await expect.poll(() => sounds(page)).toContain('coin');
+
+    // Silenciar: ya no suena nada.
+    await page.getByTestId('btn-sound').click();
+    await expect(page.getByTestId('btn-sound')).toHaveAttribute('aria-pressed', 'true');
+    const count = (await sounds(page)).length;
+    await page.getByTestId('buy-deco-roca-musgo').click();
+    await page.waitForTimeout(300);
+    expect((await sounds(page)).length).toBe(count);
+    // Se recuerda al recargar.
+    await page.reload();
+    await expect(page.getByTestId('btn-sound')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('Proto-0 evoluciona a v2 con animación y cambia de color', async ({ page }) => {
+    await seedEra1Done(page, { protoSeen: 1 }); // la persona aún no ha visto la v2
+    await page.goto('/');
+    const dock = page.getByTestId('proto-dock');
+    await expect(dock).toHaveAttribute('data-evolving', 'true');
+    await expect(page.getByTestId('proto-bubble')).toContainText('Evolucioné');
+    await shot(page, 'r06-evolucion');
+    await expect(dock).toHaveAttribute('data-evolving', 'false', { timeout: 5000 });
+    expect(await protoPixel(page, 16, 12)).toBe('#d8a657'); // cabeza de bronce (v2)
+    expect(await page.evaluate(() => localStorage.getItem('codenova:proto-version'))).toBe('2');
+
+    // No se repite al recargar.
+    await page.reload();
+    await page.waitForTimeout(500);
+    await expect(dock).toHaveAttribute('data-evolving', 'false');
+  });
+
+  test('una persona nueva ve a Proto-0 v1 oxidado y el número de versión de la app', async ({ page }) => {
+    await page.goto('/');
+    const dock = page.getByTestId('proto-dock');
+    await expect(dock).toHaveAttribute('data-era', '1');
+    await expect(dock).toHaveAttribute('data-progress', '0.00');
+    await page.waitForTimeout(400);
+    expect(await protoPixel(page, 16, 12)).toBe('#b6a6c8'); // metal gris (v1)
+    expect(await protoPixel(page, 10, 11)).toBe('#8a4a26'); // mancha de óxido
+    await page.getByTestId('tab-lecciones').click();
+    await expect(page.getByTestId('app-version')).toContainText(/CodeNova v0\.5\.0/);
   });
 });

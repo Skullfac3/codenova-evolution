@@ -6,6 +6,7 @@ import { OUTFIT_COLORS, drawHut, drawTemple, drawTile, spriteCanvas, type Sprite
 import { availableCount, equipOutfit, placeObject, removeObjectAt, transferPet, transferablePets } from '../game/economy';
 import { ERAS } from '../learning/lessons';
 import { SpriteIcon } from './SpriteIcon';
+import { play } from '../game/sound';
 
 const W = COLS * TILE;
 const H = ROWS * TILE;
@@ -194,14 +195,19 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
     const occupied = objects.some((o) => o.x === x && o.y === y);
     if (occupied) {
       const r = act((s) => removeObjectAt(s, era, x, y));
-      if (r.ok) protoSay('Lo guardé en tu inventario.', 'talking', 2200);
+      if (r.ok) {
+        play('remove');
+        protoSay('Lo guardé en tu inventario.', 'talking', 2200);
+      }
       return;
     }
     if (!selected) {
+      play('hint');
       protoSay('Elige un adorno de tu inventario y toca una casilla.', 'talking', 3500);
       return;
     }
     const r = act((s) => placeObject(s, era, selected, x, y));
+    play(r.ok ? 'place' : 'alert');
     if (r.ok) protoSay(`¡${itemById(selected)?.name} colocado!`, 'happy', 2200);
     else protoSay(r.reason, 'sad', 3000);
   };
@@ -282,7 +288,7 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
             <span>Ropa de inicio</span>
           </button>
           {outfits.map((o) => (
-            <button key={o.id} className={`inv-item ${save.equippedOutfit === o.id ? 'on' : ''}`} onClick={() => { act((s) => equipOutfit(s, o.id)); protoSay('¡Te queda muy bien!', 'happy', 2200); }} data-testid={`outfit-${o.id}`}>
+            <button key={o.id} className={`inv-item ${save.equippedOutfit === o.id ? 'on' : ''}`} onClick={() => { act((s) => equipOutfit(s, o.id)); play('place'); protoSay('¡Te queda muy bien!', 'happy', 2200); }} data-testid={`outfit-${o.id}`}>
               <SpriteIcon sprite="explorador1" overrides={OUTFIT_COLORS[o.id]} size={40} />
               <span>{o.name}</span>
             </button>
@@ -308,7 +314,7 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
           <div className="transfer">
             <p>Puedes traer <strong>una</strong> mascota de una era anterior:</p>
             {incoming.map((p) => (
-              <button key={p.id} className="btn small" onClick={() => { const r = act((s) => transferPet(s, p.id, era)); if (r.ok) protoSay(`¡${itemById(p.itemId)?.name} viajó contigo!`, 'surprised', 3000); }} data-testid={`transfer-${p.id}`}>
+              <button key={p.id} className="btn small" onClick={() => { const r = act((s) => transferPet(s, p.id, era)); if (r.ok) play('evolve'); if (r.ok) protoSay(`¡${itemById(p.itemId)?.name} viajó contigo!`, 'surprised', 3000); }} data-testid={`transfer-${p.id}`}>
                 Traer a {itemById(p.itemId)?.name}
               </button>
             ))}
