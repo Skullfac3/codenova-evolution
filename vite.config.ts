@@ -7,6 +7,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 const base = process.env.GITHUB_ACTIONS ? '/codenova-evolution/' : '/';
 
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.5.0'),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+  },
   base,
   plugins: [
     react(),

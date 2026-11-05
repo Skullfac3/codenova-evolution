@@ -14,7 +14,22 @@ export interface ProtoFrame {
   tick: number;
   /** Era actual: Proto-0 evoluciona con el estudiante. */
   era: number;
+  /** Avance en la era actual (0 a 1): en la Era 1 se repara, en la Era 2 gana laureles. */
+  progress: number;
+  /** Destello durante la animación de evolución. */
+  flash?: boolean;
 }
+
+/** Colores que cambian en la v2 (bronce, ojos azules). */
+const V2: Record<string, string> = {
+  L: '#f6e3b4', M: '#d8a657', D: '#a26f2f',
+  E: '#5fd3ff', e: '#2a8fc4', Y: '#e9fbff',
+};
+
+/** Manchas de óxido de la Era 1 (desaparecen con cada lección). */
+const RUST: Array<[number, number]> = [[10, 11], [20, 12], [7, 20], [23, 19], [12, 26], [19, 25], [15, 11]];
+/** Hojas de laurel de la Era 2 (aparecen con cada lección), alternando izquierda y derecha. */
+const LAUREL: Array<[number, number]> = [[12, 8], [18, 8], [10, 8], [20, 8], [8, 8], [22, 8], [6, 9], [24, 9]];
 
 const PAL: Record<string, string> = {
   o: '#0d0812', L: '#e6dcef', M: '#b6a6c8', D: '#7a6790',
@@ -22,6 +37,7 @@ const PAL: Record<string, string> = {
   E: '#ff8a3d', e: '#d9682a', Y: '#fff0c2', k: '#1b1325',
   g: '#7bd389', G: '#2a1f35',
   b: '#4aa3d8', B: '#bfe8ff', n: '#c9962e', N: '#ffd97a',
+  r: '#8a4a26', R: '#b8682f', l: '#3f8f3a', V: '#7cc95a',
 };
 
 const N = 32;
@@ -55,7 +71,19 @@ export function buildProtoGrid(f: ProtoFrame): string[][] {
   for (let y = 10; y < 27; y++) { put(6, y, 'L'); put(25, y, 'D'); }
   hline(6, 25, 27, 'D');
   for (const [x, y] of [[8, 11], [23, 11], [8, 26], [23, 26]] as const) put(x, y, 'D');
-  if (evolved) for (let x = 6; x <= 25; x++) put(x, 10, x % 2 ? 'n' : 'N'); // banda dorada
+  if (evolved) {
+    for (let x = 6; x <= 25; x++) put(x, 10, x % 2 ? 'n' : 'N'); // banda dorada
+    // orejas de gema
+    rect(3, 16, 3, 19, 'b'); put(3, 16, 'B');
+    rect(28, 16, 28, 19, 'b'); put(28, 16, 'B');
+    // laureles: una hoja por lección de la era
+    const leaves = Math.round(Math.min(1, Math.max(0, f.progress)) * LAUREL.length);
+    for (const [x, y] of LAUREL.slice(0, leaves)) { put(x, y, 'l'); put(x + 1, y, 'V'); put(x, y - 1, 'V'); put(x + 1, y - 1, 'l'); }
+  } else {
+    // óxido: menos manchas conforme avanza la Era 1
+    const spots = Math.round((1 - Math.min(1, Math.max(0, f.progress))) * RUST.length);
+    for (const [x, y] of RUST.slice(0, spots)) { put(x, y, 'r'); put(x + 1, y, 'R'); }
+  }
 
   // Ojos
   for (const ex of [8, 18]) drawEye(ex, f, put, rect, hline);
@@ -146,11 +174,12 @@ function drawMouth(f: ProtoFrame, put: Put, rect: Rect, hline: HLine) {
 export function drawProto(ctx: CanvasRenderingContext2D, f: ProtoFrame): void {
   ctx.clearRect(0, 0, N, N);
   const g = buildProtoGrid(f);
+  const pal = f.era >= 2 ? { ...PAL, ...V2 } : PAL;
   for (let y = 0; y < N; y++) {
     for (let x = 0; x < N; x++) {
       const c = g[y]![x]!;
       if (c === '.') continue;
-      ctx.fillStyle = PAL[c]!;
+      ctx.fillStyle = f.flash ? (c === 'o' ? '#ffd97a' : '#ffffff') : pal[c]!;
       ctx.fillRect(x, y, 1, 1);
     }
   }

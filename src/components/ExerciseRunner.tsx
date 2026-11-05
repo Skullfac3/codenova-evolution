@@ -4,6 +4,7 @@ import { validateWithTests, type ValidationResult } from '../learning/validate';
 import { CodeSandbox } from '../editor/sandbox';
 import { CodeEditor } from './CodeEditor';
 import { protoSay } from '../store/proto';
+import { play } from '../game/sound';
 
 const sandbox = new CodeSandbox({ timeoutMs: 2000 });
 
@@ -31,6 +32,7 @@ export function ExerciseRunner({ exercise, label, era, messages, onPassed }: Pro
     setResult(r);
     const v = await validateWithTests(exercise, code, r, (c) => sandbox.run(c));
     setValidation(v);
+    play(v.passed ? 'success' : 'error');
     if (v.passed) protoSay('¡Funciona! 🎉', 'happy', 3000);
     else protoSay(r.error || r.timedOut ? '¡Uy! Hubo un error. Lee la explicación.' : 'Casi… revisa lo que te marqué.', 'sad', 3500);
     setRunning(false);
@@ -59,6 +61,7 @@ export function ExerciseRunner({ exercise, label, era, messages, onPassed }: Pro
           onClick={() => {
             const n = Math.min(hintsShown + 1, exercise.hints.length);
             setHintsShown(n);
+            play('hint');
             protoSay(exercise.hints[n - 1]!, 'talking', 7000);
           }}
           disabled={hintsShown >= exercise.hints.length}
