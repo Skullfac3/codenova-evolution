@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.4",
     "@codemirror/commands": "^6.7.0",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/language": "^6.13.1",

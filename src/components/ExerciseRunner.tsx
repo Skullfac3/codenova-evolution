@@ -3,17 +3,20 @@ import type { Exercise, RunResult } from '../types/lesson';
 import { validateWithTests, type ValidationResult } from '../learning/validate';
 import { CodeSandbox } from '../editor/sandbox';
 import { CodeEditor } from './CodeEditor';
+import { protoSay } from '../store/proto';
 
 const sandbox = new CodeSandbox({ timeoutMs: 2000 });
 
 interface Props {
   exercise: Exercise;
   label: string;
+  /** Era de la lección (decide los atajos del editor). */
+  era: number;
   messages: { success: string; retry: string };
   onPassed: (hintsUsed: number) => void;
 }
 
-export function ExerciseRunner({ exercise, label, messages, onPassed }: Props) {
+export function ExerciseRunner({ exercise, label, era, messages, onPassed }: Props) {
   const [code, setCode] = useState(exercise.starterCode);
   const [resetCount, setResetCount] = useState(0);
   const [running, setRunning] = useState(false);
@@ -23,9 +26,13 @@ export function ExerciseRunner({ exercise, label, messages, onPassed }: Props) {
 
   const run = useCallback(async () => {
     setRunning(true);
+    protoSay('Procesando…', 'thinking', 10000);
     const r = await sandbox.run(code);
     setResult(r);
-    setValidation(await validateWithTests(exercise, code, r, (c) => sandbox.run(c)));
+    const v = await validateWithTests(exercise, code, r, (c) => sandbox.run(c));
+    setValidation(v);
+    if (v.passed) protoSay('¡Funciona! 🎉', 'happy', 3000);
+    else protoSay(r.error || r.timedOut ? '¡Uy! Hubo un error. Lee la explicación.' : 'Casi… revisa lo que te marqué.', 'sad', 3500);
     setRunning(false);
   }, [code, exercise]);
 
@@ -41,7 +48,7 @@ export function ExerciseRunner({ exercise, label, messages, onPassed }: Props) {
       <p className="eyebrow">{label}</p>
       <p className="prompt" style={{ whiteSpace: 'pre-line' }}>{exercise.prompt}</p>
 
-      <CodeEditor value={code} onChange={setCode} resetKey={`${exercise.id}-${resetCount}`} onRun={run} />
+      <CodeEditor value={code} onChange={setCode} resetKey={`${exercise.id}-${resetCount}`} onRun={run} era={era} />
 
       <div className="row">
         <button className="btn primary" onClick={run} disabled={running} data-testid="btn-run">
@@ -49,7 +56,11 @@ export function ExerciseRunner({ exercise, label, messages, onPassed }: Props) {
         </button>
         <button
           className="btn"
-          onClick={() => setHintsShown((n) => Math.min(n + 1, exercise.hints.length))}
+          onClick={() => {
+            const n = Math.min(hintsShown + 1, exercise.hints.length);
+            setHintsShown(n);
+            protoSay(exercise.hints[n - 1]!, 'talking', 7000);
+          }}
           disabled={hintsShown >= exercise.hints.length}
           data-testid="btn-hint"
         >

@@ -25,6 +25,8 @@ export interface SaveV2 {
   worlds: Record<number, { objects: Array<{ id: string; x: number; y: number }> }>;
   inventory: Record<string, number>;
   pets: Array<{ id: string; itemId: string; originEra: number; currentEra: number; nickname?: string }>;
+  /** Atuendo puesto (id de la tienda) o ausente si usa el de inicio. */
+  equippedOutfit?: string;
   /** Recompensas completadas sin conexión, pendientes de enviar a Supabase. */
   pendingSync: Array<{ lessonId: string; score: number; eventId: string }>;
   updatedAt: string;

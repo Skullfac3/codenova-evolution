@@ -111,6 +111,7 @@ test.describe('Eras 1 y 2 · prueba completa', () => {
 
   test('una persona nueva completa la Prehistoria y las Civilizaciones antiguas', async ({ page }) => {
     await page.goto('/');
+    await page.getByTestId('tab-lecciones').click();
     await expect(page.getByTestId('map')).toBeVisible();
     expect(await hud(page)).toEqual({ xp: '0 XP', coins: '🪙 0', level: 'Nv 1' });
 
@@ -139,6 +140,7 @@ test.describe('Eras 1 y 2 · prueba completa', () => {
     // Recargar a mitad del camino: el progreso sigue ahí.
     await page.reload();
     expect(await hud(page)).toEqual({ xp: '170 XP', coins: '🪙 90', level: 'Nv 2' });
+    await page.getByTestId('tab-lecciones').click();
 
     // ── Era 2 ──
     xp = await completeEra(page, era2Lessons, 'era2', xp);
@@ -183,6 +185,7 @@ test.describe('Eras 1 y 2 · prueba completa', () => {
       }
     });
     await page.goto('/');
+    await page.getByTestId('tab-lecciones').click();
     await page.getByTestId('lesson-e2-05-funciones').click();
     await page.getByTestId('btn-start').click();
     await typeCode(page, 'function area(base, altura) {\n  return 20;\n}\nconsole.log(area(4, 5));');
@@ -195,6 +198,7 @@ test.describe('Eras 1 y 2 · prueba completa', () => {
 
   test('un ciclo infinito no congela la app y se explica el error', async ({ page }) => {
     await page.goto('/');
+    await page.getByTestId('tab-lecciones').click();
     await page.getByTestId(`lesson-${era1Lessons[0]!.id}`).click();
     await page.getByTestId('btn-start').click();
     await typeCode(page, 'while (true) {}');
@@ -217,6 +221,7 @@ test.describe('Eras 1 y 2 · prueba completa', () => {
 
   test('errores típicos de principiante reciben una explicación clara', async ({ page }) => {
     await page.goto('/');
+    await page.getByTestId('tab-lecciones').click();
     await page.getByTestId(`lesson-${era1Lessons[0]!.id}`).click();
     await page.getByTestId('btn-start').click();
 
@@ -236,6 +241,7 @@ test.describe('Eras 1 y 2 · prueba completa', () => {
 
   test('el código del estudiante no puede leer la sesión ni la red', async ({ page }) => {
     await page.goto('/');
+    await page.getByTestId('tab-lecciones').click();
     await page.evaluate(() => localStorage.setItem('sb-token', 'SECRETO'));
     await page.getByTestId(`lesson-${era1Lessons[0]!.id}`).click();
     await page.getByTestId('btn-start').click();
@@ -258,6 +264,7 @@ test.describe('Eras 1 y 2 · prueba completa', () => {
       }
     });
     await page.goto('/');
+    await page.getByTestId('tab-lecciones').click();
     await expect(page.getByTestId('map')).toContainText('Hola, Ana');
     expect(await hud(page)).toEqual({ xp: '40 XP', coins: '🪙 20', level: 'Nv 1' });
     await expect(page.getByTestId('lesson-e1-02-la-consola')).toHaveAttribute('data-state', 'done');
