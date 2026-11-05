@@ -2,12 +2,23 @@ import { useState } from 'react';
 import { ERAS, findLesson } from './learning/lessons';
 import { levelForXp, useProgress } from './store/progress';
 import { LessonPlayer } from './components/LessonPlayer';
+import { Habitat } from './components/Habitat';
+import { Shop } from './components/Shop';
+import { ProtoDock } from './components/ProtoDock';
+
+type Tab = 'refugio' | 'lecciones' | 'tienda';
+const TABS: Array<{ id: Tab; icon: string; label: string }> = [
+  { id: 'refugio', icon: '🏡', label: 'Refugio' },
+  { id: 'lecciones', icon: '📚', label: 'Lecciones' },
+  { id: 'tienda', icon: '🛒', label: 'Tienda' },
+];
 
 export default function App() {
   const save = useProgress((s) => s.save);
   const isUnlocked = useProgress((s) => s.isLessonUnlocked);
   const isEraComplete = useProgress((s) => s.isEraComplete);
   const resetProgress = useProgress((s) => s.resetProgress);
+  const [tab, setTab] = useState<Tab>('refugio');
   const [openId, setOpenId] = useState<string | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const lesson = openId ? findLesson(openId) : undefined;
@@ -26,7 +37,9 @@ export default function App() {
       </header>
 
       <main>
-        {lesson ? (
+        {tab === 'refugio' && <Habitat onGoToLessons={() => setTab('lecciones')} onGoToShop={() => setTab('tienda')} />}
+        {tab === 'tienda' && <Shop onGoToHabitat={() => setTab('refugio')} />}
+        {tab === 'lecciones' && (lesson ? (
           <LessonPlayer
             key={lesson.id}
             lesson={lesson}
@@ -96,8 +109,25 @@ export default function App() {
               </button>
             )}
           </div>
-        )}
+        ))}
       </main>
+
+      <ProtoDock />
+
+      <nav className="tabbar" aria-label="Secciones">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            className={`tab ${tab === t.id ? 'on' : ''}`}
+            aria-current={tab === t.id ? 'page' : undefined}
+            onClick={() => { setTab(t.id); if (t.id !== 'lecciones') setOpenId(null); }}
+            data-testid={`tab-${t.id}`}
+          >
+            <span aria-hidden>{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }

@@ -5,5 +5,7 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 
 export default defineConfig({
   plugins: [react(), viteSingleFile()],
+  // La demo de un solo archivo no usa service worker.
+  resolve: { alias: { 'virtual:pwa-register': '/src/pwa-stub.ts' } },
   build: { outDir: 'dist-demo', emptyOutDir: true },
 });

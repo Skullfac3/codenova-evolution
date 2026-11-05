@@ -11,7 +11,11 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'prompt', // el usuario decide cuándo actualizar (no se pierde una lección a medias)
+      // autoUpdate: la versión nueva se activa sola. Con 'prompt' la app instalada
+      // se quedaba en la versión vieja porque no había botón de actualizar.
+      registerType: 'autoUpdate',
+      injectRegister: false, // se registra en src/pwa.ts
+      workbox: { cleanupOutdatedCaches: true, clientsClaim: true, skipWaiting: true },
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png', 'sprites/**/*', 'audio/**/*'],
       manifest: {
         name: 'CodeNova Evolution',

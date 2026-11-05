@@ -184,17 +184,20 @@ npm run test:e2e   # recorrido completo de las Eras 1 y 2 en móvil y escritorio
 - [x] Dos eras de demostración y transferencia de mascota
 - [x] Validar en navegadores móviles (Android emulado + iPhone real)
 - [x] Perfeccionar el editor (CodeMirror con números de línea y resaltado)
-- [ ] Mejorar las animaciones *(llega con la migración del mundo)*
+- [x] Mejorar las animaciones (Proto-0 con expresiones, fogata, mascotas y explorador animados)
 - [x] Migración del progreso entre versiones *(falta ajustar al formato del prototipo)*
 
 **Fase 3 — MVP educativo** 🔄 *en curso*
-- [ ] Migrar a React + Vite + TypeScript *(lecciones ✅ · mundo del juego pendiente)*
+- [x] Migrar a React + Vite + TypeScript (lecciones, refugio, tienda y Proto-0)
 - [x] Sistema modular de lecciones
 - [x] Laboratorio con sandbox seguro
 - [x] 15 microlecciones (Era 1 y Era 2) con ejercicios de código real y pruebas ocultas
 - [x] Evaluaciones de módulo
-- [ ] Mundo del juego que evoluciona con el nivel
-- [ ] Tienda de NovaCoins y retos diarios
+- [x] Refugio por era: decorar, mascotas que pasean, atuendos y explorador que camina
+- [x] Tienda de NovaCoins y transferencia de una mascota por era
+- [x] Proto-0 animado: mira, parpadea, reacciona al código y evoluciona por era
+- [x] Atajos y autocompletado en el editor según la era
+- [ ] Retos diarios
 
 > **Definición del MVP:** una persona sin experiencia puede completar la Era 1 de principio a fin en un navegador móvil, con progreso guardado localmente, sin necesidad de cuenta. ✅ *Cumplido el 3 de noviembre de 2026.*
 

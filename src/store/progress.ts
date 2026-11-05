@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createEmptySave, loadSave, writeSave, type Save } from '../services/storage/save';
 import { ERAS, findLesson, lessonsOfEra } from '../learning/lessons';
+import type { Result } from '../game/economy';
 
 /** Igual que public.level_for_xp() en Supabase. */
 export const levelForXp = (xp: number) => Math.floor(Math.sqrt(Math.max(xp, 0) / 100)) + 1;
@@ -17,6 +18,8 @@ interface ProgressStore {
   isLessonUnlocked: (lessonId: string) => boolean;
   isEraComplete: (era: number) => boolean;
   resetProgress: () => void;
+  /** Aplica una acción del refugio o la tienda (reglas en game/economy.ts) y guarda si funcionó. */
+  act: (action: (save: Save) => Result) => Result;
 }
 
 const persist = (save: Save) => {
@@ -80,4 +83,10 @@ export const useProgress = create<ProgressStore>((set, get) => ({
   isEraComplete: (era) => eraDone(get().save, era),
 
   resetProgress: () => set({ save: persist(createEmptySave()) }),
+
+  act: (action) => {
+    const result = action(get().save);
+    if (result.ok) set({ save: persist(result.save) });
+    return result;
+  },
 }));
