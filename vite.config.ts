@@ -1,4 +1,5 @@
 /// <reference types="vitest/config" />
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -6,8 +7,17 @@ import { VitePWA } from 'vite-plugin-pwa';
 // En GitHub Pages el sitio vive en https://<usuario>.github.io/codenova-evolution/
 const base = process.env.GITHUB_ACTIONS ? '/codenova-evolution/' : '/';
 
+// La versión vive solo en package.json; se inyecta en el build para
+// mostrarla en la app (src/version.ts). No se hardcodea en dos sitios.
+const { version: appVersion } = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf-8'),
+) as { version: string };
+
 export default defineConfig({
   base,
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   plugins: [
     react(),
     VitePWA({

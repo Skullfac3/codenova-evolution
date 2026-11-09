@@ -4,7 +4,7 @@
 
 CodeNova Evolution es una plataforma educativa que convierte el aprendizaje de programación en una aventura Pixel Art de 16 bits. Empiezas en la Prehistoria con un robot rudimentario, **Proto-0**, y cada concepto que dominas hace evolucionar tu civilización hasta la era futurista.
 
-**Estado:** 🧪 MVP educativo (Eras 1 y 2 jugables) · **Modelo:** gratuito · **Pruébalo:** [skullfac3.github.io/codenova-evolution](https://skullfac3.github.io/codenova-evolution/)
+**Estado:** 🧪 MVP educativo (Eras 1 y 2 jugables) · **Versión:** 0.4.0 · **Modelo:** gratuito · **Pruébalo:** [skullfac3.github.io/codenova-evolution](https://skullfac3.github.io/codenova-evolution/)
 
 ---
 
@@ -70,7 +70,7 @@ Las **eras** son la ruta oficial: cada una corresponde a un **nivel** de conteni
 
 **El explorador.** Avatar personalizable que representa al estudiante: se mueve por los escenarios, interactúa con objetos, cambia de atuendo y evoluciona visualmente.
 
-**Proto-0, el robot mentor.** Comienza como una máquina rudimentaria. Con cada era desbloquea piezas, expresiones y animaciones, y sus pistas se vuelven más avanzadas. Es un mentor, no un adorno: es quien explica errores y guía los retos.
+**Proto-0, el robot mentor.** Comienza como una máquina rudimentaria. Con cada era desbloquea piezas, expresiones y animaciones, y sus pistas se vuelven más avanzadas. Es un mentor, no un adorno: es quien explica errores y guía los retos. Su evolución se ve en el Refugio (panel "Evolución de Proto-0"): v1 Explorador (antena naranja) en la Era 1 y v2 Guardián (gema azul en la antena y banda dorada) al desbloquear la Era 2, que él mismo anuncia. Vendrán más evoluciones con las eras 3-5.
 
 ## 🏡 Mundo, construcción y economía
 
@@ -198,6 +198,8 @@ npm run test:e2e   # recorrido completo de las Eras 1 y 2 en móvil y escritorio
 - [x] Proto-0 animado: mira, parpadea, reacciona al código y evoluciona por era
 - [x] Atajos y autocompletado en el editor según la era
 - [x] Perfiles en el navegador (sin PIN): Administrador con todas las eras y lecciones desbloqueadas e historial de compras de todos los perfiles, y Pruebas, una partida normal para hacer retos y comprar. La partida que ya existía se importa como "Mi partida" sin perder progreso.
+- [x] Leyenda de versión en la app (`CodeNova v0.4.0`, inyectada desde `package.json`) y aviso de actualización: cuando hay una versión nueva, la app muestra un banner "Hay una nueva versión de CodeNova" con botón "Actualizar ahora".
+- [x] Panel "Evolución de Proto-0" en el Refugio con sus etapas (v1 Explorador, v2 Guardián) y anuncio cuando evoluciona.
 - [ ] Retos diarios
 
 > **Definición del MVP:** una persona sin experiencia puede completar la Era 1 de principio a fin en un navegador móvil, con progreso guardado localmente, sin necesidad de cuenta. ✅ *Cumplido el 3 de noviembre de 2026.*
@@ -215,6 +217,8 @@ npm run test:e2e   # recorrido completo de las Eras 1 y 2 en móvil y escritorio
 **Fase 6 — Lanzamiento**
 - [ ] Pruebas con usuarios reales y validación educativa
 - [ ] Rendimiento, publicación estable y evaluación de apps móviles
+
+Plan móvil (Android e iOS con Capacitor, sin implementar): [`docs/plan-movil.md`](docs/plan-movil.md).
 
 Plan técnico detallado: [`docs/MIGRACION.md`](docs/MIGRACION.md).
 

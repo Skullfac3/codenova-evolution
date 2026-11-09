@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { drawProto, type ProtoFrame, type ProtoLook } from '../game/proto';
+import { drawProto, stageForEra, type ProtoFrame, type ProtoLook } from '../game/proto';
 import { tipFor, useProto } from '../store/proto';
 import { useProgress } from '../store/progress';
 
@@ -22,6 +22,18 @@ export function ProtoDock() {
   moodRef.current = mood;
   const eraRef = useRef(era);
   eraRef.current = era;
+  const stage = stageForEra(era);
+
+  // Cuando se desbloquea la Era 2, Proto-0 anuncia su evolución una sola
+  // vez. El ref guarda la era anterior: en el primer render es la misma
+  // (cargar ya en Era 2, p. ej. como Administrador, no anuncia nada).
+  const prevEra = useRef(era);
+  useEffect(() => {
+    if (prevEra.current === 1 && era === 2) {
+      say('¡Evolucioné! Mira mi gema azul y mi banda dorada.', 'happy', 6000);
+    }
+    prevEra.current = era;
+  }, [era, say]);
 
   useEffect(() => {
     const ctx = canvas.current!.getContext('2d')!;
@@ -78,7 +90,7 @@ export function ProtoDock() {
         onClick={() => say(tipFor(era), 'talking', 5000)}
       >
         <canvas ref={canvas} width={32} height={32} />
-        <span className="proto-name">Proto-0 · v{era}</span>
+        <span className="proto-name">Proto-0 · {stage.name}</span>
       </button>
     </div>
   );
