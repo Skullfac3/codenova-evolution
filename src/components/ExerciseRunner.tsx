@@ -13,10 +13,12 @@ interface Props {
   /** Era de la lección (decide los atajos del editor). */
   era: number;
   messages: { success: string; retry: string };
+  /** Recompensa que se suma al completar la lección (se muestra al aprobar). */
+  rewardLabel?: string;
   onPassed: (hintsUsed: number) => void;
 }
 
-export function ExerciseRunner({ exercise, label, era, messages, onPassed }: Props) {
+export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, onPassed }: Props) {
   const [code, setCode] = useState(exercise.starterCode);
   const [resetCount, setResetCount] = useState(0);
   const [running, setRunning] = useState(false);
@@ -103,9 +105,12 @@ export function ExerciseRunner({ exercise, label, era, messages, onPassed }: Pro
               <ul>{validation.failures.map((f, i) => <li key={i}>{f}</li>)}</ul>
             )}
             {validation.passed && (
-              <button className="btn primary" onClick={() => onPassed(hintsShown)} data-testid="btn-continue">
-                Continuar →
-              </button>
+              <>
+                {rewardLabel && <p className="muted">Recompensa al completar la lección: {rewardLabel}.</p>}
+                <button className="btn primary" onClick={() => onPassed(hintsShown)} data-testid="btn-continue">
+                  Continuar →
+                </button>
+              </>
             )}
           </div>
         </div>

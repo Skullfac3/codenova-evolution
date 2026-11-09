@@ -95,6 +95,13 @@ h3 { font-size: 14px; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
 
 /* Player */
+.player { padding-bottom: 24px; }
+.player .btn.big {
+  /* Que el botón nunca quede pegado al borde inferior ni tapado por la
+     barra de pestañas fija: al desplazarlo hasta él queda entero a la vista. */
+  margin-bottom: 8px;
+  scroll-margin-bottom: calc(170px + env(safe-area-inset-bottom, 0px));
+}
 .player-head { display: flex; gap: 12px; align-items: center; margin: 16px 0; flex-wrap: wrap; }
 .speech { display: flex; gap: 12px; background: var(--panel); border: 2px solid var(--line); padding: 12px; }
 .speech p { margin: 0; }
