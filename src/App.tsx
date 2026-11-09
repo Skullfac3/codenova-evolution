@@ -15,7 +15,6 @@ const TABS: Array<{ id: Tab; icon: string; label: string }> = [
 
 export default function App() {
   const save = useProgress((s) => s.save);
-  const isUnlocked = useProgress((s) => s.isLessonUnlocked);
   const isEraComplete = useProgress((s) => s.isEraComplete);
   const resetProgress = useProgress((s) => s.resetProgress);
   const [tab, setTab] = useState<Tab>('refugio');
@@ -44,7 +43,10 @@ export default function App() {
             key={lesson.id}
             lesson={lesson}
             onExit={() => setOpenId(null)}
-            onNext={(next) => setOpenId(next && isUnlocked(next) ? next : null)}
+            // La siguiente lección se desbloquea al completar esta: no volver
+            // a comprobarlo aquí. Antes, esa comprobación dejaba la lección
+            // siguiente bloqueada en el mapa hasta recargar la página.
+            onNext={(next) => setOpenId(next ?? null)}
           />
         ) : (
           <div className="map" data-testid="map">
@@ -61,9 +63,13 @@ export default function App() {
                       <p className="muted">Progreso: {done} de {era.lessons.length}</p>
                       <div className="bar"><span style={{ width: `${(done / era.lessons.length) * 100}%` }} /></div>
                       <ol className="lessons">
-                        {era.lessons.map((l) => {
+                        {era.lessons.map((l, index) => {
                           const isDone = Boolean(save.completedLessons[l.id]);
-                          const open = isUnlocked(l.id);
+                          // Se calcula desde la partida guardada, no desde una
+                          // función capturada: así el mapa se actualiza en
+                          // cuanto se completa la lección anterior, sin
+                          // necesidad de recargar.
+                          const open = index === 0 || Boolean(save.completedLessons[era.lessons[index - 1]!.id]);
                           const state = isDone ? 'done' : open ? 'open' : 'locked';
                           return (
                             <li key={l.id}>

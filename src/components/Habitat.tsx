@@ -277,7 +277,7 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
       <div className="panel">
         <h2>Atuendo</h2>
         <div className="inv-grid">
-          <button className={`inv-item ${!save.equippedOutfit ? 'on' : ''}`} onClick={() => act((s) => equipOutfit(s, null))} data-testid="outfit-none">
+          <button className={`inv-item ${!save.equippedOutfit ? 'on' : ''}`} onClick={() => { const r = act((s) => equipOutfit(s, null)); if (r.ok) protoSay(save.equippedOutfit ? 'Ropa de inicio puesta.' : 'Ya llevas la ropa de inicio.', 'talking', 2200); }} data-testid="outfit-none">
             <SpriteIcon sprite="explorador1" size={40} />
             <span>Ropa de inicio</span>
           </button>
