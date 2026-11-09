@@ -155,3 +155,39 @@ export function drawProto(ctx: CanvasRenderingContext2D, f: ProtoFrame): void {
     }
   }
 }
+
+/**
+ * Etapas de evolución de Proto-0: su aspecto cambia con la era del
+ * estudiante (ver buildProtoGrid: era >= 2 cambia la antena y la banda).
+ * Las eras 3-5 aún no tienen lecciones, así que tampoco tienen etapa.
+ */
+export interface ProtoStage {
+  /** Era en la que se desbloquea esta etapa. */
+  era: number;
+  /** Nombre que se muestra, p. ej. "v1 Explorador". */
+  name: string;
+  /** Qué cambia en su aspecto al llegar a esta etapa. */
+  description: string;
+}
+
+export const PROTO_STAGES: readonly ProtoStage[] = [
+  {
+    era: 1,
+    name: 'v1 Explorador',
+    description: 'Antena naranja y cuerpo gris: el robot con el que empieza la aventura.',
+  },
+  {
+    era: 2,
+    name: 'v2 Guardián',
+    description: 'Gema azul en la antena y banda dorada en la frente: evoluciona al completar la Era 1.',
+  },
+] as const;
+
+export const PROTO_FUTURE_NOTE =
+  'Vendrán más evoluciones con las eras 3, 4 y 5, cuando lleguen sus lecciones.';
+
+/** Etapa de Proto-0 para una era: la más alta disponible sin pasarla. */
+export function stageForEra(era: number): ProtoStage {
+  const stage = [...PROTO_STAGES].reverse().find((s) => s.era <= era);
+  return stage ?? PROTO_STAGES[0]!;
+}

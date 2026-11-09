@@ -182,6 +182,25 @@ h3 { font-size: 14px; }
 .editor .cm-snippetField { background: #ffe2c4; }
 .editor .cm-completionDetail { margin-left: 8px; color: #6b5a7a; font-style: normal; }
 
+/* ── Versión y aviso de actualización ── */
+.app-footer { text-align: center; color: var(--muted); font-size: 11px; padding: 20px 0 8px; }
+.update-banner {
+  position: fixed; left: 12px; right: 12px; top: calc(64px + env(safe-area-inset-top, 0px)); z-index: 40;
+  display: flex; gap: 10px; align-items: center; justify-content: space-between;
+  background: #2c3a2e; border: 2px solid var(--moss); padding: 10px 12px;
+  font-weight: 700; box-shadow: 4px 4px 0 #0008;
+}
+
+/* ── Evolución de Proto-0 (Refugio) ── */
+.proto-stages { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.proto-stages li {
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--panel-2); border: 2px solid var(--line); padding: 8px 10px;
+}
+.proto-stages li[data-state='current'] { border-color: var(--moss); }
+.proto-stages li[data-state='locked'] { opacity: .55; }
+.proto-stages small { color: var(--muted); }
+
 /* ── Barra de pestañas ── */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;

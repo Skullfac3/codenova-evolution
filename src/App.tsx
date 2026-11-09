@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ERAS, findLesson } from './learning/lessons';
 import { levelForXp, useProgress } from './store/progress';
+import { APP_VERSION } from './version';
+import { onUpdateAvailable } from './pwa';
 import { LessonPlayer } from './components/LessonPlayer';
 import { Habitat } from './components/Habitat';
 import { Shop } from './components/Shop';
@@ -22,6 +24,10 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('refugio');
   const [openId, setOpenId] = useState<string | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
+  // Hay una versión nueva lista: el banner ofrece recargar para usarla.
+  // Sin esto, la app instalada se quedaba en silencio con el JS viejo.
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  useEffect(() => onUpdateAvailable(() => setUpdateAvailable(true)), []);
   const lesson = openId ? findLesson(openId) : undefined;
 
   // Muestra las eras con contenido y, como anuncio, la siguiente sin contenido.
@@ -122,6 +128,19 @@ export default function App() {
       </main>
 
       <ProtoDock />
+
+      {updateAvailable && (
+        <div className="update-banner" role="alert" data-testid="update-banner">
+          <span>Hay una nueva versión de CodeNova</span>
+          <button className="btn small" onClick={() => window.location.reload()} data-testid="btn-apply-update">
+            Actualizar ahora
+          </button>
+        </div>
+      )}
+
+      <footer className="app-footer">
+        <span data-testid="app-version">CodeNova v{APP_VERSION}</span>
+      </footer>
 
       <nav className="tabbar" aria-label="Secciones">
         {TABS.map((t) => (
