@@ -185,7 +185,7 @@ h3 { font-size: 14px; }
 /* ── Barra de pestañas ── */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid; grid-template-columns: repeat(4, 1fr);
   background: var(--bg); border-top: 2px solid var(--line);
   padding-left: max(8px, env(safe-area-inset-left, 0px));
   padding-right: max(8px, env(safe-area-inset-right, 0px));
@@ -259,6 +259,21 @@ h3 { font-size: 14px; }
 
 /* ── Tienda ── */
 .wallet { font-family: var(--pixel); font-size: 11px; background: var(--panel); border: 2px solid var(--line); padding: 8px; }
+
+/* ── Perfiles ── */
+.profiles h1 { margin: 24px 0 8px; }
+.profile-list { display: grid; gap: 10px; margin: 16px 0; }
+.profile-card {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  background: var(--panel); border: 2px solid var(--line); padding: 12px; box-shadow: 4px 4px 0 #0007;
+}
+.profile-card.on { border-color: var(--fire); }
+.profile-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.purchase-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.purchase-list li {
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--panel-2); border: 2px solid var(--line); padding: 8px 10px;
+}
 .shop-era h2 { font-size: 12px; margin: 20px 0 10px; }
 .shop-era.locked { opacity: .6; }
 .shop-grid { display: grid; gap: 8px; }

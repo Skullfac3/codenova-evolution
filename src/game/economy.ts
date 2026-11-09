@@ -25,9 +25,17 @@ export function buyItem(save: Save, itemId: string, newId: () => string = () => 
   if (item.kind === 'outfit' && (save.inventory[itemId] ?? 0) > 0) return fail('Ya tienes este atuendo.');
   if (save.novacoins < item.price) return fail(`Te faltan ${item.price - save.novacoins} NovaCoins.`);
 
-  const next: Save = { ...save, novacoins: save.novacoins - item.price };
+  const purchaseId = newId();
+  const next: Save = {
+    ...save,
+    novacoins: save.novacoins - item.price,
+    purchases: [
+      ...(save.purchases ?? []),
+      { id: purchaseId, itemId, price: item.price, at: new Date().toISOString() },
+    ],
+  };
   if (item.kind === 'pet') {
-    next.pets = [...save.pets, { id: newId(), itemId, originEra: item.era, currentEra: item.era }];
+    next.pets = [...save.pets, { id: purchaseId, itemId, originEra: item.era, currentEra: item.era }];
   } else {
     next.inventory = { ...save.inventory, [itemId]: (save.inventory[itemId] ?? 0) + 1 };
   }
