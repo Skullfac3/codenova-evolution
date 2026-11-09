@@ -27,6 +27,10 @@ export interface SaveV2 {
   pets: Array<{ id: string; itemId: string; originEra: number; currentEra: number; nickname?: string }>;
   /** Atuendo puesto (id de la tienda) o ausente si usa el de inicio. */
   equippedOutfit?: string;
+  /** Perfil Administrador: todo desbloqueado. Ausente o false = jugador normal. */
+  admin?: boolean;
+  /** Historial de compras en la tienda (lo ve el Administrador). */
+  purchases?: Array<{ id: string; itemId: string; price: number; at: string }>;
   /** Recompensas completadas sin conexión, pendientes de enviar a Supabase. */
   pendingSync: Array<{ lessonId: string; score: number; eventId: string }>;
   updatedAt: string;

@@ -197,6 +197,7 @@ npm run test:e2e   # recorrido completo de las Eras 1 y 2 en móvil y escritorio
 - [x] Tienda de NovaCoins y transferencia de una mascota por era
 - [x] Proto-0 animado: mira, parpadea, reacciona al código y evoluciona por era
 - [x] Atajos y autocompletado en el editor según la era
+- [x] Perfiles en el navegador (sin PIN): Administrador con todas las eras y lecciones desbloqueadas e historial de compras de todos los perfiles, y Pruebas, una partida normal para hacer retos y comprar. La partida que ya existía se importa como "Mi partida" sin perder progreso.
 - [ ] Retos diarios
 
 > **Definición del MVP:** una persona sin experiencia puede completar la Era 1 de principio a fin en un navegador móvil, con progreso guardado localmente, sin necesidad de cuenta. ✅ *Cumplido el 3 de noviembre de 2026.*

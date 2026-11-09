@@ -1,5 +1,14 @@
 import { create } from 'zustand';
-import { createEmptySave, loadSave, writeSave, type Save } from '../services/storage/save';
+import { createEmptySave, type Save } from '../services/storage/save';
+import {
+  loadProfiles,
+  loadProfileSave,
+  writeProfiles,
+  writeProfileSave,
+  createAdminSave,
+  type Profile,
+  type ProfilesState,
+} from '../services/storage/profiles';
 import { ERAS, findLesson, lessonsOfEra } from '../learning/lessons';
 import type { Result } from '../game/economy';
 
@@ -14,6 +23,10 @@ export interface CompletionOutcome {
 
 interface ProgressStore {
   save: Save;
+  profiles: Profile[];
+  activeProfileId: string;
+  activeProfile: () => Profile;
+  switchProfile: (profileId: string) => void;
   completeLesson: (lessonId: string, score: number, reward: { xp: number; coins: number }) => CompletionOutcome;
   isLessonUnlocked: (lessonId: string) => boolean;
   isEraComplete: (era: number) => boolean;
@@ -22,71 +35,97 @@ interface ProgressStore {
   act: (action: (save: Save) => Result) => Result;
 }
 
-const persist = (save: Save) => {
-  writeSave(save);
-  return save;
-};
-
 const eraDone = (save: Save, era: number) => {
   const lessons = lessonsOfEra(era);
   return lessons.length > 0 && lessons.every((l) => save.completedLessons[l.id]);
 };
 
-export const useProgress = create<ProgressStore>((set, get) => ({
-  save: loadSave(),
+const initialProfiles: ProfilesState = loadProfiles();
+const initialProfile = initialProfiles.profiles.find((p) => p.id === initialProfiles.activeId) ?? initialProfiles.profiles[0]!;
 
-  completeLesson: (lessonId, score, reward) => {
-    const { save } = get();
-    // Misma regla que complete_lesson(): una recompensa por lección.
-    if (save.completedLessons[lessonId]) return { awarded: false, eraUnlocked: null };
+export const useProgress = create<ProgressStore>((set, get) => {
+  const persist = (save: Save) => {
+    writeProfileSave(get().activeProfileId, save);
+    return save;
+  };
 
-    const eventId = crypto.randomUUID();
-    let next: Save = {
-      ...save,
-      xp: save.xp + reward.xp,
-      novacoins: save.novacoins + reward.coins,
-      completedLessons: {
-        ...save.completedLessons,
-        [lessonId]: { score, completedAt: new Date().toISOString(), eventId },
-      },
-      pendingSync: [...save.pendingSync, { lessonId, score, eventId }],
-    };
+  return {
+    save: loadProfileSave(initialProfile),
+    profiles: initialProfiles.profiles,
+    activeProfileId: initialProfiles.activeId,
 
-    // Misma regla que unlock_next_era(): todo lo publicado de la era debe estar completo.
-    let eraUnlocked: number | null = null;
-    const era = findLesson(lessonId)?.era;
-    const nextEra = ERAS.find((e) => e.id === (era ?? 0) + 1);
-    if (era && nextEra && eraDone(next, era) && !next.unlockedEras.includes(nextEra.id)) {
-      eraUnlocked = nextEra.id;
-      next = {
-        ...next,
-        unlockedEras: [...next.unlockedEras, nextEra.id],
-        currentEra: nextEra.id,
-        worlds: { ...next.worlds, [nextEra.id]: next.worlds[nextEra.id] ?? { objects: [] } },
+    activeProfile: () => get().profiles.find((p) => p.id === get().activeProfileId) ?? get().profiles[0]!,
+
+    switchProfile: (profileId) => {
+      const { activeProfileId, save, profiles } = get();
+      if (profileId === activeProfileId) return;
+      const next = profiles.find((p) => p.id === profileId);
+      if (!next) return;
+      writeProfileSave(activeProfileId, save);
+      const nextSave = loadProfileSave(next);
+      writeProfiles({ activeId: profileId, profiles });
+      set({ save: nextSave, activeProfileId: profileId });
+    },
+
+    completeLesson: (lessonId, score, reward) => {
+      const { save } = get();
+      // Misma regla que complete_lesson(): una recompensa por lección.
+      if (save.completedLessons[lessonId]) return { awarded: false, eraUnlocked: null };
+
+      const eventId = crypto.randomUUID();
+      let next: Save = {
+        ...save,
+        xp: save.xp + reward.xp,
+        novacoins: save.novacoins + reward.coins,
+        completedLessons: {
+          ...save.completedLessons,
+          [lessonId]: { score, completedAt: new Date().toISOString(), eventId },
+        },
+        pendingSync: [...save.pendingSync, { lessonId, score, eventId }],
       };
-    }
 
-    set({ save: persist(next) });
-    return { awarded: true, eraUnlocked };
-  },
+      // Misma regla que unlock_next_era(): todo lo publicado de la era debe estar completo.
+      let eraUnlocked: number | null = null;
+      const era = findLesson(lessonId)?.era;
+      const nextEra = ERAS.find((e) => e.id === (era ?? 0) + 1);
+      if (era && nextEra && eraDone(next, era) && !next.unlockedEras.includes(nextEra.id)) {
+        eraUnlocked = nextEra.id;
+        next = {
+          ...next,
+          unlockedEras: [...next.unlockedEras, nextEra.id],
+          currentEra: nextEra.id,
+          worlds: { ...next.worlds, [nextEra.id]: next.worlds[nextEra.id] ?? { objects: [] } },
+        };
+      }
 
-  isLessonUnlocked: (lessonId) => {
-    const lesson = findLesson(lessonId);
-    if (!lesson) return false;
-    const { save } = get();
-    if (!save.unlockedEras.includes(lesson.era)) return false;
-    const siblings = lessonsOfEra(lesson.era);
-    const index = siblings.findIndex((l) => l.id === lessonId);
-    return index === 0 || Boolean(save.completedLessons[siblings[index - 1]!.id]);
-  },
+      set({ save: persist(next) });
+      return { awarded: true, eraUnlocked };
+    },
 
-  isEraComplete: (era) => eraDone(get().save, era),
+    isLessonUnlocked: (lessonId) => {
+      const lesson = findLesson(lessonId);
+      if (!lesson) return false;
+      const { save } = get();
+      // El Administrador ve todas las lecciones, sin completar nada.
+      if (save.admin) return true;
+      if (!save.unlockedEras.includes(lesson.era)) return false;
+      const siblings = lessonsOfEra(lesson.era);
+      const index = siblings.findIndex((l) => l.id === lessonId);
+      return index === 0 || Boolean(save.completedLessons[siblings[index - 1]!.id]);
+    },
 
-  resetProgress: () => set({ save: persist(createEmptySave()) }),
+    isEraComplete: (era) => eraDone(get().save, era),
 
-  act: (action) => {
-    const result = action(get().save);
-    if (result.ok) set({ save: persist(result.save) });
-    return result;
-  },
-}));
+    resetProgress: () => {
+      const profile = get().activeProfile();
+      const fresh = profile.kind === 'admin' ? createAdminSave() : createEmptySave();
+      set({ save: persist({ ...fresh, explorerName: profile.kind === 'admin' ? 'Administrador' : profile.name }) });
+    },
+
+    act: (action) => {
+      const result = action(get().save);
+      if (result.ok) set({ save: persist(result.save) });
+      return result;
+    },
+  };
+});

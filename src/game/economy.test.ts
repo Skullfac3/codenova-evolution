@@ -19,6 +19,19 @@ describe('tienda', () => {
     expect(s.inventory['deco-fogata']).toBe(1);
   });
 
+  it('cada compra queda registrada en el historial para el Administrador', () => {
+    const s = ok(buyItem(withCoins(90), 'deco-fogata'));
+    expect(s.purchases).toHaveLength(1);
+    expect(s.purchases![0]).toMatchObject({ itemId: 'deco-fogata', price: 10 });
+    const s2 = ok(buyItem(s, 'deco-helecho'));
+    expect(s2.purchases).toHaveLength(2);
+  });
+
+  it('una compra fallida no deja registro', () => {
+    const r = buyItem(withCoins(30), 'pet-dodo');
+    expect(r.ok).toBe(false);
+  });
+
   it('no deja comprar sin monedas suficientes y dice cuántas faltan', () => {
     const r = buyItem(withCoins(30), 'pet-dodo');
     expect(r).toEqual({ ok: false, reason: 'Te faltan 10 NovaCoins.' });

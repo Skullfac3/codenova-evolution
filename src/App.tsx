@@ -4,13 +4,15 @@ import { levelForXp, useProgress } from './store/progress';
 import { LessonPlayer } from './components/LessonPlayer';
 import { Habitat } from './components/Habitat';
 import { Shop } from './components/Shop';
+import { Profiles } from './components/Profiles';
 import { ProtoDock } from './components/ProtoDock';
 
-type Tab = 'refugio' | 'lecciones' | 'tienda';
+type Tab = 'refugio' | 'lecciones' | 'tienda' | 'perfiles';
 const TABS: Array<{ id: Tab; icon: string; label: string }> = [
   { id: 'refugio', icon: '🏡', label: 'Refugio' },
   { id: 'lecciones', icon: '📚', label: 'Lecciones' },
   { id: 'tienda', icon: '🛒', label: 'Tienda' },
+  { id: 'perfiles', icon: '👤', label: 'Perfiles' },
 ];
 
 export default function App() {
@@ -38,6 +40,7 @@ export default function App() {
       <main>
         {tab === 'refugio' && <Habitat onGoToLessons={() => setTab('lecciones')} onGoToShop={() => setTab('tienda')} />}
         {tab === 'tienda' && <Shop onGoToHabitat={() => setTab('refugio')} />}
+        {tab === 'perfiles' && <Profiles />}
         {tab === 'lecciones' && (lesson ? (
           <LessonPlayer
             key={lesson.id}
@@ -68,8 +71,8 @@ export default function App() {
                           // Se calcula desde la partida guardada, no desde una
                           // función capturada: así el mapa se actualiza en
                           // cuanto se completa la lección anterior, sin
-                          // necesidad de recargar.
-                          const open = index === 0 || Boolean(save.completedLessons[era.lessons[index - 1]!.id]);
+                          // necesidad de recargar. El Administrador lo ve todo abierto.
+                          const open = Boolean(save.admin) || index === 0 || Boolean(save.completedLessons[era.lessons[index - 1]!.id]);
                           const state = isDone ? 'done' : open ? 'open' : 'locked';
                           return (
                             <li key={l.id}>
