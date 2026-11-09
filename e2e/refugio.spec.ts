@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
-import { era1Lessons } from '../src/learning/lessons/era1';
+import { era3Lessons } from '../src/learning/lessons/era3';
 
-/** Partida como la de una persona que acaba de terminar la Era 1: 170 XP y 90 NovaCoins. */
+/** Partida como la de una persona que acaba de terminar la primera parte de JavaScript (Era 3): 170 XP y 90 NovaCoins. */
 async function seedEra1Done(page: Page) {
-  const ids = era1Lessons.map((l) => l.id);
+  const ids = era3Lessons.slice(0, 7).map((l) => l.id);
   await page.addInitScript((ids) => {
     if (localStorage.getItem('codenova:save')) return;
     localStorage.setItem(
@@ -115,7 +115,7 @@ test.describe('Refugio, tienda y Proto-0', () => {
     await seedEra1Done(page);
     await page.goto('/');
     const dock = page.getByTestId('proto-dock');
-    await expect(dock).toHaveAttribute('data-era', '2'); // ya evolucionó
+    await expect(dock).toHaveAttribute('data-era', '3'); // ya evolucionó
 
     // Mira hacia distintos lados con el tiempo.
     const looks = new Set<string>();
@@ -132,7 +132,7 @@ test.describe('Refugio, tienda y Proto-0', () => {
 
     // Reacciona al ejecutar código.
     await page.getByTestId('tab-lecciones').click();
-    await page.getByTestId('lesson-e2-01-condicionales').click();
+    await page.getByTestId('lesson-e3-08-condicionales').click();
     await page.getByTestId('btn-start').click();
     await page.getByTestId('btn-run').click();
     await expect(dock).toHaveAttribute('data-mood', 'sad');
@@ -143,10 +143,10 @@ test.describe('Refugio, tienda y Proto-0', () => {
     await seedEra1Done(page);
     await page.goto('/');
     await page.getByTestId('tab-lecciones').click();
-    await page.getByTestId('lesson-e2-01-condicionales').click();
+    await page.getByTestId('lesson-e3-08-condicionales').click();
     await page.getByTestId('btn-start').click();
 
-    // Los atajos de la Era 2 aparecen (if, for, function…), además de los de la Era 1.
+    // Los atajos de la Era 3 aparecen (if, for, function…), además de los de la primera parte.
     for (const id of ['log', 'let', 'if', 'for', 'function']) await expect(page.getByTestId(`snip-${id}`)).toBeVisible();
 
     const editor = page.locator('.cm-content');

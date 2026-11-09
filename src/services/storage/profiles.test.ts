@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createEmptySave, SAVE_KEY, writeSave } from './save';
+import { createEmptySave, SAVE_KEY } from './save';
 import {
   ADMIN_PROFILE_ID,
   TEST_PROFILE_ID,
@@ -39,13 +39,22 @@ describe('perfiles', () => {
 
   it('migra la partida vieja como "Mi partida" sin perder progreso', () => {
     const storage = new MemoryStorage();
-    writeSave({ ...createEmptySave(), xp: 40, novacoins: 20, completedLessons: { 'e1-01-que-es-programar': { score: 100, completedAt: '2026-11-09T00:00:00Z', eventId: 'x' } } }, storage);
+    // Partida guardada por la versión 2 (ids e1- de antes del reordenamiento).
+    storage.setItem(SAVE_KEY, JSON.stringify({
+      version: 2, explorerName: 'Explorador', avatar: 'explorer-01', xp: 40, novacoins: 20, currentEra: 1,
+      unlockedEras: [1],
+      completedLessons: { 'e1-01-que-es-programar': { score: 100, completedAt: '2026-11-09T00:00:00Z', eventId: 'x' } },
+      worlds: { 1: { objects: [] } }, inventory: {}, pets: [], pendingSync: [], updatedAt: '2026-11-09T00:00:00Z',
+    }));
     const state = loadProfiles(storage);
     expect(state.profiles.map((p) => p.id)).toContain('mi-partida');
     expect(state.activeId).toBe('mi-partida');
     const migrated = loadProfileSave(state.profiles.find((p) => p.id === 'mi-partida')!, storage);
     expect(migrated.xp).toBe(40);
-    expect(migrated.completedLessons['e1-01-que-es-programar']).toBeDefined();
+    // La lección era de JavaScript: migró a la Era 3 con su id nuevo.
+    expect(migrated.completedLessons['e3-01-que-es-programar']).toBeDefined();
+    expect(migrated.completedLessons['e1-01-que-es-programar']).toBeUndefined();
+    expect(migrated.unlockedEras).toContain(3);
   });
 
   it('cada perfil guarda su propia partida, sin mezclarse', () => {

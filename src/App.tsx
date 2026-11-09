@@ -20,6 +20,7 @@ const TABS: Array<{ id: Tab; icon: string; label: string }> = [
 export default function App() {
   const save = useProgress((s) => s.save);
   const isEraComplete = useProgress((s) => s.isEraComplete);
+  const isEraUnlocked = useProgress((s) => s.isEraUnlocked);
   const resetProgress = useProgress((s) => s.resetProgress);
   const [tab, setTab] = useState<Tab>('refugio');
   const [openId, setOpenId] = useState<string | null>(null);
@@ -30,9 +31,12 @@ export default function App() {
   useEffect(() => onUpdateAvailable(() => setUpdateAvailable(true)), []);
   const lesson = openId ? findLesson(openId) : undefined;
 
-  // Muestra las eras con contenido y, como anuncio, la siguiente sin contenido.
+  // Muestra todas las eras: las que tienen lecciones y, como anuncio,
+  // las que aún no tienen (HTML y CSS van primero en el mapa). El banner
+  // anuncia la siguiente era sin contenido después de la última publicada.
   const published = ERAS.filter((e) => e.lessons.length > 0);
-  const upcoming = ERAS.find((e) => e.lessons.length === 0);
+  const lastPublishedId = Math.max(...published.map((e) => e.id));
+  const upcoming = ERAS.find((e) => e.lessons.length === 0 && e.id > lastPublishedId);
 
   return (
     <div className="app">
@@ -61,8 +65,18 @@ export default function App() {
           <div className="map" data-testid="map">
             <p className="muted greeting">Hola, {save.explorerName}.</p>
 
-            {published.map((era) => {
-              const unlocked = save.unlockedEras.includes(era.id);
+            {ERAS.map((era) => {
+              const unlocked = isEraUnlocked(era.id);
+              // Era anunciada sin lecciones todavía: se muestra qué viene.
+              if (era.lessons.length === 0) {
+                return (
+                  <section key={era.id} className="era era-coming" data-testid={`era-${era.id}`} data-state="coming-soon">
+                    <h1>{era.icon} Era {era.id} · {era.name}</h1>
+                    <p className="muted">{era.teaser}</p>
+                    <p className="coming-note">📣 Sus lecciones llegan pronto.</p>
+                  </section>
+                );
+              }
               const done = era.lessons.filter((l) => save.completedLessons[l.id]).length;
               return (
                 <section key={era.id} className={`era ${unlocked ? '' : 'era-locked'}`} data-testid={`era-${era.id}`} data-state={unlocked ? (isEraComplete(era.id) ? 'done' : 'open') : 'locked'}>

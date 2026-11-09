@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useProgress } from '../store/progress';
 import { protoSay } from '../store/proto';
-import { PROTO_FUTURE_NOTE, PROTO_STAGES } from '../game/proto';
+import { PROTO_FUTURE_NOTE, PROTO_STAGES, stageForEra } from '../game/proto';
 import { COLS, ITEMS, LANDMARK, ROWS, TILE, WORLD_ERAS, isLandmarkTile, itemById } from '../game/items';
 import { OUTFIT_COLORS, drawHut, drawTemple, drawTile, spriteCanvas, type SpriteKey, type TileKind } from '../game/sprites';
 import { availableCount, equipOutfit, placeObject, removeObjectAt, transferPet, transferablePets } from '../game/economy';
@@ -210,7 +210,7 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
   const eraInfo = ERAS.find((e) => e.id === era)!;
   const nextLessonEra = Math.max(...save.unlockedEras);
   // Era que ve Proto-0: solo 1 y 2 tienen etapa (las eras 3-5 no existen aún).
-  const protoEra = Math.max(...save.unlockedEras.filter((e) => e <= 2));
+  const protoEra = Math.max(...save.unlockedEras.filter((e) => e <= 3));
 
   return (
     <section className="habitat" data-testid="habitat" data-era={era} data-mode={mode} data-objects={objects.length} data-pets={petsHere.length} data-outfit={save.equippedOutfit ?? ''}>
@@ -226,7 +226,7 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
           </div>
         )}
       </div>
-      <p className="muted habitat-sub">{eraInfo.name}{nextLessonEra > 2 ? ' · La Era industrial llega pronto.' : ''}</p>
+      <p className="muted habitat-sub">{eraInfo.name}{nextLessonEra > 2 ? ' · La Era digital llega pronto.' : ''}</p>
 
       <div className="world-frame">
         <canvas
@@ -297,7 +297,9 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
         <h2>Evolución de Proto-0</h2>
         <ul className="proto-stages">
           {PROTO_STAGES.map((stage) => {
-            const current = stage.era === protoEra;
+            // La etapa actual es la más alta desbloqueada (stageForEra):
+            // con protoEra 3 la etapa actual sigue siendo v2 Guardián.
+            const current = stage.era === stageForEra(protoEra).era;
             const unlocked = stage.era <= protoEra;
             return (
               <li key={stage.era} data-testid={`proto-stage-${stage.era}`} data-state={current ? 'current' : unlocked ? 'unlocked' : 'locked'}>

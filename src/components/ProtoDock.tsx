@@ -16,7 +16,9 @@ export function ProtoDock() {
   const message = useProto((s) => s.message);
   const messageId = useProto((s) => s.messageId);
   const say = useProto((s) => s.say);
-  const era = useProgress((s) => Math.max(...s.save.unlockedEras.filter((e) => e <= 2)));
+  // La era más alta desbloqueada, hasta la Era 3 (JavaScript): ahí
+  // llegan los consejos de JS. Las eras 4 y 5 aún no tienen contenido.
+  const era = useProgress((s) => Math.max(...s.save.unlockedEras.filter((e) => e <= 3)));
 
   const moodRef = useRef(mood);
   moodRef.current = mood;

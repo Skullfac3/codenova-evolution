@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { era1Lessons } from '../src/learning/lessons/era1';
-import { era2Lessons } from '../src/learning/lessons/era2';
+import { era3Lessons } from '../src/learning/lessons/era3';
 
 /**
  * Perfiles: Administrador (todo desbloqueado + historial de compras) y
@@ -17,9 +16,9 @@ test.describe('Perfiles: Administrador y Pruebas', () => {
     await expect(page.getByTestId('purchases-empty')).toBeVisible();
 
     await page.getByTestId('tab-lecciones').click();
-    // Era 2 completa, sin haber completado la Era 1.
-    await expect(page.getByTestId('era-2')).toHaveAttribute('data-state', 'open');
-    for (const l of [...era1Lessons, ...era2Lessons]) {
+    // Era 3 (JavaScript) abierta, sin haber completado nada.
+    await expect(page.getByTestId('era-3')).toHaveAttribute('data-state', 'open');
+    for (const l of era3Lessons) {
       await expect(page.getByTestId(`lesson-${l.id}`)).toHaveAttribute('data-state', 'open');
     }
   });
@@ -32,13 +31,13 @@ test.describe('Perfiles: Administrador y Pruebas', () => {
 
     // Completa la lección 1 en Pruebas y gana 10 NovaCoins.
     await page.getByTestId('tab-lecciones').click();
-    await page.getByTestId(`lesson-${era1Lessons[0]!.id}`).click();
+    await page.getByTestId(`lesson-${era3Lessons[0]!.id}`).click();
     await page.getByTestId('btn-start').click();
     const content = page.locator('.cm-content').first();
     await content.click();
     await page.keyboard.press('ControlOrMeta+A');
     await page.keyboard.press('Delete');
-    await page.keyboard.insertText(era1Lessons[0]!.exercise.solution);
+    await page.keyboard.insertText(era3Lessons[0]!.exercise.solution);
     await page.getByTestId('btn-run').click();
     await expect(page.getByTestId('feedback')).toHaveAttribute('data-status', 'pass');
     await page.getByTestId('btn-continue').click();
@@ -78,5 +77,8 @@ test.describe('Perfiles: Administrador y Pruebas', () => {
     await page.getByTestId('tab-perfiles').click();
     await expect(page.getByTestId('profile-mi-partida')).toBeVisible();
     await expect(page.getByTestId('btn-switch-mi-partida')).toBeDisabled();
+    // La lección vieja migró a la Era 3 y sigue marcada como completada.
+    await page.getByTestId('tab-lecciones').click();
+    await expect(page.getByTestId('lesson-e3-01-que-es-programar')).toHaveAttribute('data-state', 'done');
   });
 });

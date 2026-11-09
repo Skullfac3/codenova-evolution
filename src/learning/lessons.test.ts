@@ -33,8 +33,15 @@ describe('estructura de las eras', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('las 15 microlecciones de la Fase 3 están publicadas', () => {
+  it('las 15 microlecciones de JavaScript están publicadas en la Era 3', () => {
     expect(allLessons).toHaveLength(15);
+    expect(ERAS.find((e) => e.id === 3)!.lessons).toHaveLength(15);
+  });
+
+  it('las eras 1, 2, 4 y 5 están anunciadas sin lecciones todavía', () => {
+    for (const id of [1, 2, 4, 5] as const) {
+      expect(ERAS.find((e) => e.id === id)!.lessons).toHaveLength(0);
+    }
   });
 
   it.each(publishedEras.map((e) => [e.name, e] as const))('%s: orden, encadenado y una evaluación al final', (_n, era) => {
@@ -46,8 +53,8 @@ describe('estructura de las eras', () => {
     expect(era.lessons.at(-1)!.kind).toBe('evaluation');
   });
 
-  it('la Era 1 lleva a la Era 2', () => {
-    expect(ERAS[0]!.lessons.at(-1)!.next).toBe(ERAS[1]!.lessons[0]!.id);
+  it('la última lección de la Era 3 no tiene siguiente (la Era 4 llega después)', () => {
+    expect(ERAS.find((e) => e.id === 3)!.lessons.at(-1)!.next).toBeNull();
   });
 
   it('cada lección normal tiene 2 retos extra y pistas', () => {
@@ -85,7 +92,7 @@ describe('pruebas ocultas', () => {
   const find = (id: string) => allExercises.find(([, e]) => e.id === id)![1];
 
   it('rechazan una función que imprime la respuesta a mano', async () => {
-    const ex = find('e2-05-ex-main');
+    const ex = find('e3-12-ex-main');
     const tramposo = 'function area(base, altura) {\n  return 20;\n}\nconsole.log(area(4, 5));';
     const r = await check(ex, tramposo);
     expect(r.passed).toBe(false);
@@ -93,7 +100,7 @@ describe('pruebas ocultas', () => {
   });
 
   it('detectan "mayor o igual" cuando se pedía "mayor que"', async () => {
-    const ex = find('e2-08-ex-practical');
+    const ex = find('e3-15-ex-practical');
     const casi = ex.solution.replace('n > limite', 'n >= limite');
     expect((await check(ex, casi)).passed).toBe(false);
   });

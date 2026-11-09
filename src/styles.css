@@ -161,6 +161,8 @@ h3 { font-size: 14px; }
 .era { margin-bottom: 8px; }
 .era-locked h1 { color: var(--muted); }
 .locked-note { background: var(--panel); border: 2px dashed var(--line); padding: 12px; color: var(--muted); margin: 0 0 24px; }
+.coming-note { background: var(--panel); border: 2px dashed var(--line); padding: 12px; color: var(--muted); margin: 0 0 24px; }
+.era-coming h1 { color: var(--muted); }
 
 /* Atajos del editor */
 .editor-wrap { display: grid; gap: 6px; min-width: 0; }
