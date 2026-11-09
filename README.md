@@ -34,7 +34,7 @@ CodeNova Evolution es una plataforma educativa que convierte el aprendizaje de p
 | **Categoría** | EdTech · Gamificación |
 | **Plataforma** | Web primero (PWA), móvil después |
 | **Público** | Cualquier edad, sin experiencia previa |
-| **Qué se aprende** | Programación y desarrollo web: JavaScript → web → herramientas → React/TypeScript → Next.js, Node.js y Python |
+| **Qué se aprende** | Programación y desarrollo web: HTML → CSS y Tailwind → JavaScript por niveles → React → TypeScript → Next.js |
 | **Lecciones** | Microlecciones de 5, 10 o 15 minutos |
 | **Estilo visual** | Pixel Art 2D de 16 bits, original |
 | **Progreso** | XP, niveles, NovaCoins y eras |
@@ -58,13 +58,13 @@ Las **eras** son la ruta oficial: cada una corresponde a un **nivel** de conteni
 
 | Era | Nivel | Mundo | Qué aprendes | Estado |
 |---|---|---|---|---|
-| 🪨 **1. Prehistoria** | Fundamentos I | Fogatas, rocas, primer refugio | Qué es programar, instrucciones, consola, variables, constantes, tipos de datos, operadores | ✅ 7 lecciones |
-| 🏛️ **2. Civilizaciones antiguas** | Fundamentos II | Arquitectura antigua, herramientas | Condicionales, ciclos, funciones, arreglos, objetos, resolución de problemas | ✅ 8 lecciones |
-| ⚙️ **3. Era industrial** | JavaScript intermedio + Web | Fábricas, máquinas | Métodos de arreglos, scope, funciones flecha, HTML, CSS, DOM, eventos, formularios, JSON, APIs, promesas, async/await | 🗺️ Planeada |
-| 💻 **4. Era digital** | Herramientas profesionales + React | Computadoras, redes, centros de datos | Terminal, Git, GitHub, depuración, Postman, buenas prácticas, React, TypeScript | 🗺️ Planeada |
-| 🚀 **5. Era futurista** | Full stack y más allá | Ciudades futuristas, IA | Next.js, Node.js, bases de datos, backend, Python, integración con IA, arquitectura de aplicaciones | 🗺️ Planeada |
+| 🪨 **1. Prehistoria** | HTML | Fogatas, rocas, primer refugio | Etiquetas, estructura y tu primera página web | 🗺️ Llega pronto |
+| 🏛️ **2. Civilizaciones antiguas** | CSS + Tailwind | Arquitectura antigua, herramientas | Selectores, colores, diseño, flexbox y Tailwind | 🗺️ Llega pronto |
+| ⚙️ **3. Era industrial** | JavaScript por niveles | Fábricas, máquinas | Fundamentos, condicionales, ciclos, funciones, arreglos, objetos y resolución de problemas | ✅ 15 lecciones |
+| 💻 **4. Era digital** | React | Computadoras, redes, centros de datos | Componentes, props, estado e interfaces | 🗺️ Planeada |
+| 🚀 **5. Era futurista** | TypeScript + Next.js | Ciudades futuristas, IA | Tipos, rutas, renderizado y la web profesional | 🗺️ Planeada |
 
-> Las eras 3 a 5 son visión de producto, no funcionalidades terminadas. La ruta se revisará conforme evolucionen las herramientas del desarrollo web.
+> Las eras 1, 2, 4 y 5 son visión de producto, no funcionalidades terminadas. La ruta se revisará conforme evolucionen las herramientas del desarrollo web.
 
 ## 🤖 Personajes
 
@@ -191,7 +191,7 @@ npm run test:e2e   # recorrido completo de las Eras 1 y 2 en móvil y escritorio
 - [x] Migrar a React + Vite + TypeScript (lecciones, refugio, tienda y Proto-0)
 - [x] Sistema modular de lecciones
 - [x] Laboratorio con sandbox seguro
-- [x] 15 microlecciones (Era 1 y Era 2) con ejercicios de código real y pruebas ocultas
+- [x] 15 microlecciones de JavaScript (Era 3) con ejercicios de código real y pruebas ocultas
 - [x] Evaluaciones de módulo
 - [x] Refugio por era: decorar, mascotas que pasean, atuendos y explorador que camina
 - [x] Tienda de NovaCoins y transferencia de una mascota por era
@@ -202,7 +202,7 @@ npm run test:e2e   # recorrido completo de las Eras 1 y 2 en móvil y escritorio
 - [x] Panel "Evolución de Proto-0" en el Refugio con sus etapas (v1 Explorador, v2 Guardián) y anuncio cuando evoluciona.
 - [ ] Retos diarios
 
-> **Definición del MVP:** una persona sin experiencia puede completar la Era 1 de principio a fin en un navegador móvil, con progreso guardado localmente, sin necesidad de cuenta. ✅ *Cumplido el 3 de noviembre de 2026.*
+> **Definición del MVP:** una persona sin experiencia puede completar JavaScript (Era 3) de principio a fin en un navegador móvil, con progreso guardado localmente, sin necesidad de cuenta. ✅ *Cumplido el 3 de noviembre de 2026.*
 
 **Fase 4 — Cuentas y persistencia**
 - [ ] Proyecto Supabase, registro por correo, Google y GitHub

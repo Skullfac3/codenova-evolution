@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { era1Lessons } from '../src/learning/lessons/era1';
+import { era3Lessons } from '../src/learning/lessons/era3';
 
 /**
  * Regresión de los errores encontrados en la prueba manual del 9 nov 2026:
@@ -11,7 +11,7 @@ import { era1Lessons } from '../src/learning/lessons/era1';
 test('la lección 2 se desbloquea en el mapa sin recargar, tras completar la 1', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('tab-lecciones').click();
-  await page.getByTestId(`lesson-${era1Lessons[0]!.id}`).click();
+  await page.getByTestId(`lesson-${era3Lessons[0]!.id}`).click();
   await page.getByTestId('btn-start').click();
 
   // Resolver el reto principal con la solución oficial.
@@ -19,7 +19,7 @@ test('la lección 2 se desbloquea en el mapa sin recargar, tras completar la 1',
   await content.click();
   await page.keyboard.press('ControlOrMeta+A');
   await page.keyboard.press('Delete');
-  await page.keyboard.insertText(era1Lessons[0]!.exercise.solution);
+  await page.keyboard.insertText(era3Lessons[0]!.exercise.solution);
   await page.getByTestId('btn-run').click();
   await expect(page.getByTestId('feedback')).toHaveAttribute('data-status', 'pass');
   // Error 3: al aprobar debe verse la recompensa pendiente antes de continuar.
@@ -32,9 +32,9 @@ test('la lección 2 se desbloquea en el mapa sin recargar, tras completar la 1',
 
   // Ir a la lección 2 y volver al mapa: debe aparecer abierta SIN recargar.
   await page.getByTestId('btn-next-lesson').click();
-  await expect(page.getByTestId('player')).toHaveAttribute('data-lesson', era1Lessons[1]!.id);
+  await expect(page.getByTestId('player')).toHaveAttribute('data-lesson', era3Lessons[1]!.id);
   await page.getByTestId('btn-exit').click();
-  await expect(page.getByTestId(`lesson-${era1Lessons[1]!.id}`)).toHaveAttribute('data-state', 'open');
+  await expect(page.getByTestId(`lesson-${era3Lessons[1]!.id}`)).toHaveAttribute('data-state', 'open');
 });
 
 test('Ropa de inicio responde y no borra los adornos del refugio', async ({ page }) => {
@@ -49,7 +49,7 @@ test('Ropa de inicio responde y no borra los adornos del refugio', async ({ page
         worlds: { 1: { objects: [] }, 2: { objects: [] } }, inventory: {}, pets: [], pendingSync: [], updatedAt: '2026-11-05T00:00:00Z',
       }),
     );
-  }, era1Lessons.map((l) => l.id));
+  }, era3Lessons.slice(0, 7).map((l) => l.id));
   await page.goto('/');
 
   // Comprar y colocar una fogata.

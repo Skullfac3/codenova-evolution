@@ -1,9 +1,9 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e2-03-ciclo-for',
-  era: 2,
-  order: 3,
+  id: 'e3-10-ciclo-for',
+  era: 3,
+  order: 10,
   kind: 'lesson',
   title: 'Ciclo for: construir sin cansarse',
   topics: ['for', 'repetición', 'contador'],
@@ -39,7 +39,7 @@ Dentro del ciclo puedes usar \`i\` para saber en qué vuelta vas.
   },
 
   exercise: {
-    id: 'e2-03-ex-main',
+    id: 'e3-10-ex-main',
     prompt: 'Usa un ciclo for para mostrar "Ladrillo 1", "Ladrillo 2"… hasta "Ladrillo 5".',
     starterCode: `// Un solo console.log dentro de un for
 `,
@@ -67,7 +67,7 @@ Dentro del ciclo puedes usar \`i\` para saber en qué vuelta vas.
 
   extraChallenges: [
     {
-      id: 'e2-03-ex-extra-1',
+      id: 'e3-10-ex-extra-1',
       prompt: 'Usa un for para sumar todos los números del 1 al 10 en la variable total y muestra el resultado.',
       starterCode: `let total = 0;
 // suma con un for
@@ -85,7 +85,7 @@ console.log(total);`,
       hints: ['En cada vuelta: total += i;'],
     },
     {
-      id: 'e2-03-ex-extra-2',
+      id: 'e3-10-ex-extra-2',
       prompt: 'Haz una cuenta regresiva con un for: 3, 2, 1 y después "¡Abran las puertas!".',
       starterCode: `// Cuenta hacia atrás con i--
 `,
@@ -107,5 +107,5 @@ console.log("¡Abran las puertas!");`,
     retry: 'La muralla quedó chueca. Revisa dónde empieza el contador, cuándo termina y cuánto avanza.',
   },
   reward: { xp: 25, coins: 15 },
-  next: 'e2-04-ciclo-while',
+  next: 'e3-11-ciclo-while',
 };

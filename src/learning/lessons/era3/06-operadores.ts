@@ -1,8 +1,8 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e1-06-operadores',
-  era: 1,
+  id: 'e3-06-operadores',
+  era: 3,
   order: 6,
   kind: 'lesson',
   title: 'Operadores',
@@ -40,7 +40,7 @@ console.log((2 + 3) * 4);`,
   },
 
   exercise: {
-    id: 'e1-06-ex-main',
+    id: 'e3-06-ex-main',
     prompt:
       'Hay 17 bayas para 5 exploradores. Muestra primero cuántas bayas enteras le tocan a cada uno ' +
       'y después cuántas sobran. Calcula con las variables y usa el operador %.',
@@ -74,7 +74,7 @@ console.log(sobrantes);`,
 
   extraChallenges: [
     {
-      id: 'e1-06-ex-extra-1',
+      id: 'e3-06-ex-extra-1',
       prompt: 'Proto-0 tiene 50 de energía. Come una baya (+25) y luego camina (−10). Usa += y -= y muestra la energía final.',
       starterCode: `let energia = 50;
 // Usa += y -=
@@ -91,7 +91,7 @@ console.log(energia);`,
       hints: ['energia += 25; suma 25 a lo que ya tenía.'],
     },
     {
-      id: 'e1-06-ex-extra-2',
+      id: 'e3-06-ex-extra-2',
       prompt: 'La batería de Proto-0 está en 42. Muestra si es mayor o igual a 50, y después si es exactamente 42.',
       starterCode: `const bateria = 42;
 // Muestra dos comparaciones
@@ -113,5 +113,5 @@ console.log(bateria === 42);`,
     retry: 'Mis números no cuadran. Revisa qué operador usaste y en qué orden se calcula.',
   },
   reward: { xp: 20, coins: 10 },
-  next: 'e1-07-evaluacion',
+  next: 'e3-07-evaluacion',
 };

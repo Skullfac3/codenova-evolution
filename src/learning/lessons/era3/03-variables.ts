@@ -1,8 +1,8 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e1-03-variables',
-  era: 1,
+  id: 'e3-03-variables',
+  era: 3,
   order: 3,
   kind: 'lesson',
   title: 'Variables: cajas con nombre',
@@ -37,7 +37,7 @@ console.log(piedras);`,
   },
 
   exercise: {
-    id: 'e1-03-ex-main',
+    id: 'e3-03-ex-main',
     prompt:
       'Crea una variable llamada ramas con el valor 3 y muéstrala. ' +
       'Luego Proto-0 encuentra 4 ramas más: suma 4 a la variable y muéstrala de nuevo.',
@@ -72,7 +72,7 @@ console.log(ramas);`,
 
   extraChallenges: [
     {
-      id: 'e1-03-ex-extra-1',
+      id: 'e3-03-ex-extra-1',
       prompt:
         'Crea una variable nombreExplorador con tu nombre (entre comillas) y muestra un saludo que empiece con "Hola, " seguido de la variable.',
       starterCode: `// Pista: puedes unir textos con +
@@ -95,7 +95,7 @@ console.log("Hola, " + nombreExplorador);`,
       hints: ['"Hola, " + nombreExplorador une los dos textos.'],
     },
     {
-      id: 'e1-03-ex-extra-2',
+      id: 'e3-03-ex-extra-2',
       prompt: 'Este código tiene un nombre de variable mal escrito. Arréglalo para que muestre 10.',
       starterCode: `let bayasRojas = 10;
 console.log(bayasrojas);`,
@@ -114,5 +114,5 @@ console.log(bayasRojas);`,
     retry: 'Mi memoria no guardó lo correcto. Revisa el nombre de la variable y el valor.',
   },
   reward: { xp: 20, coins: 10 },
-  next: 'e1-04-constantes',
+  next: 'e3-04-constantes',
 };

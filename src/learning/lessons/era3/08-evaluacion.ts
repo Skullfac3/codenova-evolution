@@ -1,16 +1,16 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e2-08-evaluacion',
-  era: 2,
-  order: 8,
+  id: 'e3-15-evaluacion',
+  era: 3,
+  order: 15,
   kind: 'evaluation',
-  title: 'Evaluación de las Civilizaciones antiguas',
-  topics: ['repaso Era 2'],
+  title: 'Evaluación final · JavaScript',
+  topics: ['repaso JavaScript · 2ª parte'],
 
   intro:
     'El consejo de la ciudad se reúne en el anfiteatro. Si resuelves su desafío, ' +
-    'las chimeneas de la Era industrial empezarán a humear en el horizonte.',
+    'las pantallas de la Era digital empezarán a encenderse en el horizonte.',
 
   concept: `
 Esta evaluación tiene **5 preguntas** y **un ejercicio práctico**.
@@ -61,7 +61,7 @@ Esta evaluación tiene **5 preguntas** y **un ejercicio práctico**.
   ],
 
   exercise: {
-    id: 'e2-08-ex-practical',
+    id: 'e3-15-ex-practical',
     prompt:
       'El consejo quiere saber cuántas cosechas superaron la meta.\n' +
       '1. Escribe una función contarMayores(numeros, limite).\n' +
@@ -109,5 +109,5 @@ console.log(contarMayores([5, 12, 8, 20], 10));`,
     retry: 'Casi. Repasa ciclos y funciones y vuelve al anfiteatro cuando quieras.',
   },
   reward: { xp: 60, coins: 40 },
-  next: null, // primera lección de la Era 3
+  next: null, // la Era 4 aún no tiene lecciones
 };

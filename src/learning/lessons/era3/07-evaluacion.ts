@@ -1,23 +1,23 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e1-07-evaluacion',
-  era: 1,
+  id: 'e3-07-evaluacion',
+  era: 3,
   order: 7,
   kind: 'evaluation',
-  title: 'Evaluación de la Prehistoria',
-  topics: ['repaso Era 1'],
+  title: 'Evaluación intermedia · JavaScript',
+  topics: ['repaso JavaScript · 1ª parte'],
 
   intro:
     'El gran fuego del consejo está encendido. Si demuestras lo que aprendiste, ' +
-    'la tribu abrirá el camino hacia las Civilizaciones antiguas.',
+    'seguirás hacia la segunda parte de la Era industrial.',
 
   concept: `
 Esta evaluación tiene **5 preguntas** y **un ejercicio práctico**.
 
 - Preguntas: 60 % de la calificación.
 - Ejercicio práctico: 40 % y es **obligatorio** para aprobar.
-- Necesitas **60 puntos** para desbloquear la Era 2. Puedes repetirla las veces que quieras.
+- Necesitas **60 puntos** para seguir con la segunda parte de la Era 3. Puedes repetirla las veces que quieras.
 `.trim(),
 
   example: { code: '', output: [] },
@@ -56,7 +56,7 @@ Esta evaluación tiene **5 preguntas** y **un ejercicio práctico**.
   ],
 
   exercise: {
-    id: 'e1-07-ex-practical',
+    id: 'e3-07-ex-practical',
     prompt:
       'Haz el inventario del refugio:\n' +
       '1. Crea una constante nombreRefugio con "Cueva del Alba".\n' +
@@ -94,9 +94,9 @@ console.log("Recursos: " + recursos);`,
   extraChallenges: [],
 
   feedback: {
-    success: '¡Lo lograste! La tribu celebra y el camino hacia la Era 2 se abre. Mis engranajes ya no rechinan. ⚙️✨',
+    success: '¡Lo lograste! La tribu celebra y el camino hacia la segunda parte de la Era 3 se abre. Mis engranajes ya no rechinan. ⚙️✨',
     retry: 'Casi. Repasa las lecciones marcadas y vuelve al fuego del consejo cuando quieras.',
   },
   reward: { xp: 50, coins: 30 },
-  next: 'e2-01-condicionales',
+  next: 'e3-08-condicionales',
 };

@@ -1,9 +1,9 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e2-04-ciclo-while',
-  era: 2,
-  order: 4,
+  id: 'e3-11-ciclo-while',
+  era: 3,
+  order: 11,
   kind: 'lesson',
   title: 'Ciclo while: mientras sea necesario',
   topics: ['while', 'ciclo infinito', 'acumuladores'],
@@ -38,7 +38,7 @@ while (piedras > 0) {
   },
 
   exercise: {
-    id: 'e2-04-ex-main',
+    id: 'e3-11-ex-main',
     prompt:
       'Llena el cántaro de 3 en 3 litros MIENTRAS tenga menos de 10. Muestra el nivel después de cada viaje.',
     starterCode: `let agua = 0;
@@ -62,7 +62,7 @@ while (agua < 10) {
 
   extraChallenges: [
     {
-      id: 'e2-04-ex-extra-1',
+      id: 'e3-11-ex-extra-1',
       prompt:
         'Un mercader duplica sus monedas cada día. Empieza con 1. Usa while para contar cuántos días tarda en tener 100 o más, y muestra los días.',
       starterCode: `let monedas = 1;
@@ -84,7 +84,7 @@ console.log(dias);`,
       hints: ['Dentro del ciclo: monedas *= 2; y dias++;'],
     },
     {
-      id: 'e2-04-ex-extra-2',
+      id: 'e3-11-ex-extra-2',
       prompt: 'Este ciclo nunca termina. Arréglalo para que muestre "Paso 0", "Paso 1" y "Paso 2".',
       starterCode: `let i = 0;
 while (i < 3) {
@@ -108,5 +108,5 @@ while (i < 3) {
     retry: 'El agua no llegó como esperaba. Revisa la condición y qué cambia en cada vuelta.',
   },
   reward: { xp: 25, coins: 15 },
-  next: 'e2-05-funciones',
+  next: 'e3-12-funciones',
 };

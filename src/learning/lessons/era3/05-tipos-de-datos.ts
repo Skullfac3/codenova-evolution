@@ -1,8 +1,8 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e1-05-tipos-de-datos',
-  era: 1,
+  id: 'e3-05-tipos-de-datos',
+  era: 3,
   order: 5,
   kind: 'lesson',
   title: 'Tipos de datos',
@@ -40,7 +40,7 @@ console.log(typeof esRara);`,
   },
 
   exercise: {
-    id: 'e1-05-ex-main',
+    id: 'e3-05-ex-main',
     prompt:
       'Crea tres variables: nombre con el texto "Proto-0", bateria con el número 42 y encendido con true. ' +
       'Luego muestra el typeof de cada una, en ese orden.',
@@ -89,7 +89,7 @@ console.log(typeof encendido);`,
 
   extraChallenges: [
     {
-      id: 'e1-05-ex-extra-1',
+      id: 'e3-05-ex-extra-1',
       prompt: 'Proto-0 sumó mal: obtuvo 55 en lugar de 10. Arregla el código para que muestre 10 usando Number().',
       starterCode: `let piedras = "5";
 let nuevas = 5;
@@ -105,7 +105,7 @@ console.log(Number(piedras) + nuevas);`,
       hints: ['Number(piedras) convierte "5" en 5.'],
     },
     {
-      id: 'e1-05-ex-extra-2',
+      id: 'e3-05-ex-extra-2',
       prompt: 'Crea una variable mascota sin asignarle valor. Muestra su valor y luego su tipo.',
       starterCode: `// let mascota;  ← crea la variable sin usar =
 `,
@@ -125,5 +125,5 @@ console.log(typeof mascota);`,
     retry: 'Algo quedó en la caja equivocada. Revisa las comillas: deciden si algo es texto.',
   },
   reward: { xp: 20, coins: 10 },
-  next: 'e1-06-operadores',
+  next: 'e3-06-operadores',
 };

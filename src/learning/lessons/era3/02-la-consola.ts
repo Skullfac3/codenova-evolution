@@ -1,8 +1,8 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e1-02-la-consola',
-  era: 1,
+  id: 'e3-02-la-consola',
+  era: 3,
   order: 2,
   kind: 'lesson',
   title: 'La consola: la voz de tu código',
@@ -32,7 +32,7 @@ console.log(3);`,
   },
 
   exercise: {
-    id: 'e1-02-ex-main',
+    id: 'e3-02-ex-main',
     prompt:
       'Enciende la pantalla de Proto-0. Muestra el texto "Proto-0 en línea" y, en la siguiente línea, ' +
       'el número 3 (su número de piezas) escrito SIN comillas.',
@@ -60,7 +60,7 @@ console.log(3);`,
 
   extraChallenges: [
     {
-      id: 'e1-02-ex-extra-1',
+      id: 'e3-02-ex-extra-1',
       prompt: 'Muestra en UNA sola instrucción el texto "Ramas:" y el número 8, para que salga: Ramas: 8',
       starterCode: `// Usa una coma para separar el texto del número
 `,
@@ -76,7 +76,7 @@ console.log(3);`,
       hints: ['console.log acepta varias cosas separadas por comas y las une con un espacio.'],
     },
     {
-      id: 'e1-02-ex-extra-2',
+      id: 'e3-02-ex-extra-2',
       prompt: 'Proto-0 tiene un fallo: este código da error. Arréglalo para que muestre: Hola fogata',
       starterCode: `console.log(Hola fogata);`,
       solution: `console.log("Hola fogata");`,
@@ -93,5 +93,5 @@ console.log(3);`,
     retry: 'Mi pantalla muestra algo raro. Revisa las comillas: el texto las necesita, los números no.',
   },
   reward: { xp: 20, coins: 10 },
-  next: 'e1-03-variables',
+  next: 'e3-03-variables',
 };

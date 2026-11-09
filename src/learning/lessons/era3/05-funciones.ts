@@ -1,9 +1,9 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e2-05-funciones',
-  era: 2,
-  order: 5,
+  id: 'e3-12-funciones',
+  era: 3,
+  order: 12,
   kind: 'lesson',
   title: 'Funciones: recetas reutilizables',
   topics: ['function', 'parámetros', 'return'],
@@ -40,7 +40,7 @@ console.log(saludo("Proto-0"));`,
   },
 
   exercise: {
-    id: 'e2-05-ex-main',
+    id: 'e3-12-ex-main',
     prompt:
       'Escribe una función area que reciba base y altura y DEVUELVA base × altura. Luego muestra area(4, 5).',
     starterCode: `function area(base, altura) {
@@ -73,7 +73,7 @@ console.log(area(4, 5));`,
 
   extraChallenges: [
     {
-      id: 'e2-05-ex-extra-1',
+      id: 'e3-12-ex-extra-1',
       prompt: 'Escribe una función saludar(nombre) que devuelva "Salve, " + nombre + "!". Muestra saludar("Nefer").',
       starterCode: `// function saludar(nombre) { … }
 `,
@@ -95,7 +95,7 @@ console.log(saludar("Nefer"));`,
       hints: ['return "Salve, " + nombre + "!";'],
     },
     {
-      id: 'e2-05-ex-extra-2',
+      id: 'e3-12-ex-extra-2',
       prompt: 'Escribe una función esPar(n) que devuelva true si n es par y false si no. Muestra esPar(4) y esPar(7).',
       starterCode: `// Pista: un número es par si n % 2 === 0
 `,
@@ -124,5 +124,5 @@ console.log(esPar(7));`,
     retry: 'Mi receta salió mal. Revisa que la función use sus parámetros y que tenga return.',
   },
   reward: { xp: 25, coins: 15 },
-  next: 'e2-06-arreglos',
+  next: 'e3-13-arreglos',
 };

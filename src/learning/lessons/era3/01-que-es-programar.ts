@@ -1,8 +1,8 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e1-01-que-es-programar',
-  era: 1,
+  id: 'e3-01-que-es-programar',
+  era: 3,
   order: 1,
   kind: 'lesson',
   title: '¿Qué es programar?',
@@ -35,7 +35,7 @@ console.log("Encender la fogata");`,
   },
 
   exercise: {
-    id: 'e1-01-ex-main',
+    id: 'e3-01-ex-main',
     prompt:
       'Proto-0 quiere construir un refugio, pero sus instrucciones están revueltas. ' +
       'Reordena las líneas para que se muestren en orden: 1, 2 y 3.',
@@ -62,7 +62,7 @@ console.log("3. Poner el techo de hojas");`,
 
   extraChallenges: [
     {
-      id: 'e1-01-ex-extra-1',
+      id: 'e3-01-ex-extra-1',
       prompt: 'El refugio está listo. Agrega un cuarto paso al final que muestre: 4. Encender la fogata',
       starterCode: `console.log("1. Juntar ramas");
 console.log("2. Levantar las paredes");
@@ -83,7 +83,7 @@ console.log("4. Encender la fogata");`,
       hints: ['Copia la forma de las líneas de arriba y cambia solo el texto entre comillas.'],
     },
     {
-      id: 'e1-01-ex-extra-2',
+      id: 'e3-01-ex-extra-2',
       prompt: 'Haz que Proto-0 se presente. Muestra exactamente: Hola, soy Proto-0',
       starterCode: `// Tu primera instrucción desde cero
 `,
@@ -104,5 +104,5 @@ console.log("4. Encender la fogata");`,
     retry: 'Mmm, algo no salió en orden. Lee tus líneas de arriba hacia abajo como si fueras yo.',
   },
   reward: { xp: 20, coins: 10 },
-  next: 'e1-02-la-consola',
+  next: 'e3-02-la-consola',
 };

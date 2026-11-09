@@ -1,9 +1,9 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e2-06-arreglos',
-  era: 2,
-  order: 6,
+  id: 'e3-13-arreglos',
+  era: 3,
+  order: 13,
   kind: 'lesson',
   title: 'Arreglos: el almacén ordenado',
   topics: ['arreglos', 'índices', 'length', 'push', 'for...of'],
@@ -42,7 +42,7 @@ console.log(columnas[2]);`,
   },
 
   exercise: {
-    id: 'e2-06-ex-main',
+    id: 'e3-13-ex-main',
     prompt:
       'Agrega "higos" a las ofrendas con push. Luego muestra cuántas ofrendas hay (length), la primera y la última (usa length - 1).',
     starterCode: `const ofrendas = ["trigo", "aceite", "miel"];
@@ -73,7 +73,7 @@ console.log(ofrendas[ofrendas.length - 1]);`,
 
   extraChallenges: [
     {
-      id: 'e2-06-ex-extra-1',
+      id: 'e3-13-ex-extra-1',
       prompt: 'Suma todas las cosechas con un ciclo for...of y muestra el total.',
       starterCode: `const cosechas = [12, 7, 20, 5];
 let total = 0;
@@ -93,7 +93,7 @@ console.log(total);`,
       hints: ['for (const c of cosechas) { total += c; }'],
     },
     {
-      id: 'e2-06-ex-extra-2',
+      id: 'e3-13-ex-extra-2',
       prompt: 'Encuentra la piedra más grande recorriendo el arreglo y muéstrala.',
       starterCode: `const piedras = [3, 9, 4, 15, 6];
 let mayor = piedras[0];
@@ -121,5 +121,5 @@ console.log(mayor);`,
     retry: 'Algo se desacomodó en el almacén. Recuerda: los índices empiezan en 0.',
   },
   reward: { xp: 25, coins: 15 },
-  next: 'e2-07-objetos',
+  next: 'e3-14-objetos',
 };

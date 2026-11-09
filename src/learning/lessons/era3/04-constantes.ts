@@ -1,8 +1,8 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e1-04-constantes',
-  era: 1,
+  id: 'e3-04-constantes',
+  era: 3,
   order: 4,
   kind: 'lesson',
   title: 'Constantes: grabado en piedra',
@@ -38,7 +38,7 @@ console.log(piedrasPorFogata * fogatas);`,
   },
 
   exercise: {
-    id: 'e1-04-ex-main',
+    id: 'e3-04-ex-main',
     prompt:
       'Este programa se rompe porque intenta cambiar una constante. Arréglalo para que funcione y muestre 3 y luego 3. ' +
       'No cambies la palabra const.',
@@ -71,7 +71,7 @@ console.log(fuegoNecesario);`,
 
   extraChallenges: [
     {
-      id: 'e1-04-ex-extra-1',
+      id: 'e3-04-ex-extra-1',
       prompt: 'Reemplaza cada ??? por let o const según corresponda, para que se muestre: Los del Valle 13',
       starterCode: `??? nombreTribu = "Los del Valle";
 ??? habitantes = 12;
@@ -94,7 +94,7 @@ console.log(nombreTribu, habitantes);`,
       hints: ['¿Cuál de los dos valores cambia más abajo en el código?'],
     },
     {
-      id: 'e1-04-ex-extra-2',
+      id: 'e3-04-ex-extra-2',
       prompt: 'Crea una constante diasPorLuna con el valor 29 y muestra cuántos días hay en 3 lunas.',
       starterCode: `// Crea la constante y multiplica por 3
 `,
@@ -122,5 +122,5 @@ console.log(diasPorLuna * 3);`,
     retry: 'Algo se movió que no debía moverse. Revisa qué valores son const.',
   },
   reward: { xp: 20, coins: 10 },
-  next: 'e1-05-tipos-de-datos',
+  next: 'e3-05-tipos-de-datos',
 };

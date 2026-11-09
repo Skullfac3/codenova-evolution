@@ -29,6 +29,7 @@ interface ProgressStore {
   switchProfile: (profileId: string) => void;
   completeLesson: (lessonId: string, score: number, reward: { xp: number; coins: number }) => CompletionOutcome;
   isLessonUnlocked: (lessonId: string) => boolean;
+  isEraUnlocked: (era: number) => boolean;
   isEraComplete: (era: number) => boolean;
   resetProgress: () => void;
   /** Aplica una acción del refugio o la tienda (reglas en game/economy.ts) y guarda si funcionó. */
@@ -38,6 +39,19 @@ interface ProgressStore {
 const eraDone = (save: Save, era: number) => {
   const lessons = lessonsOfEra(era);
   return lessons.length > 0 && lessons.every((l) => save.completedLessons[l.id]);
+};
+
+/**
+ * Una era está abierta si está en `unlockedEras`, o si todas las eras
+ * anteriores están vacías o completas: las eras anunciadas sin
+ * lecciones (hoy HTML en la Era 1 y CSS en la Era 2) no bloquean el
+ * camino hacia la siguiente era con contenido. Sin esto, nadie nuevo
+ * podría llegar nunca a JavaScript, que vive en la Era 3.
+ */
+const eraOpen = (save: Save, era: number): boolean => {
+  if (save.admin) return true;
+  if (save.unlockedEras.includes(era)) return true;
+  return ERAS.filter((e) => e.id < era).every((e) => e.lessons.length === 0 || eraDone(save, e.id));
 };
 
 const initialProfiles: ProfilesState = loadProfiles();
@@ -108,11 +122,13 @@ export const useProgress = create<ProgressStore>((set, get) => {
       const { save } = get();
       // El Administrador ve todas las lecciones, sin completar nada.
       if (save.admin) return true;
-      if (!save.unlockedEras.includes(lesson.era)) return false;
+      if (!eraOpen(save, lesson.era)) return false;
       const siblings = lessonsOfEra(lesson.era);
       const index = siblings.findIndex((l) => l.id === lessonId);
       return index === 0 || Boolean(save.completedLessons[siblings[index - 1]!.id]);
     },
+
+    isEraUnlocked: (era) => eraOpen(get().save, era),
 
     isEraComplete: (era) => eraDone(get().save, era),
 

@@ -1,9 +1,9 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e2-02-operadores-logicos',
-  era: 2,
-  order: 2,
+  id: 'e3-09-operadores-logicos',
+  era: 3,
+  order: 9,
   kind: 'lesson',
   title: 'Más caminos: else if y operadores lógicos',
   topics: ['else if', '&&', '||', '!'],
@@ -44,7 +44,7 @@ console.log(!tieneAgua);`,
   },
 
   exercise: {
-    id: 'e2-02-ex-main',
+    id: 'e3-09-ex-main',
     prompt:
       'Asigna la medalla según el puntaje: 90 o más es "Oro", 70 o más es "Plata" y cualquier otro es "Bronce". Usa if, else if y else.',
     starterCode: `const puntaje = 85;
@@ -75,7 +75,7 @@ if (puntaje >= 90) {
 
   extraChallenges: [
     {
-      id: 'e2-02-ex-extra-1',
+      id: 'e3-09-ex-extra-1',
       prompt: 'La puerta del almacén se abre solo si tienes la llave Y es de día. Si ambas son verdaderas muestra "Abrir la puerta"; si no, "Esperar".',
       starterCode: `const tieneLlave = true;
 const esDeDia = true;
@@ -95,7 +95,7 @@ if (tieneLlave && esDeDia) {
       hints: ['if (tieneLlave && esDeDia) { … }'],
     },
     {
-      id: 'e2-02-ex-extra-2',
+      id: 'e3-09-ex-extra-2',
       prompt: 'El mercado cierra si es festivo O si es domingo. Muestra "El mercado está cerrado" o "El mercado está abierto".',
       starterCode: `const esFestivo = false;
 const esDomingo = true;
@@ -121,5 +121,5 @@ if (esFestivo || esDomingo) {
     retry: 'Algo se cruzó en el camino. Revisa el orden de las condiciones: se revisan de arriba hacia abajo.',
   },
   reward: { xp: 25, coins: 15 },
-  next: 'e2-03-ciclo-for',
+  next: 'e3-10-ciclo-for',
 };

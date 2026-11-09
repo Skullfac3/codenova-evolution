@@ -1,9 +1,9 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e2-01-condicionales',
-  era: 2,
-  order: 1,
+  id: 'e3-08-condicionales',
+  era: 3,
+  order: 8,
   kind: 'lesson',
   title: 'Condicionales: el camino se divide',
   topics: ['if', 'else', 'decisiones'],
@@ -39,7 +39,7 @@ if (energia >= 50) {
   },
 
   exercise: {
-    id: 'e2-01-ex-main',
+    id: 'e3-08-ex-main',
     prompt:
       'La cueva necesita al menos 2 antorchas para estar iluminada. Usa if/else: si antorchas es mayor o igual a 2, ' +
       'muestra "La cueva está iluminada"; si no, muestra "Está muy oscuro".',
@@ -68,7 +68,7 @@ if (antorchas >= 2) {
 
   extraChallenges: [
     {
-      id: 'e2-01-ex-extra-1',
+      id: 'e3-08-ex-extra-1',
       prompt:
         'Al templo solo entran sin guía quienes tienen 13 años o más. Si edad >= 13 muestra "Puede entrar al templo", si no "Necesita un guía".',
       starterCode: `const edad = 12;
@@ -87,7 +87,7 @@ if (edad >= 13) {
       hints: ['Con 12 años la condición es false, así que se ejecuta el else.'],
     },
     {
-      id: 'e2-01-ex-extra-2',
+      id: 'e3-08-ex-extra-2',
       prompt: 'Si clima es exactamente "lluvia", muestra "Llevar capa"; si no, "Llevar sombrero".',
       starterCode: `const clima = "lluvia";
 `,
@@ -111,5 +111,5 @@ if (clima === "lluvia") {
     retry: 'Tomé el camino equivocado. Revisa la condición y qué hay dentro de cada llave.',
   },
   reward: { xp: 25, coins: 15 },
-  next: 'e2-02-operadores-logicos',
+  next: 'e3-09-operadores-logicos',
 };

@@ -1,9 +1,9 @@
 import type { Lesson } from '../../../types/lesson';
 
 export const lesson: Lesson = {
-  id: 'e2-07-objetos',
-  era: 2,
-  order: 7,
+  id: 'e3-14-objetos',
+  era: 3,
+  order: 14,
   kind: 'lesson',
   title: 'Objetos: fichas con propiedades',
   topics: ['objetos', 'propiedades', 'notación de punto', 'arreglos de objetos'],
@@ -41,7 +41,7 @@ console.log(herramienta.nombre + ": " + herramienta.usos + " usos");`,
   },
 
   exercise: {
-    id: 'e2-07-ex-main',
+    id: 'e3-14-ex-main',
     prompt:
       'Crea el objeto templo con nombre "Templo del Sol", columnas 8 y terminado false. Muestra su nombre. ' +
       'Luego agrégale 4 columnas, márcalo como terminado y muestra columnas y terminado.',
@@ -73,7 +73,7 @@ console.log(templo.terminado);`,
 
   extraChallenges: [
     {
-      id: 'e2-07-ex-extra-1',
+      id: 'e3-14-ex-extra-1',
       prompt: 'Recorre la lista de mercaderes con for...of y muestra para cada uno: "<nombre> tiene <monedas> monedas".',
       starterCode: `const mercaderes = [
   { nombre: "Iri", monedas: 30 },
@@ -96,7 +96,7 @@ for (const m of mercaderes) {
       hints: ['m.nombre + " tiene " + m.monedas + " monedas"'],
     },
     {
-      id: 'e2-07-ex-extra-2',
+      id: 'e3-14-ex-extra-2',
       prompt: 'Escribe una función describir(animal) que devuelva "<nombre> es un <especie>". Muestra describir con el búho.',
       starterCode: `const buho = { nombre: "Sabio", especie: "búho" };
 // function describir(animal) { … }
@@ -126,5 +126,5 @@ console.log(describir(buho));`,
     retry: 'La ficha tiene un error. Revisa las comas entre propiedades y la notación de punto.',
   },
   reward: { xp: 25, coins: 15 },
-  next: 'e2-08-evaluacion',
+  next: 'e3-15-evaluacion',
 };

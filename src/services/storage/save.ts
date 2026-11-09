@@ -11,10 +11,10 @@
 
 export const SAVE_KEY = 'codenova:save';
 export const LEGACY_KEY = 'codenova-save';
-export const CURRENT_VERSION = 2;
+export const CURRENT_VERSION = 3;
 
-export interface SaveV2 {
-  version: 2;
+export interface SaveV3 {
+  version: 3;
   explorerName: string;
   avatar: string;
   xp: number;
@@ -36,11 +36,11 @@ export interface SaveV2 {
   updatedAt: string;
 }
 
-export type Save = SaveV2;
+export type Save = SaveV3;
 
 export function createEmptySave(): Save {
   return {
-    version: 2,
+    version: 3,
     explorerName: 'Explorador',
     avatar: 'explorer-01',
     xp: 0,
@@ -73,7 +73,7 @@ function migrateFromLegacy(legacy: Record<string, unknown>): Record<string, unkn
 }
 
 /** v1 → v2: mundos por era, inventario, mascotas y cola de sincronización. */
-function migrateV1toV2(v1: Record<string, unknown>): SaveV2 {
+function migrateV1toV2(v1: Record<string, unknown>): SaveV3 {
   const base = createEmptySave();
   const era = num(v1.era, 1) || 1;
   const lessons = (v1.lessons as unknown[]).filter((l): l is string => typeof l === 'string');
@@ -96,6 +96,43 @@ function migrateV1toV2(v1: Record<string, unknown>): SaveV2 {
   };
 }
 
+/**
+ * Reordenamiento de eras (2026-11-09): las lecciones de JavaScript
+ * pasaron de las eras 1 y 2 a la Era 3. `e1-NN-...` → `e3-NN-...`
+ * y `e2-NN-...` → `e3-(NN+7)-...` (las 7 de la vieja Era 1 ocupan
+ * e3-01..e3-07 y las 8 de la vieja Era 2, e3-08..e3-15). Los ids
+ * que no coinciden con ese patrón se dejan tal cual, así la
+ * migración es idempotente: correrla dos veces no cambia nada.
+ */
+export function remapLessonId(id: string): string {
+  const m = /^e([12])-(\d+)-(.*)$/.exec(id);
+  if (!m) return id;
+  const num = Number(m[2]) + (m[1] === '2' ? 7 : 0);
+  return `e3-${String(num).padStart(2, '0')}-${m[3]}`;
+}
+
+/** v2 → v3: reordenamiento de eras. No toca XP, NovaCoins, inventario, mascotas ni perfiles. */
+function migrateV2toV3(v2: SaveV3): SaveV3 {
+  const entries = Object.entries(v2.completedLessons ?? {});
+  const hadOldIds = entries.some(([id]) => remapLessonId(id) !== id);
+  const completedLessons: SaveV3['completedLessons'] = {};
+  for (const [id, record] of entries) {
+    const next = remapLessonId(id);
+    // Si el id nuevo ya existe (no debería), se conserva el existente.
+    if (!completedLessons[next]) completedLessons[next] = record;
+  }
+  const pendingSync = (v2.pendingSync ?? []).map((p) => ({ ...p, lessonId: remapLessonId(p.lessonId) }));
+  // Quien tenía progreso en JavaScript lo conserva en su nueva casa (Era 3):
+  // si tenía lecciones viejas completadas o la Era 2 desbloqueada, la Era 3
+  // queda desbloqueada y pasa a ser su era actual.
+  const hadJsAccess = hadOldIds || (v2.unlockedEras ?? []).includes(2);
+  const unlockedEras = hadJsAccess
+    ? [...new Set([...(v2.unlockedEras ?? []), 3])].sort((a, b) => a - b)
+    : [...(v2.unlockedEras ?? [])];
+  const currentEra = hadJsAccess && (v2.currentEra === 1 || v2.currentEra === 2) ? 3 : v2.currentEra;
+  return { ...v2, version: 3, completedLessons, pendingSync, unlockedEras, currentEra };
+}
+
 /** Aplica migraciones en cadena. Agrega aquí cada nueva versión. */
 export function migrate(raw: unknown): Save {
   if (typeof raw !== 'object' || raw === null) return createEmptySave();
@@ -106,6 +143,7 @@ export function migrate(raw: unknown): Save {
   }
   if (version < 1) data = migrateFromLegacy(data);
   if (version < 2) data = migrateV1toV2(data) as unknown as Record<string, unknown>;
+  if (version < 3) data = migrateV2toV3(data as unknown as SaveV3) as unknown as Record<string, unknown>;
   return data as unknown as Save;
 }
 

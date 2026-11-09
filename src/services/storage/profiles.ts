@@ -19,6 +19,7 @@
 import {
   createEmptySave,
   loadSave,
+  migrate,
   writeSave,
   type Save,
 } from './save';
@@ -142,7 +143,10 @@ export function loadProfileSave(profile: Profile, storage: Storage | null = defa
   if (!storage) return profile.kind === 'admin' ? createAdminSave() : createPlayerSave(profile.name);
   try {
     const raw = storage.getItem(saveKeyForProfile(profile.id));
-    if (raw) return JSON.parse(raw) as Save;
+    // Pasa por migrate(): una partida guardada en una versión vieja
+    // (p. ej. con ids e1-/e2- de antes del reordenamiento) se actualiza
+    // al leerla, sin perder progreso.
+    if (raw) return migrate(JSON.parse(raw));
   } catch {
     // Partida corrupta: se crea una nueva abajo.
   }
