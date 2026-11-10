@@ -6,23 +6,53 @@ import { era1Lessons } from './lessons/era1';
 import { era2Lessons } from './lessons/era2';
 import { era3Lessons } from './lessons/era3';
 import type { Lesson } from '../types/lesson';
-import { formatValue, scoreEvaluation, validateHtml, validateWithTests, type HtmlParser } from './validate';
+import {
+  formatValue,
+  scoreEvaluation,
+  validateHtml,
+  validateWithTests,
+  type HtmlParser,
+  type ValidationResult,
+} from './validate';
 import type { Exercise, RunResult } from '../types/lesson';
 
-/** Ejecutor de pruebas en Node (en el navegador se usa el sandbox de iframe). */
-function runInNode(code: string): RunResult {
+/**
+ * Ejecutor de pruebas en Node (en el navegador se usa el sandbox de iframe).
+ * Espera a que termine el trabajo asíncrono, igual que el sandbox:
+ * promesas, await y setTimeout producen sus logs después de la ejecución
+ * síncrona. Solo espera cuando el código puede ser asíncrono, para no
+ * ralentizar las pruebas del resto de lecciones.
+ */
+async function runInNode(code: string): Promise<RunResult> {
   const logs: string[] = [];
   const context = vm.createContext({
     console: { log: (...args: unknown[]) => logs.push(args.map(formatValue).join(' ')) },
+    setTimeout,
+    clearTimeout,
   });
   try {
     new vm.Script(code).runInContext(context, { timeout: 1000 });
-    return { logs };
   } catch (e) {
     const err = e as Error;
     if (/timed out/i.test(err.message)) return { logs, timedOut: true };
     return { logs, error: { name: err.name, message: err.message } };
   }
+  if (!/\b(await|async|then\s*\(|setTimeout|setInterval|Promise|fetch\s*\()/.test(code)) {
+    return { logs };
+  }
+  const start = Date.now();
+  let lastLen = logs.length;
+  let lastChange = Date.now();
+  while (Date.now() - start < 1000) {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    if (logs.length !== lastLen) {
+      lastLen = logs.length;
+      lastChange = Date.now();
+    } else if (Date.now() - lastChange >= 150) {
+      break;
+    }
+  }
+  return { logs };
 }
 const run = async (code: string) => runInNode(code);
 /** En Node no hay DOMParser: las pruebas HTML usan jsdom (misma API de selectores). */
@@ -35,10 +65,10 @@ function visibleText(code: string): string[] {
     .filter(Boolean);
 }
 
-const check = (ex: Exercise, code: string) =>
+const check = async (ex: Exercise, code: string): Promise<ValidationResult> =>
   ex.language === 'html'
-    ? Promise.resolve(validateHtml(ex, code, parseHtml))
-    : validateWithTests(ex, code, runInNode(code), run);
+    ? validateHtml(ex, code, parseHtml)
+    : validateWithTests(ex, code, await runInNode(code), run);
 
 const publishedEras = ERAS.filter((e) => e.lessons.length > 0);
 /** Lecciones completas (con ejercicios y quiz): solo las pruebas las
@@ -55,7 +85,7 @@ describe('estructura de las eras', () => {
   });
 
   it('las 7 microlecciones de HTML están publicadas en la Era 1', () => {
-    expect(allLessons).toHaveLength(30);
+    expect(allLessons).toHaveLength(34);
     expect(ERAS.find((e) => e.id === 1)!.lessons).toHaveLength(7);
   });
 
@@ -63,8 +93,8 @@ describe('estructura de las eras', () => {
     expect(ERAS.find((e) => e.id === 2)!.lessons).toHaveLength(8);
   });
 
-  it('las 15 microlecciones de JavaScript están publicadas en la Era 3', () => {
-    expect(ERAS.find((e) => e.id === 3)!.lessons).toHaveLength(15);
+  it('las 19 microlecciones de JavaScript están publicadas en la Era 3', () => {
+    expect(ERAS.find((e) => e.id === 3)!.lessons).toHaveLength(19);
   });
 
   it('las eras 4 y 5 están anunciadas sin lecciones todavía', () => {
@@ -112,9 +142,10 @@ describe('estructura de las eras', () => {
     }
   });
 
-  it('los ejemplos producen exactamente la salida documentada', () => {
+  it('los ejemplos producen exactamente la salida documentada', async () => {
     for (const l of fullLessons.filter((l) => l.example.code)) {
-      const actual = l.exercise.language === 'html' ? visibleText(l.example.code) : runInNode(l.example.code).logs;
+      const actual =
+        l.exercise.language === 'html' ? visibleText(l.example.code) : (await runInNode(l.example.code)).logs;
       expect(actual, l.id).toEqual(l.example.output);
     }
   });

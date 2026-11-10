@@ -8,7 +8,7 @@ import type { EraId, LessonKind } from '../types/lesson';
  * El contenido completo de cada lección (intro, concepto, ejercicios,
  * quiz) vive en src/learning/lessons/era{N}/ y se carga bajo demanda
  * con loadLesson() — así la primera pantalla no tiene que bajar las
- * 30 lecciones a la vez. Este archivo es la única parte de las
+ * 34 lecciones a la vez. Este archivo es la única parte de las
  * lecciones que viaja en el paquete inicial.
  *
  * Para no duplicar datos a mano, el catálogo se generó a partir de las
@@ -558,12 +558,85 @@ export const ERAS: EraMeta[] = [
           xp: 25,
           coins: 15
         },
+        next: "e3-16-el-dom"
+      },
+      {
+        id: "e3-16-el-dom",
+        era: 3,
+        order: 15,
+        kind: "lesson",
+        title: "El DOM: la página como un árbol",
+        topics: [
+          "DOM",
+          "document",
+          "querySelector",
+          "textContent"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
+        next: "e3-17-eventos"
+      },
+      {
+        id: "e3-17-eventos",
+        era: 3,
+        order: 16,
+        kind: "lesson",
+        title: "Eventos: la página te escucha",
+        topics: [
+          "eventos",
+          "addEventListener",
+          "clic",
+          "teclado"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
+        next: "e3-18-json-fetch"
+      },
+      {
+        id: "e3-18-json-fetch",
+        era: 3,
+        order: 17,
+        kind: "lesson",
+        title: "JSON y fetch: traer datos de internet",
+        topics: [
+          "JSON",
+          "JSON.parse",
+          "JSON.stringify",
+          "fetch",
+          "promesas"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
+        next: "e3-19-promesas-async"
+      },
+      {
+        id: "e3-19-promesas-async",
+        era: 3,
+        order: 18,
+        kind: "lesson",
+        title: "Promesas y async/await: esperar sin bloquear",
+        topics: [
+          "promesas",
+          "async",
+          "await",
+          "then"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
         next: "e3-15-evaluacion"
       },
       {
         id: "e3-15-evaluacion",
         era: 3,
-        order: 15,
+        order: 19,
         kind: "evaluation",
         title: "Evaluación final · JavaScript",
         topics: [

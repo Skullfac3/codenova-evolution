@@ -138,6 +138,9 @@ test.describe('Ruta completa: HTML, CSS y luego JavaScript', () => {
   }
 
   test('una persona nueva completa HTML y luego JavaScript', async ({ page }) => {
+    // Ruta completa de 34 lecciones: bajo carga (suite completa) tarda
+    // más de los 180 s por defecto; aislada tarda ~2 min.
+    test.setTimeout(360_000);
     await page.goto('/');
     await page.getByTestId('tab-lecciones').click();
     await expect(page.getByTestId('map')).toBeVisible();
@@ -191,10 +194,10 @@ test.describe('Ruta completa: HTML, CSS y luego JavaScript', () => {
     expect(await hud(page)).toEqual({ xp: '530 XP', coins: '🪙 280', level: 'Nv 3' });
     await page.getByTestId('tab-lecciones').click();
 
-    // ── Segunda parte de JavaScript (8 lecciones) ──
+    // ── Segunda parte de JavaScript (12 lecciones) ──
     xp = await completeEra(page, era3Lessons.slice(7), 'era3b', xp, true);
-    expect(xp).toBe(765); // Era 1 (170) + Era 2 (190) + Era 3 primera parte (170) + segunda parte (235)
-    expect(await hud(page)).toEqual({ xp: '765 XP', coins: '🪙 425', level: 'Nv 3' });
+    expect(xp).toBe(845); // Era 1 (170) + Era 2 (190) + Era 3 primera parte (170) + segunda parte (315)
+    expect(await hud(page)).toEqual({ xp: '845 XP', coins: '🪙 465', level: 'Nv 3' });
     await expect(page.getByTestId('era-unlocked')).toHaveAttribute('data-era', '4');
 
     await page.getByTestId('btn-next-lesson').click();
@@ -203,18 +206,18 @@ test.describe('Ruta completa: HTML, CSS y luego JavaScript', () => {
     for (const l of era3Lessons) await expect(page.getByTestId(`lesson-${l.id}`)).toHaveAttribute('data-state', 'done');
     await shot(page, '07-mapa-completo');
 
-    // La partida está lista para sincronizar con Supabase: 30 eventos únicos (7 de HTML + 8 de CSS + 15 de JavaScript).
+    // La partida está lista para sincronizar con Supabase: 34 eventos únicos (7 de HTML + 8 de CSS + 19 de JavaScript).
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('codenova:save')!));
     expect(saved.unlockedEras).toEqual([1, 2, 3, 4]);
-    expect(saved.pendingSync).toHaveLength(30);
-    expect(new Set(saved.pendingSync.map((e: { eventId: string }) => e.eventId)).size).toBe(30);
+    expect(saved.pendingSync).toHaveLength(34);
+    expect(new Set(saved.pendingSync.map((e: { eventId: string }) => e.eventId)).size).toBe(34);
 
     // Repetir una lección no da recompensa doble.
     await page.getByTestId(`lesson-${era3Lessons[7]!.id}`).click();
     await page.getByTestId('btn-start').click();
     await solveCurrentExercise(page);
     await expect(page.getByTestId('reward')).toHaveAttribute('data-awarded', 'false');
-    await expect(page.getByTestId('hud-xp')).toHaveText('765 XP');
+    await expect(page.getByTestId('hud-xp')).toHaveText('845 XP');
   });
 
   test('las pruebas ocultas detectan una función que imprime la respuesta a mano', async ({ page }) => {
