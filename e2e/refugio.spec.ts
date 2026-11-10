@@ -156,11 +156,13 @@ test.describe('Refugio, tienda y Proto-0', () => {
     await page.keyboard.insertText('const antorchas = 3;\n');
 
     // if/else con dos toques: solo se escribe la condición y los textos.
-    await page.getByTestId('snip-ifelse').dispatchEvent('pointerdown');
+    // Un toque real es pointerdown + pointerup en el mismo punto: solo
+    // pointerdown ya no inserta (así no se inserta al desplazar la cinta).
+    await page.getByTestId('snip-ifelse').click();
     await page.keyboard.type('antorchas >= 2');
     await page.keyboard.press('Tab');
-    await page.getByTestId('snip-log').dispatchEvent('pointerdown');
-    await page.getByTestId('snip-texto').dispatchEvent('pointerdown');
+    await page.getByTestId('snip-log').click();
+    await page.getByTestId('snip-texto').click();
     await page.keyboard.type('La cueva está iluminada');
     // Ir a la línea vacía del else (penúltima línea) con el teclado.
     await page.keyboard.press('ControlOrMeta+End');
