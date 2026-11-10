@@ -9,7 +9,7 @@ import {
   type Profile,
   type ProfilesState,
 } from '../services/storage/profiles';
-import { ERAS, findLesson, lessonsOfEra } from '../learning/lessons';
+import { ERAS, findLesson, lessonsOfEra } from '../learning/catalog';
 import type { Result } from '../game/economy';
 
 /** Igual que public.level_for_xp() en Supabase. */

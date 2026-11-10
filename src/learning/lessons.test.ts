@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import vm from 'node:vm';
 import { JSDOM } from 'jsdom';
-import { ERAS, allLessons } from './lessons';
+import { ERAS, allLessons } from './catalog';
+import { era1Lessons } from './lessons/era1';
+import { era2Lessons } from './lessons/era2';
+import { era3Lessons } from './lessons/era3';
+import type { Lesson } from '../types/lesson';
 import { formatValue, scoreEvaluation, validateHtml, validateWithTests, type HtmlParser } from './validate';
 import type { Exercise, RunResult } from '../types/lesson';
 
@@ -37,7 +41,10 @@ const check = (ex: Exercise, code: string) =>
     : validateWithTests(ex, code, runInNode(code), run);
 
 const publishedEras = ERAS.filter((e) => e.lessons.length > 0);
-const allExercises: Array<[string, Exercise]> = allLessons.flatMap((lesson) =>
+/** Lecciones completas (con ejercicios y quiz): solo las pruebas las
+ *  cargan todas a la vez; la app las baja por era bajo demanda. */
+const fullLessons: Lesson[] = [...era1Lessons, ...era2Lessons, ...era3Lessons];
+const allExercises: Array<[string, Exercise]> = fullLessons.flatMap((lesson) =>
   [lesson.exercise, ...lesson.extraChallenges].map((ex) => [`${lesson.id} › ${ex.id}`, ex] as [string, Exercise]),
 );
 
@@ -92,21 +99,21 @@ describe('estructura de las eras', () => {
   });
 
   it('cada lección normal tiene 2 retos extra y pistas', () => {
-    for (const l of allLessons.filter((l) => l.kind === 'lesson')) {
+    for (const l of fullLessons.filter((l) => l.kind === 'lesson')) {
       expect(l.extraChallenges, l.id).toHaveLength(2);
       for (const ex of [l.exercise, ...l.extraChallenges]) expect(ex.hints.length, ex.id).toBeGreaterThan(0);
     }
   });
 
   it('las evaluaciones tienen máximo 5 preguntas con respuesta válida', () => {
-    for (const ev of allLessons.filter((l) => l.kind === 'evaluation')) {
+    for (const ev of fullLessons.filter((l) => l.kind === 'evaluation')) {
       expect(ev.quiz!.length).toBeLessThanOrEqual(5);
       for (const q of ev.quiz!) expect(q.options[q.correctIndex], ev.id).toBeDefined();
     }
   });
 
   it('los ejemplos producen exactamente la salida documentada', () => {
-    for (const l of allLessons.filter((l) => l.example.code)) {
+    for (const l of fullLessons.filter((l) => l.example.code)) {
       const actual = l.exercise.language === 'html' ? visibleText(l.example.code) : runInNode(l.example.code).logs;
       expect(actual, l.id).toEqual(l.example.output);
     }

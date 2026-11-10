@@ -7,12 +7,35 @@
     <title>CodeNova Evolution</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Press+Start+2P&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+      /* Pantalla de carga estática: se ve de inmediato, antes de que el
+         JavaScript baje y arranque React. React vacía #root al montar
+         la app, así que el splash desaparece solo. Sin esto, abrir la
+         app era mirar una pantalla en blanco varios segundos. */
+      html, body { margin: 0; background: #1b1325; }
+      .splash {
+        min-height: 100vh; min-height: 100dvh;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+        background: #1b1325; color: #f3e9dc;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; text-align: center;
+        padding: 24px; box-sizing: border-box;
+      }
+      .splash-logo { color: #ff8a3d; font-size: 28px; font-weight: 800; letter-spacing: 2px; }
+      .splash-bar { width: min(220px, 70vw); height: 10px; background: #2a1f35; border: 2px solid #4a3a5c; overflow: hidden; }
+      .splash-bar span { display: block; height: 100%; width: 40%; background: #7bd389; animation: splash-carga 1.2s ease-in-out infinite alternate; }
+      @keyframes splash-carga { from { margin-left: 0; } to { margin-left: 60%; } }
+      .splash-text { color: #b9a9c9; font-size: 15px; margin: 0; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="splash">
+        <div class="splash-logo">CodeNova</div>
+        <div class="splash-bar" aria-hidden="true"><span></span></div>
+        <p class="splash-text">Cargando tu aventura…</p>
+      </div>
+    </div>
+    <noscript><p style="color:#f3e9dc;font-family:system-ui,sans-serif;text-align:center;padding:24px">CodeNova necesita JavaScript para jugar.</p></noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

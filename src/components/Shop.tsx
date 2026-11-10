@@ -3,7 +3,7 @@ import { protoSay } from '../store/proto';
 import { ITEMS, type ItemKind } from '../game/items';
 import { buyItem } from '../game/economy';
 import { OUTFIT_COLORS } from '../game/sprites';
-import { ERAS } from '../learning/lessons';
+import { ERAS } from '../learning/catalog';
 import { SpriteIcon } from './SpriteIcon';
 
 const KIND_LABEL: Record<ItemKind, string> = { decoration: 'Adorno', outfit: 'Atuendo', pet: 'Mascota' };

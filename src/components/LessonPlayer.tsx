@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { DurationMinutes, Lesson } from '../types/lesson';
 import { exercisesFor, scoreEvaluation, scoreLesson } from '../learning/validate';
 import { useProgress, type CompletionOutcome } from '../store/progress';
-import { ERAS } from '../learning/lessons';
+import { ERAS } from '../learning/catalog';
 import { protoSay } from '../store/proto';
 import { ExerciseRunner } from './ExerciseRunner';
 import { Markdown } from './Markdown';
@@ -27,6 +27,20 @@ export function LessonPlayer({ lesson, onExit, onNext }: Props) {
   const [duration, setDuration] = useState<DurationMinutes>(5);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [quizCorrect, setQuizCorrect] = useState(0);
+  // Precalienta el editor (CodeMirror) mientras se lee la introducción,
+  // para que al pulsar «¡A practicar!» ya esté descargado y no haya
+  // que esperar entonces. Si falla, el ejercicio lo baja al abrirse.
+  useEffect(() => {
+    let cancelled = false;
+    import('./CodeEditor')
+      .then((m) => {
+        if (!cancelled) m.preloadEditorLanguages(lesson);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [lesson]);
   const isEval = lesson.kind === 'evaluation';
   const exercises = useMemo(() => (isEval ? [lesson.exercise] : exercisesFor(lesson, duration)), [lesson, duration, isEval]);
 

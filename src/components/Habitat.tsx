@@ -5,7 +5,7 @@ import { PROTO_FUTURE_NOTE, PROTO_STAGES, stageForEra } from '../game/proto';
 import { COLS, ITEMS, LANDMARK, ROWS, TILE, WORLD_ERAS, isLandmarkTile, itemById } from '../game/items';
 import { OUTFIT_COLORS, drawHut, drawTemple, drawTile, spriteCanvas, type SpriteKey, type TileKind } from '../game/sprites';
 import { availableCount, equipOutfit, placeObject, removeObjectAt, transferPet, transferablePets } from '../game/economy';
-import { ERAS } from '../learning/lessons';
+import { ERAS } from '../learning/catalog';
 import { SpriteIcon } from './SpriteIcon';
 
 const W = COLS * TILE;

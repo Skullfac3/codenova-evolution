@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useProgress } from '../store/progress';
 import { loadAllProfileSaves } from '../services/storage/profiles';
 import { itemById } from '../game/items';
-import { ERAS } from '../learning/lessons';
+import { ERAS } from '../learning/catalog';
 
 /**
  * Perfiles: cambiar entre Administrador y Pruebas (sin PIN).
