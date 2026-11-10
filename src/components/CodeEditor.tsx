@@ -101,6 +101,19 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era, language = '
     v.focus();
   };
 
+  /**
+   * Un toque real, no un desplazamiento: en táctil, pointerdown se dispara
+   * al empezar CUALQUIER gesto sobre el botón, incluido desplazar la cinta
+   * para ver más atajos. Antes eso insertaba el atajo aunque el usuario
+   * solo estuviera recorriendo la cinta.
+   *
+   * Se guarda la posición al presionar y solo se inserta al soltar si el
+   * dedo apenas se movió (umbral ~10px); si el navegador toma el gesto
+   * para desplazar, llega pointercancel y no se inserta nada.
+   */
+  const pressRef = useRef<{ x: number; y: number; snippet: Snippet } | null>(null);
+  const TAP_SLOP_PX = 10;
+
   // pointerdown + preventDefault: el editor no pierde el foco y el teclado del celular no se cierra.
   const chip = (s: Snippet) => (
     <button
@@ -112,7 +125,17 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era, language = '
       data-testid={`snip-${s.id}`}
       onPointerDown={(e) => {
         e.preventDefault();
-        insert(s);
+        pressRef.current = { x: e.clientX, y: e.clientY, snippet: s };
+      }}
+      onPointerUp={(e) => {
+        const press = pressRef.current;
+        pressRef.current = null;
+        if (!press) return;
+        const moved = Math.hypot(e.clientX - press.x, e.clientY - press.y);
+        if (moved <= TAP_SLOP_PX) insert(press.snippet);
+      }}
+      onPointerCancel={() => {
+        pressRef.current = null;
       }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {

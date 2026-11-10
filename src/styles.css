@@ -123,7 +123,9 @@ h3 { font-size: 14px; }
 .progressbar .now { background: var(--fire); }
 .prompt { font-weight: 700; font-size: 17px; }
 
-.editor { border: 2px solid var(--line); background: #fbf6ee; color: #1b1325; font-size: 15px; }
+/* 16px: por debajo Safari en iPhone hace zoom automático al tocar el editor
+   y la pantalla se desajusta (hay que pellizcar para volver). */
+.editor { border: 2px solid var(--line); background: #fbf6ee; color: #1b1325; font-size: 16px; }
 .editor .cm-editor { min-height: 150px; }
 .editor .cm-editor.cm-focused { outline: 3px solid var(--fire-2); }
 .editor .cm-content, .editor .cm-gutters { font-family: var(--mono); }
