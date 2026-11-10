@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { era1Lessons } from '../src/learning/lessons/era1';
 import { era3Lessons } from '../src/learning/lessons/era3';
 
 /**
@@ -29,15 +30,15 @@ test.describe('Perfiles: Administrador y Pruebas', () => {
     await page.getByTestId('tab-perfiles').click();
     await expect(page.getByTestId('btn-switch-pruebas')).toBeDisabled();
 
-    // Completa la lección 1 en Pruebas y gana 10 NovaCoins.
+    // Completa la lección 1 de HTML en Pruebas y gana 10 NovaCoins.
     await page.getByTestId('tab-lecciones').click();
-    await page.getByTestId(`lesson-${era3Lessons[0]!.id}`).click();
+    await page.getByTestId(`lesson-${era1Lessons[0]!.id}`).click();
     await page.getByTestId('btn-start').click();
     const content = page.locator('.cm-content').first();
     await content.click();
     await page.keyboard.press('ControlOrMeta+A');
     await page.keyboard.press('Delete');
-    await page.keyboard.insertText(era3Lessons[0]!.exercise.solution);
+    await page.keyboard.insertText(era1Lessons[0]!.exercise.solution);
     await page.getByTestId('btn-run').click();
     await expect(page.getByTestId('feedback')).toHaveAttribute('data-status', 'pass');
     await page.getByTestId('btn-continue').click();

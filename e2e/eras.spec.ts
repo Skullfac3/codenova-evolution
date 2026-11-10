@@ -1,9 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
+import { era1Lessons } from '../src/learning/lessons/era1';
 import { era3Lessons } from '../src/learning/lessons/era3';
 import type { Exercise, Lesson } from '../src/types/lesson';
 
 const allExercises = new Map<string, Exercise>(
-  era3Lessons.flatMap((l) => [l.exercise, ...l.extraChallenges]).map((e) => [e.id, e]),
+  [...era1Lessons, ...era3Lessons].flatMap((l) => [l.exercise, ...l.extraChallenges]).map((e) => [e.id, e]),
 );
 
 async function shot(page: Page, name: string) {
@@ -13,6 +14,27 @@ async function shot(page: Page, name: string) {
 async function expectNoHorizontalScroll(page: Page) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow, 'la página no debe desplazarse horizontalmente').toBeLessThanOrEqual(0);
+}
+
+/**
+ * Partida con la Era 1 (HTML) ya completada: la Era 3 (JavaScript) queda
+ * abierta, como si el estudiante acabara de llegar desde HTML y CSS.
+ * Misma forma que la semilla de refugio.spec.ts (partida legacy v2).
+ */
+async function seedEra1Complete(page: Page) {
+  const ids = era1Lessons.map((l) => l.id);
+  await page.addInitScript((ids) => {
+    if (localStorage.getItem('codenova:save')) return;
+    localStorage.setItem(
+      'codenova:save',
+      JSON.stringify({
+        version: 2, explorerName: 'Explorador', avatar: 'explorer-01', xp: 170, novacoins: 90, currentEra: 2,
+        unlockedEras: [1, 2],
+        completedLessons: Object.fromEntries(ids.map((id) => [id, { score: 100, completedAt: '2026-11-05T00:00:00Z', eventId: id }])),
+        worlds: { 1: { objects: [] }, 2: { objects: [] } }, inventory: {}, pets: [], pendingSync: [], updatedAt: '2026-11-05T00:00:00Z',
+      }),
+    );
+  }, ids);
 }
 
 async function typeCode(page: Page, code: string) {
@@ -51,7 +73,7 @@ const hud = async (page: Page) => ({
   level: await page.getByTestId('hud-level').textContent(),
 });
 
-test.describe('Era 3 · JavaScript — prueba completa', () => {
+test.describe('Ruta completa: HTML y luego JavaScript', () => {
   /** Recorre un bloque de lecciones con sus duraciones variadas y su evaluación (reprobada y luego aprobada). */
   async function completeEra(page: Page, lessons: Lesson[], tag: string, startXp: number, expectUnlock: boolean) {
     const durations = [15, 10, 5] as const;
@@ -103,7 +125,7 @@ test.describe('Era 3 · JavaScript — prueba completa', () => {
     }
     await solveCurrentExercise(page);
     await expect(page.getByTestId('reward')).toHaveAttribute('data-awarded', 'true');
-    // Solo la evaluación final de la Era 3 desbloquea la siguiente era.
+    // Solo la evaluación final del bloque desbloquea la siguiente era (si corresponde).
     if (expectUnlock) {
       await expect(page.getByTestId('era-unlocked')).toBeVisible();
     } else {
@@ -113,28 +135,37 @@ test.describe('Era 3 · JavaScript — prueba completa', () => {
     return xp + evaluation.reward.xp;
   }
 
-  test('una persona nueva completa JavaScript en la Era 3', async ({ page }) => {
+  test('una persona nueva completa HTML y luego JavaScript', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('tab-lecciones').click();
     await expect(page.getByTestId('map')).toBeVisible();
     expect(await hud(page)).toEqual({ xp: '0 XP', coins: '🪙 0', level: 'Nv 1' });
 
-    // Las eras 1 y 2 están anunciadas (HTML y CSS llegan pronto) y la
-    // Era 3, con JavaScript, es la primera con lecciones: solo la
-    // primera está abierta.
-    await expect(page.getByTestId('era-1')).toHaveAttribute('data-state', 'coming-soon');
+    // La Era 1 (HTML) es la entrada: solo su primera lección está abierta.
+    // La Era 2 (CSS) está anunciada y la Era 3 (JavaScript) bloqueada.
+    await expect(page.getByTestId('era-1')).toHaveAttribute('data-state', 'open');
     await expect(page.getByTestId('era-2')).toHaveAttribute('data-state', 'coming-soon');
-    await expect(page.getByTestId('era-3')).toHaveAttribute('data-state', 'open');
-    await expect(page.getByTestId(`lesson-${era3Lessons[0]!.id}`)).toHaveAttribute('data-state', 'open');
-    for (const l of era3Lessons.slice(1)) await expect(page.getByTestId(`lesson-${l.id}`)).toHaveAttribute('data-state', 'locked');
+    await expect(page.getByTestId('era-3')).toHaveAttribute('data-state', 'locked');
+    await expect(page.getByTestId(`lesson-${era1Lessons[0]!.id}`)).toHaveAttribute('data-state', 'open');
+    for (const l of era1Lessons.slice(1)) await expect(page.getByTestId(`lesson-${l.id}`)).toHaveAttribute('data-state', 'locked');
     await expectNoHorizontalScroll(page);
     await shot(page, '01-mapa-inicial');
 
-    // ── Primera parte de JavaScript (7 lecciones) ──
-    const firstHalf = era3Lessons.slice(0, 7);
-    let xp = await completeEra(page, firstHalf, 'era3a', 0, false);
+    // ── Era 1 · HTML (6 lecciones + evaluación) ──
+    let xp = await completeEra(page, era1Lessons, 'era1', 0, true);
     expect(xp).toBe(170);
     expect(await hud(page)).toEqual({ xp: '170 XP', coins: '🪙 90', level: 'Nv 2' });
+
+    // La evaluación de HTML desbloquea la Era 2 (anunciada) y abre la Era 3.
+    await page.getByTestId('btn-next-lesson').click();
+    await expect(page.getByTestId('map')).toBeVisible();
+    await expect(page.getByTestId('era-3')).toHaveAttribute('data-state', 'open');
+
+    // ── Primera parte de JavaScript (7 lecciones) ──
+    const firstHalf = era3Lessons.slice(0, 7);
+    xp = await completeEra(page, firstHalf, 'era3a', xp, false);
+    expect(xp).toBe(340);
+    expect(await hud(page)).toEqual({ xp: '340 XP', coins: '🪙 180', level: 'Nv 2' });
 
     // "Siguiente lección" lleva directo a la segunda parte de la Era 3.
     await page.getByTestId('btn-next-lesson').click();
@@ -146,13 +177,13 @@ test.describe('Era 3 · JavaScript — prueba completa', () => {
 
     // Recargar a mitad del camino: el progreso sigue ahí.
     await page.reload();
-    expect(await hud(page)).toEqual({ xp: '170 XP', coins: '🪙 90', level: 'Nv 2' });
+    expect(await hud(page)).toEqual({ xp: '340 XP', coins: '🪙 180', level: 'Nv 2' });
     await page.getByTestId('tab-lecciones').click();
 
     // ── Segunda parte de JavaScript (8 lecciones) ──
     xp = await completeEra(page, era3Lessons.slice(7), 'era3b', xp, true);
-    expect(xp).toBe(405); // igual que en Supabase
-    expect(await hud(page)).toEqual({ xp: '405 XP', coins: '🪙 235', level: 'Nv 3' });
+    expect(xp).toBe(575); // Era 1 (170) + Era 3 primera parte (170) + segunda parte (235)
+    expect(await hud(page)).toEqual({ xp: '575 XP', coins: '🪙 325', level: 'Nv 3' });
     await expect(page.getByTestId('era-unlocked')).toHaveAttribute('data-era', '4');
 
     await page.getByTestId('btn-next-lesson').click();
@@ -161,18 +192,18 @@ test.describe('Era 3 · JavaScript — prueba completa', () => {
     for (const l of era3Lessons) await expect(page.getByTestId(`lesson-${l.id}`)).toHaveAttribute('data-state', 'done');
     await shot(page, '07-mapa-completo');
 
-    // La partida está lista para sincronizar con Supabase: 15 eventos únicos.
+    // La partida está lista para sincronizar con Supabase: 22 eventos únicos (7 de HTML + 15 de JavaScript).
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('codenova:save')!));
-    expect(saved.unlockedEras).toEqual([1, 4]);
-    expect(saved.pendingSync).toHaveLength(15);
-    expect(new Set(saved.pendingSync.map((e: { eventId: string }) => e.eventId)).size).toBe(15);
+    expect(saved.unlockedEras).toEqual([1, 2, 4]);
+    expect(saved.pendingSync).toHaveLength(22);
+    expect(new Set(saved.pendingSync.map((e: { eventId: string }) => e.eventId)).size).toBe(22);
 
     // Repetir una lección no da recompensa doble.
     await page.getByTestId(`lesson-${era3Lessons[7]!.id}`).click();
     await page.getByTestId('btn-start').click();
     await solveCurrentExercise(page);
     await expect(page.getByTestId('reward')).toHaveAttribute('data-awarded', 'false');
-    await expect(page.getByTestId('hud-xp')).toHaveText('405 XP');
+    await expect(page.getByTestId('hud-xp')).toHaveText('575 XP');
   });
 
   test('las pruebas ocultas detectan una función que imprime la respuesta a mano', async ({ page }) => {
@@ -204,6 +235,7 @@ test.describe('Era 3 · JavaScript — prueba completa', () => {
   });
 
   test('un ciclo infinito no congela la app y se explica el error', async ({ page }) => {
+    await seedEra1Complete(page);
     await page.goto('/');
     await page.getByTestId('tab-lecciones').click();
     await page.getByTestId(`lesson-${era3Lessons[0]!.id}`).click();
@@ -227,6 +259,7 @@ test.describe('Era 3 · JavaScript — prueba completa', () => {
   });
 
   test('errores típicos de principiante reciben una explicación clara', async ({ page }) => {
+    await seedEra1Complete(page);
     await page.goto('/');
     await page.getByTestId('tab-lecciones').click();
     await page.getByTestId(`lesson-${era3Lessons[0]!.id}`).click();
@@ -247,6 +280,7 @@ test.describe('Era 3 · JavaScript — prueba completa', () => {
   });
 
   test('el código del estudiante no puede leer la sesión ni la red', async ({ page }) => {
+    await seedEra1Complete(page);
     await page.goto('/');
     await page.getByTestId('tab-lecciones').click();
     await page.evaluate(() => localStorage.setItem('sb-token', 'SECRETO'));

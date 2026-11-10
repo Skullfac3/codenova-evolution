@@ -3,6 +3,7 @@ import { EditorState } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { javascript, javascriptLanguage } from '@codemirror/lang-javascript';
+import { html, htmlLanguage } from '@codemirror/lang-html';
 import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from '@codemirror/language';
 import {
   autocompletion,
@@ -11,7 +12,7 @@ import {
   snippetCompletion,
   type CompletionContext,
 } from '@codemirror/autocomplete';
-import { snippetsForEra, type Snippet } from '../learning/snippets';
+import { snippetsFor, type Snippet } from '../learning/snippets';
 
 interface Props {
   value: string;
@@ -21,6 +22,8 @@ interface Props {
   onRun?: () => void;
   /** Era de la lección: decide qué atajos se ofrecen. */
   era: number;
+  /** Lenguaje del ejercicio: decide el resaltado y los atajos. Por defecto 'js'. */
+  language?: 'js' | 'html';
 }
 
 /**
@@ -29,7 +32,7 @@ interface Props {
  *  - autocompletado al escribir (p. ej. "log" → console.log),
  *  - campos editables: Tab salta al siguiente.
  */
-export function CodeEditor({ value, onChange, resetKey, onRun, era }: Props) {
+export function CodeEditor({ value, onChange, resetKey, onRun, era, language = 'js' }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
@@ -37,7 +40,7 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era }: Props) {
   onChangeRef.current = onChange;
   onRunRef.current = onRun;
 
-  const snippets = useMemo(() => snippetsForEra(era), [era]);
+  const snippets = useMemo(() => snippetsFor(era, language), [era, language]);
   const codeSnippets = snippets.filter((s) => s.kind === 'code');
   const symbols = snippets.filter((s) => s.kind === 'symbol');
 
@@ -59,8 +62,8 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era }: Props) {
           lineNumbers(),
           highlightActiveLine(),
           history(),
-          javascript(),
-          javascriptLanguage.data.of({ autocomplete: source }),
+          language === 'html' ? html() : javascript(),
+          (language === 'html' ? htmlLanguage : javascriptLanguage).data.of({ autocomplete: source }),
           autocompletion({ icons: false }),
           indentUnit.of('  '),
           syntaxHighlighting(defaultHighlightStyle),
@@ -88,7 +91,7 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era }: Props) {
       view.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resetKey, era]);
+  }, [resetKey, era, language]);
 
   const insert = (s: Snippet) => {
     const v = view.current;
@@ -129,7 +132,11 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era }: Props) {
         <div className="snip-row">{symbols.map(chip)}</div>
       </div>
       <div className="editor" ref={host} data-testid="editor" />
-      <p className="snip-tip">Tip: toca un atajo o escribe <code>log</code> y elige de la lista. <kbd>Tab</kbd> salta al siguiente campo.</p>
+      <p className="snip-tip">
+        {language === 'html'
+          ? <>Tip: toca un atajo o escribe <code>h1</code> y elige de la lista. <kbd>Tab</kbd> salta al siguiente campo.</>
+          : <>Tip: toca un atajo o escribe <code>log</code> y elige de la lista. <kbd>Tab</kbd> salta al siguiente campo.</>}
+      </p>
     </div>
   );
 }

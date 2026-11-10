@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { Exercise, RunResult } from '../types/lesson';
-import { validateWithTests, type ValidationResult } from '../learning/validate';
+import { validateHtml, validateWithTests, type ValidationResult } from '../learning/validate';
 import { CodeSandbox } from '../editor/sandbox';
 import { CodeEditor } from './CodeEditor';
 import { protoSay } from '../store/proto';
@@ -19,16 +19,30 @@ interface Props {
 }
 
 export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, onPassed }: Props) {
+  const isHtml = exercise.language === 'html';
   const [code, setCode] = useState(exercise.starterCode);
   const [resetCount, setResetCount] = useState(0);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
+  /** HTML ya comprobado, listo para verse en la vista previa. */
+  const [previewCode, setPreviewCode] = useState<string | null>(null);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [hintsShown, setHintsShown] = useState(0);
 
   const run = useCallback(async () => {
     setRunning(true);
     protoSay('Procesando…', 'thinking', 10000);
+    if (isHtml) {
+      // HTML no se ejecuta: se valida su estructura y se muestra tal cual.
+      // El iframe tiene sandbox sin permisos: nunca corre scripts del estudiante.
+      const v = validateHtml(exercise, code);
+      setPreviewCode(code);
+      setValidation(v);
+      if (v.passed) protoSay('¡Se ve muy bien! 🎉', 'happy', 3000);
+      else protoSay('Casi… revisa lo que te marqué.', 'sad', 3500);
+      setRunning(false);
+      return;
+    }
     const r = await sandbox.run(code);
     setResult(r);
     const v = await validateWithTests(exercise, code, r, (c) => sandbox.run(c));
@@ -36,12 +50,13 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
     if (v.passed) protoSay('¡Funciona! 🎉', 'happy', 3000);
     else protoSay(r.error || r.timedOut ? '¡Uy! Hubo un error. Lee la explicación.' : 'Casi… revisa lo que te marqué.', 'sad', 3500);
     setRunning(false);
-  }, [code, exercise]);
+  }, [code, exercise, isHtml]);
 
   const reset = () => {
     setCode(exercise.starterCode);
     setResetCount((n) => n + 1);
     setResult(null);
+    setPreviewCode(null);
     setValidation(null);
   };
 
@@ -50,11 +65,11 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
       <p className="eyebrow">{label}</p>
       <p className="prompt" style={{ whiteSpace: 'pre-line' }}>{exercise.prompt}</p>
 
-      <CodeEditor value={code} onChange={setCode} resetKey={`${exercise.id}-${resetCount}`} onRun={run} era={era} />
+      <CodeEditor value={code} onChange={setCode} resetKey={`${exercise.id}-${resetCount}`} onRun={run} era={era} language={exercise.language ?? 'js'} />
 
       <div className="row">
         <button className="btn primary" onClick={run} disabled={running} data-testid="btn-run">
-          {running ? 'Ejecutando…' : '▶ Ejecutar'}
+          {running ? (isHtml ? 'Comprobando…' : 'Ejecutando…') : isHtml ? '👁 Ver vista previa' : '▶ Ejecutar'}
         </button>
         <button
           className="btn"
@@ -79,15 +94,31 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
         </ul>
       )}
 
-      <div className="console" data-testid="console" aria-live="polite">
-        <span className="console-title">Consola</span>
-        {result === null && <span className="muted">Ejecuta tu código para ver el resultado.</span>}
-        {result?.logs.map((line, i) => (
-          <div key={i} className="console-line">{line}</div>
-        ))}
-        {result?.error && <div className="console-line error">{result.error.name}: {result.error.message}</div>}
-        {result?.timedOut && <div className="console-line error">⏱ Tiempo agotado</div>}
-      </div>
+      {isHtml ? (
+        <div className="preview" data-testid="html-preview-wrap">
+          <span className="console-title">Vista previa</span>
+          {previewCode === null && <span className="muted">Pulsa «Ver vista previa» para ver tu página como la vería un navegador.</span>}
+          {previewCode !== null && (
+            <iframe
+              className="html-preview"
+              title="Vista previa de tu página"
+              sandbox=""
+              srcDoc={previewCode}
+              data-testid="html-preview"
+            />
+          )}
+        </div>
+      ) : (
+        <div className="console" data-testid="console" aria-live="polite">
+          <span className="console-title">Consola</span>
+          {result === null && <span className="muted">Ejecuta tu código para ver el resultado.</span>}
+          {result?.logs.map((line, i) => (
+            <div key={i} className="console-line">{line}</div>
+          ))}
+          {result?.error && <div className="console-line error">{result.error.name}: {result.error.message}</div>}
+          {result?.timedOut && <div className="console-line error">⏱ Tiempo agotado</div>}
+        </div>
+      )}
 
       {validation && (
         <div className={`feedback ${validation.passed ? 'pass' : 'fail'}`} data-testid="feedback" data-status={validation.passed ? 'pass' : 'fail'}>

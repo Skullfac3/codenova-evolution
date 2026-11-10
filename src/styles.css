@@ -133,6 +133,9 @@ h3 { font-size: 14px; }
 .console-title { display: block; font-family: var(--pixel); font-size: 9px; color: var(--muted); margin-bottom: 6px; }
 .console-line { white-space: pre-wrap; word-break: break-word; color: var(--moss); }
 .console-line.error { color: var(--danger); }
+.preview { background: #fff; border: 2px solid var(--line); padding: 10px 12px; min-height: 64px; }
+.preview .console-title { color: var(--muted); }
+.html-preview { display: block; width: 100%; min-height: 180px; border: 1px solid #d8cbb7; background: #fff; }
 .hints { background: #2e2a1f; border: 2px dashed var(--fire-2); padding: 10px 12px 10px 28px; margin: 0 0 12px; }
 
 .feedback { display: flex; gap: 12px; margin-top: 12px; padding: 12px; border: 2px solid; }
