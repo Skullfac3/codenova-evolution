@@ -13,6 +13,80 @@ export function stripComments(code: string): string {
     .replace(/(^|[^:"'`\\])\/\/.*$/gm, '$1');
 }
 
+/** Lo mismo para HTML: quita los comentarios `<!-- ... -->`. */
+export function stripHtmlComments(code: string): string {
+  return code.replace(/<!--[\s\S]*?-->/g, '');
+}
+
+/**
+ * Documento mínimo consultable por selector. En el navegador es el
+ * `Document` de DOMParser; en las pruebas se inyecta jsdom.
+ */
+export interface HtmlDocument {
+  querySelectorAll: (selector: string) => ArrayLike<{
+    textContent: string | null;
+    getAttribute: (name: string) => string | null;
+  }>;
+}
+
+export type HtmlParser = (code: string) => HtmlDocument;
+
+/** Parsea HTML con el DOMParser del navegador. */
+export function parseHtmlWithDOMParser(code: string): HtmlDocument {
+  return new DOMParser().parseFromString(code, 'text/html');
+}
+
+function runHtmlCheck(
+  check: Extract<Check, { type: 'html-contains' }>,
+  doc: HtmlDocument,
+): boolean {
+  let elements: Array<{ textContent: string | null; getAttribute: (name: string) => string | null }>;
+  try {
+    elements = Array.from(doc.querySelectorAll(check.selector));
+  } catch {
+    return false; // selector inválido
+  }
+  if (check.count !== undefined && elements.length !== check.count) return false;
+  if (elements.length === 0) return false;
+  return elements.some((el) => {
+    if (check.text !== undefined && !(el.textContent ?? '').includes(check.text)) return false;
+    if (check.attr) {
+      const value = el.getAttribute(check.attr.name);
+      if (value === null) return false;
+      if (check.attr.value !== undefined && value !== check.attr.value) return false;
+    }
+    return true;
+  });
+}
+
+/**
+ * Valida un ejercicio HTML sin ejecutar nada: comprueba la estructura
+ * del documento y el código fuente. No usa el sandbox de JavaScript.
+ */
+export function validateHtml(
+  exercise: Exercise,
+  code: string,
+  parseHtml: HtmlParser = parseHtmlWithDOMParser,
+): ValidationResult {
+  const doc = parseHtml(code);
+  const clean = stripHtmlComments(code);
+  const failures = exercise.checks
+    .filter((check) => {
+      switch (check.type) {
+        case 'html-contains':
+          return !runHtmlCheck(check, doc);
+        case 'code-matches':
+          return !new RegExp(check.pattern, 'm').test(clean);
+        case 'code-not-matches':
+          return new RegExp(check.pattern, 'm').test(clean);
+        default:
+          return true; // ese tipo de comprobación no aplica a HTML
+      }
+    })
+    .map((check) => check.message);
+  return { passed: failures.length === 0, failures };
+}
+
 function runCheck(check: Check, result: RunResult, code: string): boolean {
   const clean = stripComments(code);
   switch (check.type) {
@@ -31,6 +105,9 @@ function runCheck(check: Check, result: RunResult, code: string): boolean {
       return new RegExp(check.pattern, 'm').test(clean);
     case 'code-not-matches':
       return !new RegExp(check.pattern, 'm').test(clean);
+    case 'html-contains':
+      // Solo se evalúa en validateHtml; en el camino de JavaScript nunca pasa.
+      return false;
   }
 }
 

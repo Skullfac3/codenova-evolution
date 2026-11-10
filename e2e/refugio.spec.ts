@@ -168,11 +168,13 @@ test.describe('Refugio, tienda y Proto-0', () => {
     await page.keyboard.press('End');
 
     // Autocompletado: escribir "log" y elegir de la lista.
+    // Se toca la sugerencia (el gesto natural en el móvil) en lugar de
+    // pulsar Enter: en el móvil el Enter llegaba a veces como salto de
+    // línea y la prueba fallaba incluso sin cambios de la app.
     await page.keyboard.type('log');
-    await expect(page.locator('.cm-tooltip-autocomplete li[aria-selected]')).toContainText('console.log');
-    // CodeMirror ignora a propósito un Enter en los primeros 75 ms (evita aceptar por accidente).
-    await page.waitForTimeout(150);
-    await page.keyboard.press('Enter');
+    const suggestion = page.locator('.cm-tooltip-autocomplete li[aria-selected]');
+    await expect(suggestion).toContainText('console.log');
+    await suggestion.click();
     await page.keyboard.type('"Está muy oscuro"');
 
     await expect(editor).toContainText('if (antorchas >= 2) {');

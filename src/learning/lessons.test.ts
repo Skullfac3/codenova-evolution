@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import vm from 'node:vm';
+import { JSDOM } from 'jsdom';
 import { ERAS, allLessons } from './lessons';
-import { formatValue, scoreEvaluation, validateWithTests } from './validate';
+import { formatValue, scoreEvaluation, validateHtml, validateWithTests, type HtmlParser } from './validate';
 import type { Exercise, RunResult } from '../types/lesson';
 
 /** Ejecutor de pruebas en Node (en el navegador se usa el sandbox de iframe). */
@@ -20,7 +21,20 @@ function runInNode(code: string): RunResult {
   }
 }
 const run = async (code: string) => runInNode(code);
-const check = (ex: Exercise, code: string) => validateWithTests(ex, code, runInNode(code), run);
+/** En Node no hay DOMParser: las pruebas HTML usan jsdom (misma API de selectores). */
+const parseHtml: HtmlParser = (code) => new JSDOM(code).window.document;
+
+/** Texto visible de un fragmento HTML, en orden (lo que vería el estudiante en la vista previa). */
+function visibleText(code: string): string[] {
+  return Array.from(parseHtml(code).querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,a,button'))
+    .map((el) => (el.textContent ?? '').trim())
+    .filter(Boolean);
+}
+
+const check = (ex: Exercise, code: string) =>
+  ex.language === 'html'
+    ? Promise.resolve(validateHtml(ex, code, parseHtml))
+    : validateWithTests(ex, code, runInNode(code), run);
 
 const publishedEras = ERAS.filter((e) => e.lessons.length > 0);
 const allExercises: Array<[string, Exercise]> = allLessons.flatMap((lesson) =>
@@ -33,13 +47,17 @@ describe('estructura de las eras', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('las 7 microlecciones de HTML están publicadas en la Era 1', () => {
+    expect(allLessons).toHaveLength(22);
+    expect(ERAS.find((e) => e.id === 1)!.lessons).toHaveLength(7);
+  });
+
   it('las 15 microlecciones de JavaScript están publicadas en la Era 3', () => {
-    expect(allLessons).toHaveLength(15);
     expect(ERAS.find((e) => e.id === 3)!.lessons).toHaveLength(15);
   });
 
-  it('las eras 1, 2, 4 y 5 están anunciadas sin lecciones todavía', () => {
-    for (const id of [1, 2, 4, 5] as const) {
+  it('las eras 2, 4 y 5 están anunciadas sin lecciones todavía', () => {
+    for (const id of [2, 4, 5] as const) {
       expect(ERAS.find((e) => e.id === id)!.lessons).toHaveLength(0);
     }
   });
@@ -51,6 +69,10 @@ describe('estructura de las eras', () => {
     });
     era.lessons.slice(0, -1).forEach((l, i) => expect(l.next).toBe(era.lessons[i + 1]!.id));
     expect(era.lessons.at(-1)!.kind).toBe('evaluation');
+  });
+
+  it('la última lección de la Era 1 no tiene siguiente (la Era 2 llega después)', () => {
+    expect(ERAS.find((e) => e.id === 1)!.lessons.at(-1)!.next).toBeNull();
   });
 
   it('la última lección de la Era 3 no tiene siguiente (la Era 4 llega después)', () => {
@@ -73,7 +95,8 @@ describe('estructura de las eras', () => {
 
   it('los ejemplos producen exactamente la salida documentada', () => {
     for (const l of allLessons.filter((l) => l.example.code)) {
-      expect(runInNode(l.example.code).logs, l.id).toEqual(l.example.output);
+      const actual = l.exercise.language === 'html' ? visibleText(l.example.code) : runInNode(l.example.code).logs;
+      expect(actual, l.id).toEqual(l.example.output);
     }
   });
 });

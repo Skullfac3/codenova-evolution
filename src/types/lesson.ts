@@ -32,7 +32,19 @@ export type Check =
   | { type: 'output-equals'; expected: string[]; message: string }
   | { type: 'output-matches'; line: number; pattern: string; message: string }
   | { type: 'code-matches'; pattern: string; message: string }
-  | { type: 'code-not-matches'; pattern: string; message: string };
+  | { type: 'code-not-matches'; pattern: string; message: string }
+  | {
+      type: 'html-contains';
+      /** Selector CSS (p. ej. 'h1', 'a[href]', 'ul li'). */
+      selector: string;
+      /** Si se indica, el texto visible del elemento debe contenerlo. */
+      text?: string;
+      /** Si se indica, el elemento debe tener ese atributo (y valor, si se indica). */
+      attr?: { name: string; value?: string };
+      /** Si se indica, deben coincidir exactamente esa cantidad de elementos. */
+      count?: number;
+      message: string;
+    };
 
 /**
  * Prueba oculta: se agrega `code` al final del código del estudiante y se
@@ -48,6 +60,9 @@ export interface HiddenTest {
 
 export interface Exercise {
   id: string;
+  /** Lenguaje del ejercicio: 'js' ejecuta en el sandbox; 'html' se valida
+   *  contra el DOM y se muestra en una vista previa. Por defecto 'js'. */
+  language?: 'js' | 'html';
   /** Pruebas ocultas que se ejecutan solo si las comprobaciones visibles pasan. */
   tests?: HiddenTest[];
   /** Qué debe hacer el estudiante. */

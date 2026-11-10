@@ -14,9 +14,28 @@ export interface Snippet {
   template: string;
   era: number;
   kind: 'code' | 'symbol';
+  /** Lenguaje del atajo: por defecto 'js'. Los de HTML solo salen en ejercicios HTML. */
+  language?: 'js' | 'html';
 }
 
 export const SNIPPETS: Snippet[] = [
+  // ── Era 1 · HTML ──
+  { id: 'h1', label: '<h1>', detail: 'Título principal', template: '<h1>${}</h1>', era: 1, kind: 'code', language: 'html' },
+  { id: 'h2', label: '<h2>', detail: 'Subtítulo', template: '<h2>${}</h2>', era: 1, kind: 'code', language: 'html' },
+  { id: 'p', label: '<p>', detail: 'Párrafo', template: '<p>${}</p>', era: 1, kind: 'code', language: 'html' },
+  { id: 'a', label: '<a>', detail: 'Enlace', template: '<a href="${url}">${texto}</a>', era: 1, kind: 'code', language: 'html' },
+  { id: 'img', label: '<img>', detail: 'Imagen', template: '<img src="${url}" alt="${descripción}">', era: 1, kind: 'code', language: 'html' },
+  { id: 'ul', label: '<ul>', detail: 'Lista sin orden', template: '<ul>\n\t<li>${}</li>\n</ul>', era: 1, kind: 'code', language: 'html' },
+  { id: 'ol', label: '<ol>', detail: 'Lista ordenada', template: '<ol>\n\t<li>${}</li>\n</ol>', era: 1, kind: 'code', language: 'html' },
+  { id: 'li', label: '<li>', detail: 'Elemento de lista', template: '<li>${}</li>', era: 1, kind: 'code', language: 'html' },
+  { id: 'title', label: '<title>', detail: 'Título del documento', template: '<title>${}</title>', era: 1, kind: 'code', language: 'html' },
+  { id: 'form', label: '<form>', detail: 'Formulario', template: '<form>\n\t${}\n</form>', era: 1, kind: 'code', language: 'html' },
+  { id: 'input', label: '<input>', detail: 'Campo de texto', template: '<input type="text" placeholder="${}">', era: 1, kind: 'code', language: 'html' },
+  { id: 'button', label: '<button>', detail: 'Botón', template: '<button>${}</button>', era: 1, kind: 'code', language: 'html' },
+  // ── Símbolos HTML (difíciles de encontrar en el teclado del celular) ──
+  { id: 'ltag', label: '<', detail: 'Menor que / abre etiqueta', template: '<', era: 1, kind: 'symbol', language: 'html' },
+  { id: 'gtag', label: '>', detail: 'Mayor que / cierra etiqueta', template: '>', era: 1, kind: 'symbol', language: 'html' },
+  { id: 'slash', label: '/', detail: 'Barra (cierra etiquetas)', template: '/', era: 1, kind: 'symbol', language: 'html' },
   // ── Era 1 · código ──
   { id: 'log', label: 'console.log', detail: 'Mostrar en la consola', template: 'console.log(${})', era: 3, kind: 'code' },
   { id: 'texto', label: '"texto"', detail: 'Texto entre comillas', template: '"${}"', era: 3, kind: 'code' },
@@ -53,3 +72,7 @@ export const SNIPPETS: Snippet[] = [
 
 /** Atajos disponibles hasta cierta era (acumulativos). */
 export const snippetsForEra = (era: number) => SNIPPETS.filter((s) => s.era <= era);
+
+/** Atajos de una era y un lenguaje (acumulativos por era). */
+export const snippetsFor = (era: number, language: 'js' | 'html') =>
+  SNIPPETS.filter((s) => s.era <= era && (s.language ?? 'js') === language);
