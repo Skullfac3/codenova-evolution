@@ -145,7 +145,6 @@ Esta evaluación tiene **5 preguntas** y **un ejercicio práctico**.
     retry: 'Casi. Repasa las lecciones marcadas y vuelve al fuego del consejo cuando quieras.',
   },
   reward: { xp: 50, coins: 30 },
-  // La Era 2 aún no tiene lecciones: cuando las tenga, esta evaluación
-  // apuntará a su primera lección (mismo patrón que la Era 3).
-  next: null,
+  // La Era 2 ya tiene lecciones: la evaluación apunta a su primera lección.
+  next: 'e2-01-tu-primera-regla',
 };

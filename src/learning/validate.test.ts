@@ -78,6 +78,36 @@ describe('validateHtml', () => {
   });
 });
 
+describe('style-contains', () => {
+  const ex = htmlExercise([
+    { type: 'style-contains', pattern: 'h1\\s*\\{[^}]*color\\s*:\\s*red', message: 'falta la regla del título en rojo' },
+    { type: 'style-contains', pattern: '\\.tarjeta\\s*\\{[^}]*background-color\\s*:\\s*gold', message: 'falta el fondo dorado de la tarjeta' },
+  ]);
+
+  it('encuentra reglas CSS dentro de <style> y falla si faltan', () => {
+    const ok = '<style>\n  h1 { color: red; }\n  .tarjeta { background-color: gold; }\n</style>\n<h1>Sol</h1>';
+    expect(validateHtml(ex, ok, parseHtml).passed).toBe(true);
+    expect(validateHtml(ex, '<style>h1 { color: blue; }</style>', parseHtml).failures).toEqual([
+      'falta la regla del título en rojo',
+      'falta el fondo dorado de la tarjeta',
+    ]);
+  });
+
+  it('sin bloque <style> no pasa ninguna regla', () => {
+    expect(validateHtml(ex, '<h1 style="color: red">Sol</h1>', parseHtml).passed).toBe(false);
+  });
+
+  it('una regla escrita en un comentario CSS no cuenta', () => {
+    const tramposo = '<style>/* h1 { color: red; } */\n.tarjeta { background-color: gold; }</style>';
+    expect(validateHtml(ex, tramposo, parseHtml).failures).toEqual(['falta la regla del título en rojo']);
+  });
+
+  it('ignora mayúsculas y espacios en las reglas, como el CSS real', () => {
+    const ok = '<style>H1{ COLOR : RED; } .TARJETA { background-color : gold; }</style>';
+    expect(validateHtml(ex, ok, parseHtml).passed).toBe(true);
+  });
+});
+
 describe('stripHtmlComments', () => {
   it('quita comentarios de varias líneas', () => {
     expect(stripHtmlComments('<h1>A</h1><!-- comentario\nlargo --><p>B</p>')).toBe('<h1>A</h1><p>B</p>');

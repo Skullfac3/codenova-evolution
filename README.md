@@ -59,12 +59,12 @@ Las **eras** son la ruta oficial: cada una corresponde a un **nivel** de conteni
 | Era | Nivel | Mundo | Qué aprendes | Estado |
 |---|---|---|---|---|
 | 🪨 **1. Prehistoria** | HTML | Fogatas, rocas, primer refugio | Etiquetas, estructura y tu primera página web | ✅ 7 lecciones |
-| 🏛️ **2. Civilizaciones antiguas** | CSS + Tailwind | Arquitectura antigua, herramientas | Selectores, colores, diseño, flexbox y Tailwind | 🗺️ Llega pronto |
+| 🏛️ **2. Civilizaciones antiguas** | CSS + Tailwind | Arquitectura antigua, herramientas | Selectores, colores, diseño, flexbox y Tailwind | ✅ 8 lecciones |
 | ⚙️ **3. Era industrial** | JavaScript por niveles | Fábricas, máquinas | Fundamentos, condicionales, ciclos, funciones, arreglos, objetos y resolución de problemas | ✅ 15 lecciones |
 | 💻 **4. Era digital** | React | Computadoras, redes, centros de datos | Componentes, props, estado e interfaces | 🗺️ Planeada |
 | 🚀 **5. Era futurista** | TypeScript + Next.js | Ciudades futuristas, IA | Tipos, rutas, renderizado y la web profesional | 🗺️ Planeada |
 
-> Las eras 2, 4 y 5 son visión de producto, no funcionalidades terminadas. La ruta se revisará conforme evolucionen las herramientas del desarrollo web.
+> Las eras 4 y 5 son visión de producto, no funcionalidades terminadas. La ruta se revisará conforme evolucionen las herramientas del desarrollo web.
 
 ## 🤖 Personajes
 
@@ -166,8 +166,8 @@ VITE_SUPABASE_ANON_KEY=...
 **Pruebas:**
 
 ```bash
-npm test           # 99 pruebas: lecciones, validador y guardado
-npm run test:e2e   # recorrido completo de las Eras 1 y 2 en móvil y escritorio
+npm test           # 226 pruebas: lecciones, validador y guardado
+npm run test:e2e   # recorrido completo de las Eras 1, 2 y 3 en móvil y escritorio
 ```
 
 ---
@@ -192,6 +192,7 @@ npm run test:e2e   # recorrido completo de las Eras 1 y 2 en móvil y escritorio
 - [x] Sistema modular de lecciones
 - [x] Laboratorio con sandbox seguro
 - [x] 7 microlecciones de HTML (Era 1) con ejercicios validados contra el DOM y vista previa en vivo (sin ejecutar scripts del estudiante). La lección 6 enseña formularios (form, input, button) en lugar de tablas, porque un formulario es interactivo y prepara el camino a JavaScript y PHP.
+- [x] 8 microlecciones de CSS y Tailwind (Era 2) con ejercicios HTML con bloques `<style>`, validados con el check `style-contains` y vista previa en vivo. La lección de Tailwind usa un mini-Tailwind en `<style>` (las clases de utilidad ya definidas, con los mismos nombres y valores) porque la vista previa no carga internet y el Tailwind real no puede descargarse.
 - [x] 15 microlecciones de JavaScript (Era 3) con ejercicios de código real y pruebas ocultas
 - [x] Evaluaciones de módulo
 - [x] Refugio por era: decorar, mascotas que pasean, atuendos y explorador que camina

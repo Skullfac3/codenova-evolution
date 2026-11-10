@@ -1,5 +1,6 @@
 import type { EraId, Lesson } from '../../types/lesson';
 import { era1Lessons } from './era1';
+import { era2Lessons } from './era2';
 import { era3Lessons } from './era3';
 
 export interface EraInfo {
@@ -24,7 +25,7 @@ export interface EraInfo {
  */
 export const ERAS: EraInfo[] = [
   { id: 1, name: 'Prehistoria', icon: '🪨', lessons: era1Lessons },
-  { id: 2, name: 'Civilizaciones antiguas', icon: '🏛️', lessons: [], teaser: 'CSS y Tailwind: colores, diseño y estilo' },
+  { id: 2, name: 'Civilizaciones antiguas', icon: '🏛️', lessons: era2Lessons },
   { id: 3, name: 'Era industrial', icon: '⚙️', lessons: era3Lessons },
   { id: 4, name: 'Era digital', icon: '💻', lessons: [], teaser: 'React: componentes e interfaces' },
   { id: 5, name: 'Era futurista', icon: '🚀', lessons: [], teaser: 'TypeScript y Next.js: la web profesional' },
