@@ -36,7 +36,18 @@ export const SNIPPETS: Snippet[] = [
   { id: 'ltag', label: '<', detail: 'Menor que / abre etiqueta', template: '<', era: 1, kind: 'symbol', language: 'html' },
   { id: 'gtag', label: '>', detail: 'Mayor que / cierra etiqueta', template: '>', era: 1, kind: 'symbol', language: 'html' },
   { id: 'slash', label: '/', detail: 'Barra (cierra etiquetas)', template: '/', era: 1, kind: 'symbol', language: 'html' },
-  // ── Era 1 · código ──
+  // ── Era 2 · CSS ──
+  { id: 'style', label: '<style>', detail: 'Bloque de reglas CSS', template: '<style>\n\t${}\n</style>', era: 2, kind: 'code', language: 'html' },
+  { id: 'cssrule', label: 'regla CSS', detail: 'Selector con una declaración', template: '${selector} {\n\t${propiedad}: ${valor};\n}', era: 2, kind: 'code', language: 'html' },
+  { id: 'cssclass', label: '.clase', detail: 'Regla para una clase', template: '.${nombre} {\n\t${propiedad}: ${valor};\n}', era: 2, kind: 'code', language: 'html' },
+  { id: 'csscolor', label: 'color:', detail: 'Color del texto', template: 'color: ${};', era: 2, kind: 'code', language: 'html' },
+  { id: 'cssbg', label: 'fondo:', detail: 'Color de fondo', template: 'background-color: ${};', era: 2, kind: 'code', language: 'html' },
+  { id: 'cssflex', label: 'display: flex', detail: 'Fila flexible', template: 'display: flex;', era: 2, kind: 'code', language: 'html' },
+  // ── Símbolos CSS ──
+  { id: 'cbrace', label: '{ }', detail: 'Llaves (regla CSS)', template: '{\n\t${}\n}', era: 2, kind: 'symbol', language: 'html' },
+  { id: 'colon', label: ':', detail: 'Dos puntos (propiedad: valor)', template: ': ', era: 2, kind: 'symbol', language: 'html' },
+  { id: 'csssemi', label: ';', detail: 'Punto y coma (cierra la declaración)', template: ';', era: 2, kind: 'symbol', language: 'html' },
+  // ── Era 3 · código ──
   { id: 'log', label: 'console.log', detail: 'Mostrar en la consola', template: 'console.log(${})', era: 3, kind: 'code' },
   { id: 'texto', label: '"texto"', detail: 'Texto entre comillas', template: '"${}"', era: 3, kind: 'code' },
   { id: 'let', label: 'let', detail: 'Variable que puede cambiar', template: 'let ${nombre} = ${valor};', era: 3, kind: 'code' },

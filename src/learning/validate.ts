@@ -59,6 +59,15 @@ function runHtmlCheck(
   });
 }
 
+/** Contenido de todos los bloques <style>, sin comentarios CSS. */
+export function extractStyleBlocks(code: string): string {
+  const blocks: string[] = [];
+  const re = /<style[^>]*>([\s\S]*?)<\/style\s*>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(code)) !== null) blocks.push(m[1] ?? '');
+  return blocks.join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+}
+
 /**
  * Valida un ejercicio HTML sin ejecutar nada: comprueba la estructura
  * del documento y el código fuente. No usa el sandbox de JavaScript.
@@ -70,11 +79,15 @@ export function validateHtml(
 ): ValidationResult {
   const doc = parseHtml(code);
   const clean = stripHtmlComments(code);
+  const css = extractStyleBlocks(code);
   const failures = exercise.checks
     .filter((check) => {
       switch (check.type) {
         case 'html-contains':
           return !runHtmlCheck(check, doc);
+        case 'style-contains':
+          // CSS no distingue mayúsculas en propiedades ni valores: 'im'.
+          return !new RegExp(check.pattern, 'im').test(css);
         case 'code-matches':
           return !new RegExp(check.pattern, 'm').test(clean);
         case 'code-not-matches':
@@ -106,6 +119,9 @@ function runCheck(check: Check, result: RunResult, code: string): boolean {
     case 'code-not-matches':
       return !new RegExp(check.pattern, 'm').test(clean);
     case 'html-contains':
+      // Solo se evalúa en validateHtml; en el camino de JavaScript nunca pasa.
+      return false;
+    case 'style-contains':
       // Solo se evalúa en validateHtml; en el camino de JavaScript nunca pasa.
       return false;
   }

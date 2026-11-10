@@ -44,8 +44,8 @@ const eraDone = (save: Save, era: number) => {
 /**
  * Una era está abierta si está en `unlockedEras`, o si todas las eras
  * anteriores están vacías o completas: las eras anunciadas sin
- * lecciones (hoy CSS en la Era 2) no bloquean el camino hacia la
- * siguiente era con contenido.
+ * lecciones (hoy React en la Era 4 y TypeScript en la Era 5) no
+ * bloquean el camino hacia la siguiente era con contenido.
  */
 const eraOpen = (save: Save, era: number): boolean => {
   if (save.admin) return true;

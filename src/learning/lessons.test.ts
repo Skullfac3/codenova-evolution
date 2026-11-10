@@ -48,16 +48,20 @@ describe('estructura de las eras', () => {
   });
 
   it('las 7 microlecciones de HTML están publicadas en la Era 1', () => {
-    expect(allLessons).toHaveLength(22);
+    expect(allLessons).toHaveLength(30);
     expect(ERAS.find((e) => e.id === 1)!.lessons).toHaveLength(7);
+  });
+
+  it('las 8 microlecciones de CSS y Tailwind están publicadas en la Era 2', () => {
+    expect(ERAS.find((e) => e.id === 2)!.lessons).toHaveLength(8);
   });
 
   it('las 15 microlecciones de JavaScript están publicadas en la Era 3', () => {
     expect(ERAS.find((e) => e.id === 3)!.lessons).toHaveLength(15);
   });
 
-  it('las eras 2, 4 y 5 están anunciadas sin lecciones todavía', () => {
-    for (const id of [2, 4, 5] as const) {
+  it('las eras 4 y 5 están anunciadas sin lecciones todavía', () => {
+    for (const id of [4, 5] as const) {
       expect(ERAS.find((e) => e.id === id)!.lessons).toHaveLength(0);
     }
   });
@@ -71,8 +75,16 @@ describe('estructura de las eras', () => {
     expect(era.lessons.at(-1)!.kind).toBe('evaluation');
   });
 
-  it('la última lección de la Era 1 no tiene siguiente (la Era 2 llega después)', () => {
-    expect(ERAS.find((e) => e.id === 1)!.lessons.at(-1)!.next).toBeNull();
+  it('la última lección de la Era 1 apunta a la primera de la Era 2', () => {
+    expect(ERAS.find((e) => e.id === 1)!.lessons.at(-1)!.next).toBe(
+      ERAS.find((e) => e.id === 2)!.lessons[0]!.id,
+    );
+  });
+
+  it('la última lección de la Era 2 apunta a la primera de la Era 3', () => {
+    expect(ERAS.find((e) => e.id === 2)!.lessons.at(-1)!.next).toBe(
+      ERAS.find((e) => e.id === 3)!.lessons[0]!.id,
+    );
   });
 
   it('la última lección de la Era 3 no tiene siguiente (la Era 4 llega después)', () => {

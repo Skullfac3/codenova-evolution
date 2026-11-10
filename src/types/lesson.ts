@@ -44,6 +44,14 @@ export type Check =
       /** Si se indica, deben coincidir exactamente esa cantidad de elementos. */
       count?: number;
       message: string;
+    }
+  | {
+      type: 'style-contains';
+      /** Expresión regular (sin banderas) que debe encontrarse en el CSS
+       *  de los bloques <style> del código, sin comentarios. Sirve para
+       *  comprobar reglas CSS (p. ej. 'h1\\s*\\{[^}]*color\\s*:\\s*red'). */
+      pattern: string;
+      message: string;
     };
 
 /**
