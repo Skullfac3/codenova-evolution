@@ -64,6 +64,12 @@ export const SNIPPETS: Snippet[] = [
   { id: 'forof', label: 'for…of', detail: 'Recorrer un arreglo', template: 'for (const ${elemento} of ${lista}) {\n\t${}\n}', era: 3, kind: 'code' },
   { id: 'push', label: '.push', detail: 'Agregar al final de un arreglo', template: '.push(${})', era: 3, kind: 'code' },
   { id: 'length', label: '.length', detail: 'Cantidad de elementos', template: '.length', era: 3, kind: 'code' },
+  // ── Era 3 · Medio avanzado (DOM, eventos, fetch, async) ──
+  { id: 'queryselector', label: 'querySelector', detail: 'Buscar un elemento de la página', template: 'document.querySelector("${#id}")', era: 3, kind: 'code' },
+  { id: 'addeventlistener', label: 'addEventListener', detail: 'Escuchar un evento', template: '.addEventListener("${evento}", function () {\n\t${}\n})', era: 3, kind: 'code' },
+  { id: 'jsonparse', label: 'JSON.parse', detail: 'Convertir texto JSON en datos', template: 'JSON.parse(${texto})', era: 3, kind: 'code' },
+  { id: 'fetch', label: 'fetch', detail: 'Pedir datos de internet', template: 'fetch("${url}")\n\t.then(function (respuesta) {\n\t\treturn respuesta.json();\n\t})\n\t.then(function (datos) {\n\t\t${}\n\t})', era: 3, kind: 'code' },
+  { id: 'asyncfn', label: 'async', detail: 'Función que puede esperar', template: 'async function ${nombre}() {\n\tawait ${};\n}', era: 3, kind: 'code' },
   // ── Símbolos (difíciles de encontrar en el teclado del celular) ──
   { id: 'paren', label: '( )', detail: 'Paréntesis', template: '(${})', era: 3, kind: 'symbol' },
   { id: 'quote', label: '"', detail: 'Comillas', template: '"', era: 3, kind: 'symbol' },

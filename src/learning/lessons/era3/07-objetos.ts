@@ -126,5 +126,5 @@ console.log(describir(buho));`,
     retry: 'La ficha tiene un error. Revisa las comas entre propiedades y la notación de punto.',
   },
   reward: { xp: 25, coins: 15 },
-  next: 'e3-15-evaluacion',
+  next: 'e3-16-el-dom',
 };

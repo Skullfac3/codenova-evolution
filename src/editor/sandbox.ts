@@ -44,7 +44,9 @@ function workerMain() {
     }
     return String(v);
   };
+  let lastLogAt = Date.now();
   const log = (...args: unknown[]) => {
+    lastLogAt = Date.now();
     count++;
     if (count > maxLogs) return;
     const text = args.map(fmt).join(' ').slice(0, MAX_LINE);
@@ -64,18 +66,40 @@ function workerMain() {
 
   self.onmessage = (event: MessageEvent<{ code: string; maxLogs: number }>) => {
     maxLogs = event.data.maxLogs;
+    lastLogAt = Date.now();
+    const start = Date.now();
+    let finished = false;
+    const finish = (extra: { error?: { name: string; message: string } }) => {
+      if (finished) return;
+      finished = true;
+      postMessage({ type: 'done', truncated: count > maxLogs, ...extra });
+    };
+    // Un error en una promesa (p. ej. un await que falla) también termina la ejecución.
+    self.onunhandledrejection = (e: PromiseRejectionEvent) => {
+      const reason = e.reason as { message?: string } | undefined;
+      finish({ error: { name: 'Error', message: String(reason?.message ?? reason ?? 'Error') } });
+    };
     try {
       // eslint-disable-next-line @typescript-eslint/no-implied-eval
       new Function('"use strict";\n' + event.data.code)();
-      postMessage({ type: 'done', truncated: count > maxLogs });
     } catch (e) {
       const err = e as Error;
-      postMessage({
-        type: 'done',
-        truncated: count > maxLogs,
-        error: { name: String(err?.name ?? 'Error'), message: String(err?.message ?? err) },
-      });
+      finish({ error: { name: String(err?.name ?? 'Error'), message: String(err?.message ?? err) } });
+      return;
     }
+    // El código ya corrió, pero las promesas, los await y los temporizadores
+    // terminan después: espera hasta 150 ms sin ningún log nuevo
+    // (máximo 1000 ms) para que su salida también llegue a la consola.
+    const settle = () => {
+      if (finished) return;
+      const now = Date.now();
+      if (now - lastLogAt >= 150 || now - start >= 1000) {
+        finish({});
+        return;
+      }
+      setTimeout(settle, 25);
+    };
+    setTimeout(settle, 25);
   };
 }
 
