@@ -1,13 +1,21 @@
-import { useEffect, useState } from 'react';
-import { ERAS, findLesson } from './learning/lessons';
+import { Suspense, lazy, useEffect, useState } from 'react';
+import { ERAS } from './learning/catalog';
+import { loadLesson } from './learning/lessons';
+import type { Lesson } from './types/lesson';
 import { levelForXp, useProgress } from './store/progress';
 import { APP_VERSION } from './version';
 import { onUpdateAvailable } from './pwa';
-import { LessonPlayer } from './components/LessonPlayer';
 import { Habitat } from './components/Habitat';
-import { Shop } from './components/Shop';
-import { Profiles } from './components/Profiles';
 import { ProtoDock } from './components/ProtoDock';
+
+/**
+ * Estas tres pantallas no hacen falta en la primera carga: se bajan
+ * bajo demanda. LessonPlayer arrastra además el editor CodeMirror,
+ * la validación y el render de Markdown, que son lo más pesado.
+ */
+const LessonPlayer = lazy(() => import('./components/LessonPlayer').then((m) => ({ default: m.LessonPlayer })));
+const Shop = lazy(() => import('./components/Shop').then((m) => ({ default: m.Shop })));
+const Profiles = lazy(() => import('./components/Profiles').then((m) => ({ default: m.Profiles })));
 
 type Tab = 'refugio' | 'lecciones' | 'tienda' | 'perfiles';
 const TABS: Array<{ id: Tab; icon: string; label: string }> = [
@@ -24,12 +32,37 @@ export default function App() {
   const resetProgress = useProgress((s) => s.resetProgress);
   const [tab, setTab] = useState<Tab>('refugio');
   const [openId, setOpenId] = useState<string | null>(null);
+  // La lección completa (intro, concepto, ejercicios, quiz) se baja
+  // bajo demanda cuando se abre; el mapa solo usa el catálogo ligero.
+  const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [lessonLoading, setLessonLoading] = useState(false);
+  useEffect(() => {
+    if (!openId) {
+      setLesson(null);
+      setLessonLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setLessonLoading(true);
+    loadLesson(openId)
+      .then((loaded) => {
+        if (!cancelled) setLesson(loaded ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setLesson(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLessonLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [openId]);
   const [confirmingReset, setConfirmingReset] = useState(false);
   // Hay una versión nueva lista: el banner ofrece recargar para usarla.
   // Sin esto, la app instalada se quedaba en silencio con el JS viejo.
   const [updateAvailable, setUpdateAvailable] = useState(false);
   useEffect(() => onUpdateAvailable(() => setUpdateAvailable(true)), []);
-  const lesson = openId ? findLesson(openId) : undefined;
 
   // Muestra todas las eras: las que tienen lecciones y, como anuncio,
   // las que aún no tienen (HTML y CSS van primero en el mapa). El banner
@@ -49,18 +82,30 @@ export default function App() {
 
       <main>
         {tab === 'refugio' && <Habitat onGoToLessons={() => setTab('lecciones')} onGoToShop={() => setTab('tienda')} />}
-        {tab === 'tienda' && <Shop onGoToHabitat={() => setTab('refugio')} />}
-        {tab === 'perfiles' && <Profiles />}
+        {tab === 'tienda' && (
+          <Suspense fallback={<p className="muted">Cargando la tienda…</p>}>
+            <Shop onGoToHabitat={() => setTab('refugio')} />
+          </Suspense>
+        )}
+        {tab === 'perfiles' && (
+          <Suspense fallback={<p className="muted">Cargando los perfiles…</p>}>
+            <Profiles />
+          </Suspense>
+        )}
         {tab === 'lecciones' && (lesson ? (
-          <LessonPlayer
-            key={lesson.id}
-            lesson={lesson}
-            onExit={() => setOpenId(null)}
-            // La siguiente lección se desbloquea al completar esta: no volver
-            // a comprobarlo aquí. Antes, esa comprobación dejaba la lección
-            // siguiente bloqueada en el mapa hasta recargar la página.
-            onNext={(next) => setOpenId(next ?? null)}
-          />
+          <Suspense fallback={<p className="muted">Cargando la lección…</p>}>
+            <LessonPlayer
+              key={lesson.id}
+              lesson={lesson}
+              onExit={() => setOpenId(null)}
+              // La siguiente lección se desbloquea al completar esta: no volver
+              // a comprobarlo aquí. Antes, esa comprobación dejaba la lección
+              // siguiente bloqueada en el mapa hasta recargar la página.
+              onNext={(next) => setOpenId(next ?? null)}
+            />
+          </Suspense>
+        ) : lessonLoading ? (
+          <p className="muted">Cargando la lección…</p>
         ) : (
           <div className="map" data-testid="map">
             <p className="muted greeting">Hola, {save.explorerName}.</p>

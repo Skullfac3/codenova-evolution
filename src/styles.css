@@ -1,3 +1,30 @@
+/* Fuentes propias (OFL): se descargan en el build con
+   scripts/fetch-fonts.mjs y Vite las emite en dist/assets/.
+   Nunito y JetBrains Mono son variables (un archivo cubre todos
+   los pesos); Press Start 2P es estática. font-display: swap
+   muestra el texto con la fuente del sistema mientras cargan. */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('./assets/fonts/nunito.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('./assets/fonts/jetbrains-mono.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Press Start 2P';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/press-start-2p.woff2') format('woff2');
+}
+
 :root {
   --bg: #1b1325;
   --panel: #2a1f35;

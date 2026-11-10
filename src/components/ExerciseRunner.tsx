@@ -1,9 +1,15 @@
-import { useCallback, useState } from 'react';
+import { Suspense, lazy, useCallback, useState } from 'react';
 import type { Exercise, RunResult } from '../types/lesson';
 import { validateHtml, validateWithTests, type ValidationResult } from '../learning/validate';
 import { CodeSandbox } from '../editor/sandbox';
-import { CodeEditor } from './CodeEditor';
 import { protoSay } from '../store/proto';
+
+/**
+ * El editor (CodeMirror + lenguajes + autocompletado) es el trozo más
+ * pesado de la app y solo se necesita dentro de un ejercicio: se baja
+ * bajo demanda, no en la primera pantalla.
+ */
+const CodeEditor = lazy(() => import('./CodeEditor').then((m) => ({ default: m.CodeEditor })));
 
 const sandbox = new CodeSandbox({ timeoutMs: 2000 });
 
@@ -65,7 +71,9 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
       <p className="eyebrow">{label}</p>
       <p className="prompt" style={{ whiteSpace: 'pre-line' }}>{exercise.prompt}</p>
 
-      <CodeEditor value={code} onChange={setCode} resetKey={`${exercise.id}-${resetCount}`} onRun={run} era={era} language={exercise.language ?? 'js'} />
+      <Suspense fallback={<p className="muted">Cargando el editor…</p>}>
+        <CodeEditor value={code} onChange={setCode} resetKey={`${exercise.id}-${resetCount}`} onRun={run} era={era} language={exercise.language ?? 'js'} />
+      </Suspense>
 
       <div className="row">
         <button className="btn primary" onClick={run} disabled={running} data-testid="btn-run">

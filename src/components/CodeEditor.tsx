@@ -13,6 +13,22 @@ import {
   type CompletionContext,
 } from '@codemirror/autocomplete';
 import { snippetsFor, type Snippet } from '../learning/snippets';
+import type { Lesson } from '../types/lesson';
+
+/**
+ * Precalienta el editor y los lenguajes que usa una lección, para
+ * llamarlo mientras el estudiante lee la introducción (LessonPlayer).
+ * Los lenguajes se resuelven por importación dinámica y quedan en
+ * caché del navegador; el editor los reutiliza al montarse.
+ */
+export function preloadEditorLanguages(lesson: Lesson) {
+  const languages = new Set<'js' | 'html'>([lesson.exercise.language ?? 'js']);
+  for (const ex of lesson.extraChallenges) languages.add(ex.language ?? 'js');
+  for (const language of languages) {
+    if (language === 'html') void import('@codemirror/lang-html');
+    else void import('@codemirror/lang-javascript');
+  }
+}
 
 interface Props {
   value: string;

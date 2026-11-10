@@ -25,7 +25,14 @@ export default defineConfig({
       // se quedaba en la versión vieja porque no había botón de actualizar.
       registerType: 'autoUpdate',
       injectRegister: false, // se registra en src/pwa.ts
-      workbox: { cleanupOutdatedCaches: true, clientsClaim: true, skipWaiting: true },
+      workbox: {
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        // El patrón por defecto no incluye woff2: sin esto, las fuentes
+        // propias no quedarían en la caché offline del service worker.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      },
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png', 'sprites/**/*', 'audio/**/*'],
       manifest: {
         name: 'CodeNova Evolution',
@@ -43,6 +50,26 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Los dos lenguajes del editor (JS y HTML) son los trozos más
+        // grandes de CodeMirror y son independientes entre sí: cada uno
+        // en su propio paquete, en vez de un solo CodeEditor de 500 KB.
+        // Ambos se bajan junto con el editor cuando se abre un ejercicio.
+        manualChunks(id) {
+          if (id.includes('@codemirror/lang-javascript') || id.includes('@lezer/javascript')) return 'cm-lang-js';
+          if (
+            id.includes('@codemirror/lang-html') ||
+            id.includes('@codemirror/lang-css') ||
+            id.includes('@lezer/html') ||
+            id.includes('@lezer/css')
+          )
+            return 'cm-lang-html';
+        },
+      },
+    },
+  },
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],

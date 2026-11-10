@@ -2,6 +2,9 @@ node_modules/
 dist/
 .env.local
 *.log
+# Las fuentes woff2 se descargan en el build (scripts/fetch-fonts.mjs):
+# son binarios y no se guardan en el repo.
+src/assets/fonts/*.woff2
 e2e-results/
 e2e-report/
 test-results/
