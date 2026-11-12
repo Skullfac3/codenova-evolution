@@ -3,7 +3,7 @@ import type { Lesson } from '../../../types/lesson';
 export const lesson: Lesson = {
   id: 'e3-17-eventos',
   era: 3,
-  order: 16,
+  order: 18,
   kind: 'lesson',
   title: 'Eventos: la página te escucha',
   topics: ['eventos', 'addEventListener', 'clic', 'teclado'],

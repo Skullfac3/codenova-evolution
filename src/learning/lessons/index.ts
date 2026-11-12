@@ -15,7 +15,7 @@ import { findLesson as findLessonMeta } from '../catalog';
  * El mapa de eras sigue siendo el mismo (reordenado 2026-11-09 para
  * que HTML y CSS vayan primero): Era 1 HTML, Era 2 CSS + Tailwind,
  * Era 3 JavaScript por niveles, Era 4 React, Era 5 TypeScript +
- * Next.js. Las 19 lecciones de JavaScript viven en la Era 3.
+ * Next.js. Las 21 lecciones de JavaScript viven en la Era 3.
  */
 export { ERAS, allLessons, findLesson, lessonsOfEra, eraById } from '../catalog';
 export type { EraMeta, LessonMeta } from '../catalog';

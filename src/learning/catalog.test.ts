@@ -11,10 +11,10 @@ import { era3Lessons } from './lessons/era3';
  * viejos: esta prueba lo impide.
  */
 describe('catálogo de lecciones', () => {
-  it('hay 5 eras y 34 lecciones publicadas', () => {
+  it('hay 5 eras y 36 lecciones publicadas', () => {
     expect(ERAS).toHaveLength(5);
-    expect(allLessons).toHaveLength(34);
-    expect(ERAS.map((e) => e.lessons.length)).toEqual([7, 8, 19, 0, 0]);
+    expect(allLessons).toHaveLength(36);
+    expect(ERAS.map((e) => e.lessons.length)).toEqual([7, 8, 21, 0, 0]);
   });
 
   it('cada metadato coincide con su lección completa', () => {

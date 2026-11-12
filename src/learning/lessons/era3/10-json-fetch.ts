@@ -3,7 +3,7 @@ import type { Lesson } from '../../../types/lesson';
 export const lesson: Lesson = {
   id: 'e3-18-json-fetch',
   era: 3,
-  order: 17,
+  order: 19,
   kind: 'lesson',
   title: 'JSON y fetch: traer datos de internet',
   topics: ['JSON', 'JSON.parse', 'JSON.stringify', 'fetch', 'promesas'],

@@ -3,7 +3,7 @@ import type { Lesson } from '../../../types/lesson';
 export const lesson: Lesson = {
   id: 'e3-19-promesas-async',
   era: 3,
-  order: 18,
+  order: 20,
   kind: 'lesson',
   title: 'Promesas y async/await: esperar sin bloquear',
   topics: ['promesas', 'async', 'await', 'then'],

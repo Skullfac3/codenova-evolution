@@ -3,7 +3,7 @@ import type { Lesson } from '../../../types/lesson';
 export const lesson: Lesson = {
   id: 'e3-16-el-dom',
   era: 3,
-  order: 15,
+  order: 17,
   kind: 'lesson',
   title: 'El DOM: la página como un árbol',
   topics: ['DOM', 'document', 'querySelector', 'textContent'],
