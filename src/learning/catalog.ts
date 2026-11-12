@@ -558,12 +558,49 @@ export const ERAS: EraMeta[] = [
           xp: 25,
           coins: 15
         },
+        next: "e3-20-metodos-arreglos"
+      },
+      {
+        id: "e3-20-metodos-arreglos",
+        era: 3,
+        order: 15,
+        kind: "lesson",
+        title: "Métodos de arreglos: transformar sin repetir",
+        topics: [
+          "arreglos",
+          "map",
+          "filter",
+          "forEach",
+          "reduce"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
+        next: "e3-21-desestructuracion"
+      },
+      {
+        id: "e3-21-desestructuracion",
+        era: 3,
+        order: 16,
+        kind: "lesson",
+        title: "Desestructuración: sacar valores sin rodeos",
+        topics: [
+          "desestructuracion",
+          "arreglos",
+          "objetos",
+          "parametros"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
         next: "e3-16-el-dom"
       },
       {
         id: "e3-16-el-dom",
         era: 3,
-        order: 15,
+        order: 17,
         kind: "lesson",
         title: "El DOM: la página como un árbol",
         topics: [
@@ -581,7 +618,7 @@ export const ERAS: EraMeta[] = [
       {
         id: "e3-17-eventos",
         era: 3,
-        order: 16,
+        order: 18,
         kind: "lesson",
         title: "Eventos: la página te escucha",
         topics: [
@@ -599,7 +636,7 @@ export const ERAS: EraMeta[] = [
       {
         id: "e3-18-json-fetch",
         era: 3,
-        order: 17,
+        order: 19,
         kind: "lesson",
         title: "JSON y fetch: traer datos de internet",
         topics: [
@@ -618,7 +655,7 @@ export const ERAS: EraMeta[] = [
       {
         id: "e3-19-promesas-async",
         era: 3,
-        order: 18,
+        order: 20,
         kind: "lesson",
         title: "Promesas y async/await: esperar sin bloquear",
         topics: [
@@ -636,7 +673,7 @@ export const ERAS: EraMeta[] = [
       {
         id: "e3-15-evaluacion",
         era: 3,
-        order: 19,
+        order: 21,
         kind: "evaluation",
         title: "Evaluación final · JavaScript",
         topics: [

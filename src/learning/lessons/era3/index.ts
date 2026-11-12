@@ -13,6 +13,8 @@ import { lesson as l11 } from './04-ciclo-while';
 import { lesson as l12 } from './05-funciones';
 import { lesson as l13 } from './06-arreglos';
 import { lesson as l14 } from './07-objetos';
+import { lesson as l20 } from './12-metodos-arreglos';
+import { lesson as l21 } from './13-desestructuracion';
 import { lesson as l16 } from './08-el-dom';
 import { lesson as l17 } from './09-eventos';
 import { lesson as l18 } from './10-json-fetch';
@@ -23,8 +25,9 @@ import { lesson as l15 } from './08-evaluacion';
  * Era 3 — Era industrial: JavaScript por niveles. Las 15 microlecciones
  * vivían antes en las eras 1 y 2; se mudaron aquí cuando el mapa se
  * reordenó para que HTML (Era 1) y CSS (Era 2) vayan primero.
- * El orden importa: es la ruta del estudiante. Medio avanzado
- * (DOM, eventos, JSON/fetch, promesas y async/await) va antes de la
- * evaluación final, que sigue cerrando la era por ahora.
+ * El orden importa: es la ruta del estudiante. Medio (métodos de
+ * arreglos y desestructuración) y Medio avanzado (DOM, eventos,
+ * JSON/fetch, promesas y async/await) van antes de la evaluación
+ * final, que sigue cerrando la era por ahora.
  */
-export const era3Lessons: Lesson[] = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l16, l17, l18, l19, l15];
+export const era3Lessons: Lesson[] = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l20, l21, l16, l17, l18, l19, l15];

@@ -3,7 +3,7 @@ import type { Lesson } from '../../../types/lesson';
 export const lesson: Lesson = {
   id: 'e3-15-evaluacion',
   era: 3,
-  order: 19,
+  order: 21,
   kind: 'evaluation',
   title: 'Evaluación final · JavaScript',
   topics: ['repaso JavaScript · 2ª parte'],
