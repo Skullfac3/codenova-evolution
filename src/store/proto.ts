@@ -7,6 +7,9 @@ interface ProtoStore {
   /** Id que cambia con cada mensaje, para reiniciar el temporizador. */
   messageId: number;
   say: (message: string | null, mood?: ProtoMood, ms?: number) => void;
+  /** Era elegida en el refugio; null = la más alta desbloqueada. Proto-0 toma el aspecto de esa era. */
+  viewEra: number | null;
+  setViewEra: (era: number | null) => void;
 }
 
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -16,6 +19,8 @@ export const useProto = create<ProtoStore>((set, get) => ({
   mood: 'idle',
   message: null,
   messageId: 0,
+  viewEra: null,
+  setViewEra: (viewEra) => set({ viewEra }),
   say: (message, mood = 'talking', ms = 4000) => {
     clearTimeout(timer);
     set({ message, mood, messageId: get().messageId + 1 });

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useProgress } from '../store/progress';
-import { protoSay } from '../store/proto';
+import { protoSay, useProto } from '../store/proto';
 import { PROTO_FUTURE_NOTE, PROTO_STAGES, stageForEra } from '../game/proto';
 import { COLS, ITEMS, LANDMARK, ROWS, TILE, WORLD_ERAS, isLandmarkTile, itemById } from '../game/items';
 import { OUTFIT_COLORS, drawGrassEdge, drawHut, drawTemple, drawTile, spriteCanvas, type SpriteKey, type TileKind, type TileSide } from '../game/sprites';
@@ -71,6 +71,10 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
   const [era, setEra] = useState<number>(() => Math.max(...worldEras));
   const [mode, setMode] = useState<Mode>('explorar');
   const [selected, setSelected] = useState<string | null>(null);
+
+  // Proto-0 toma el aspecto de la era que se está viendo.
+  const setViewEra = useProto((s) => s.setViewEra);
+  useEffect(() => { setViewEra(era); }, [era, setViewEra]);
 
   const canvas = useRef<HTMLCanvasElement>(null);
   const background = useMemo(() => renderBackground(era), [era]);
@@ -317,10 +321,12 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
             // con protoEra 3 la etapa actual sigue siendo v2 Guardián.
             const current = stage.era === stageForEra(protoEra).era;
             const unlocked = stage.era <= protoEra;
+            const shown = stage.era === stageForEra(Math.min(era, protoEra)).era;
             return (
-              <li key={stage.era} data-testid={`proto-stage-${stage.era}`} data-state={current ? 'current' : unlocked ? 'unlocked' : 'locked'}>
+              <li key={stage.era} data-testid={`proto-stage-${stage.era}`} data-state={current ? 'current' : unlocked ? 'unlocked' : 'locked'} data-shown={shown}>
                 <strong>{stage.name}</strong>
                 {current ? ' · etapa actual' : unlocked ? '' : ' · llega pronto'}
+                {shown && !current ? ' · así se ve en esta era' : ''}
                 <small>{stage.description}</small>
               </li>
             );
