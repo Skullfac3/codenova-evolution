@@ -22,6 +22,7 @@ const PAL: Record<string, string> = {
   E: '#ff8a3d', e: '#d9682a', Y: '#fff0c2', k: '#1b1325',
   g: '#7bd389', G: '#2a1f35',
   b: '#4aa3d8', B: '#bfe8ff', n: '#c9962e', N: '#ffd97a',
+  W: '#f7f2fb', S: '#54446a', F: '#ffb066', // brillo, sombra profunda y resplandor del ojo
 };
 
 const N = 32;
@@ -47,6 +48,7 @@ export function buildProtoGrid(f: ProtoFrame): string[][] {
   // Orejas
   rect(2, 14, 4, 21, 'o'); rect(3, 15, 4, 20, 'M'); for (let y = 15; y < 21; y++) put(4, y, 'D');
   rect(27, 14, 29, 21, 'o'); rect(27, 15, 28, 20, 'M'); for (let y = 15; y < 21; y++) put(28, y, 'D');
+  put(3, 15, 'L'); put(27, 15, 'L'); hline(3, 4, 20, 'S'); hline(27, 28, 20, 'S');
 
   // Cabeza
   rect(5, 9, 26, 28, 'o');
@@ -54,8 +56,17 @@ export function buildProtoGrid(f: ProtoFrame): string[][] {
   hline(6, 24, 10, 'L');
   for (let y = 10; y < 27; y++) { put(6, y, 'L'); put(25, y, 'D'); }
   hline(6, 25, 27, 'D');
-  for (const [x, y] of [[8, 11], [23, 11], [8, 26], [23, 26]] as const) put(x, y, 'D');
+  // Volumen: sombra interior en dos tonos, brillo especular y esquinas redondeadas.
+  for (let y = 12; y < 27; y++) put(24, y, 'D');
+  hline(8, 24, 26, 'D');
+  for (let x = 8; x <= 23; x += 2) put(x, 25, 'D');
+  for (let y = 11; y < 28; y++) put(25, y, 'S');
+  hline(7, 25, 27, 'S');
+  hline(10, 14, 11, 'W'); put(16, 11, 'W'); put(7, 12, 'W'); put(7, 13, 'W');
+  for (const [x, y] of [[8, 11], [23, 11], [8, 26], [23, 26]] as const) put(x, y, 'S');
+  for (const [x, y] of [[5, 9], [26, 9], [5, 28], [26, 28]] as const) put(x, y, '.');
   if (evolved) for (let x = 6; x <= 25; x++) put(x, 10, x % 2 ? 'n' : 'N'); // banda dorada
+  for (const [x, y] of [[6, 10], [25, 10], [6, 27], [25, 27]] as const) put(x, y, 'o');
 
   // Ojos
   for (const ex of [8, 18]) drawEye(ex, f, put, rect, hline);
@@ -64,7 +75,7 @@ export function buildProtoGrid(f: ProtoFrame): string[][] {
   drawMouth(f, put, rect, hline);
 
   // Cuello
-  rect(11, 29, 20, 30, 'o'); rect(12, 29, 19, 30, 'D');
+  rect(11, 29, 20, 30, 'o'); rect(12, 29, 19, 30, 'D'); hline(12, 19, 30, 'S'); put(12, 29, 'M');
   return g;
 }
 
@@ -110,6 +121,7 @@ function drawEye(ex: number, f: ProtoFrame, put: Put, rect: Rect, hline: HLine) 
       rect(ex, 13, ex + 5, 18, 'o');
       rect(ex + 1, 14, ex + 4, 17, 'E');
       hline(ex + 1, ex + 4, 17, 'e');
+      hline(ex + 1, ex + 4, 14, 'F');
       const look = f.mood === 'thinking' ? 'up' : f.look;
       const px = look === 'left' ? ex + 1 : look === 'right' ? ex + 3 : ex + 2;
       const py = look === 'up' ? 14 : 15;

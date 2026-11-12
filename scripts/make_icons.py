@@ -14,6 +14,9 @@ PAL = {
     'Y': (255, 240, 194),   # brillo ojo
     'g': (123, 211, 137),   # rejilla encendida
     'k': (42, 31, 53),      # rejilla apagada
+    'W': (247, 242, 251),   # brillo especular
+    'S': (84, 68, 106),     # sombra profunda
+    'F': (255, 176, 102),   # resplandor del ojo
 }
 N = 32
 g = [['.'] * N for _ in range(N)]
@@ -34,6 +37,7 @@ for x0, (c1, c2) in ((2, ('M', 'D')), (27, ('M', 'D'))):
     rect(x0, 14, x0 + 2, 21, 'o')
     rect(x0 + (1 if x0 == 2 else 0), 15, x0 + (2 if x0 == 2 else 1), 20, c1)
     for y in range(15, 21): put(x0 + (2 if x0 == 2 else 1), y, c2)
+put(3, 15, 'L'); put(27, 15, 'L'); hline(3, 4, 20, 'S'); hline(27, 28, 20, 'S')
 
 # Cabeza
 rect(5, 9, 26, 28, 'o')
@@ -41,14 +45,25 @@ rect(6, 10, 25, 27, 'M')
 hline(6, 24, 10, 'L')
 for y in range(10, 27): put(6, y, 'L'); put(25, y, 'D')
 hline(6, 25, 27, 'D')
-for (x, y) in ((8, 11), (23, 11), (8, 26), (23, 26)): put(x, y, 'D')  # remaches
+# Volumen: sombra interior en dos tonos, brillo especular y esquinas redondeadas (igual que proto.ts)
+for y in range(12, 27): put(24, y, 'D')
+hline(8, 24, 26, 'D')
+for x in range(8, 24, 2): put(x, 25, 'D')
+for y in range(11, 28): put(25, y, 'S')
+hline(7, 25, 27, 'S')
+hline(10, 14, 11, 'W'); put(16, 11, 'W'); put(7, 12, 'W'); put(7, 13, 'W')
+for (x, y) in ((8, 11), (23, 11), (8, 26), (23, 26)): put(x, y, 'S')  # remaches
+for (x, y) in ((5, 9), (26, 9), (5, 28), (26, 28)): put(x, y, '.')
+for (x, y) in ((6, 10), (25, 10), (6, 27), (25, 27)): put(x, y, 'o')
 
 # Ojos
 for ex in (8, 18):
     rect(ex, 13, ex + 5, 18, 'o')
     rect(ex + 1, 14, ex + 4, 17, 'E')
     hline(ex + 1, ex + 4, 17, 'e')
-    put(ex + 1, 14, 'Y')
+    hline(ex + 1, ex + 4, 14, 'F')
+    rect(ex + 2, 15, ex + 3, 16, 'k')
+    put(ex + 4, 14, 'Y')
 
 # Boca (rejilla)
 rect(10, 21, 21, 24, 'o')
@@ -57,7 +72,7 @@ for y in (22, 23):
         put(x, y, 'g' if (x + y) % 2 == 0 else 'k')
 
 # Cuello
-rect(11, 29, 20, 30, 'o'); rect(12, 29, 19, 30, 'D')
+rect(11, 29, 20, 30, 'o'); rect(12, 29, 19, 30, 'D'); hline(12, 19, 30, 'S'); put(12, 29, 'M')
 
 ART = Image.new('RGB', (N, N))
 for y in range(N):
