@@ -4,6 +4,7 @@ import { exercisesFor, scoreEvaluation, scoreLesson } from '../learning/validate
 import { useProgress, type CompletionOutcome } from '../store/progress';
 import { ERAS } from '../learning/catalog';
 import { protoSay } from '../store/proto';
+import { play } from '../game/sound';
 import { ExerciseRunner } from './ExerciseRunner';
 import { Markdown } from './Markdown';
 import { Quiz } from './Quiz';
@@ -46,9 +47,13 @@ export function LessonPlayer({ lesson, onExit, onNext }: Props) {
 
   const finish = (totalHints: number) => {
     const score = isEval ? scoreEvaluation(quizCorrect, lesson.quiz?.length ?? 0, true) : scoreLesson(true, totalHints);
-    if (score < 60) return setStep({ kind: 'failed', score });
+    if (score < 60) {
+      play('alert');
+      return setStep({ kind: 'failed', score });
+    }
     const outcome = completeLesson(lesson.id, score, lesson.reward);
     setStep({ kind: 'reward', score, outcome });
+    play(outcome.eraUnlocked !== null ? 'evolve' : 'levelup');
     if (outcome.eraUnlocked !== null) protoSay(`¡Nueva era! Mira cómo evoluciono…`, 'surprised', 5000);
     else if (outcome.awarded) protoSay(`+${lesson.reward.xp} XP y +${lesson.reward.coins} NovaCoins. ¡Gástalas en la tienda!`, 'happy', 4500);
   };

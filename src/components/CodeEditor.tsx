@@ -14,6 +14,7 @@ import {
 } from '@codemirror/autocomplete';
 import { snippetsFor, type Snippet } from '../learning/snippets';
 import type { Lesson } from '../types/lesson';
+import { play } from '../game/sound';
 
 /**
  * Precalienta el editor y los lenguajes que usa una lección, para
@@ -114,6 +115,7 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era, language = '
     if (!v) return;
     const { from, to } = v.state.selection.main;
     snippet(s.template)(v, null, from, to);
+    play('tick');
     v.focus();
   };
 
