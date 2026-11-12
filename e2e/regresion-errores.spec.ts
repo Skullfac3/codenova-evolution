@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickContinue } from './helpers';
 import { era1Lessons } from '../src/learning/lessons/era1';
 import { era3Lessons } from '../src/learning/lessons/era3';
 
@@ -26,7 +27,7 @@ test('la lección 2 se desbloquea en el mapa sin recargar, tras completar la 1',
   // Error 3: al aprobar debe verse la recompensa pendiente antes de continuar.
   await expect(page.getByTestId('feedback')).toContainText('Recompensa al completar');
   await expect(page.getByTestId('feedback')).toContainText('+20 XP');
-  await page.getByTestId('btn-continue').click();
+  await clickContinue(page);
 
   await expect(page.getByTestId('reward')).toHaveAttribute('data-awarded', 'true');
   await expect(page.getByTestId('hud-xp')).toHaveText('20 XP');

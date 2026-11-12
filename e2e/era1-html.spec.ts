@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickContinue } from './helpers';
 import { era1Lessons } from '../src/learning/lessons/era1';
 
 /**
@@ -46,7 +47,7 @@ test.describe('Era 1 · HTML', () => {
     await expect(page.getByTestId('feedback')).toHaveAttribute('data-status', 'pass');
     await expect(page.frameLocator('[data-testid="html-preview"]').locator('h1')).toHaveText('Mi refugio');
 
-    await page.getByTestId('btn-continue').click();
+    await clickContinue(page);
     await expect(page.getByTestId('reward')).toHaveAttribute('data-awarded', 'true');
     await expect(page.getByTestId('hud-xp')).toHaveText('20 XP');
   });

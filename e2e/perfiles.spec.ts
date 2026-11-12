@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickContinue } from './helpers';
 import { era1Lessons } from '../src/learning/lessons/era1';
 import { era3Lessons } from '../src/learning/lessons/era3';
 
@@ -41,7 +42,7 @@ test.describe('Perfiles: Administrador y Pruebas', () => {
     await page.keyboard.insertText(era1Lessons[0]!.exercise.solution);
     await page.getByTestId('btn-run').click();
     await expect(page.getByTestId('feedback')).toHaveAttribute('data-status', 'pass');
-    await page.getByTestId('btn-continue').click();
+    await clickContinue(page);
     await expect(page.getByTestId('hud-coins')).toHaveText('🪙 10');
 
     // Compra la fogata en Pruebas.

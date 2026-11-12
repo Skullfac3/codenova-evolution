@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickContinue } from './helpers';
 import { era1Lessons } from '../src/learning/lessons/era1';
 import { era2Lessons } from '../src/learning/lessons/era2';
 
@@ -73,7 +74,7 @@ test.describe('Era 2 · CSS + Tailwind', () => {
       .evaluate((el) => getComputedStyle(el).color);
     expect(colorDespues).toBe('rgb(255, 0, 0)');
 
-    await page.getByTestId('btn-continue').click();
+    await clickContinue(page);
     await expect(page.getByTestId('reward')).toHaveAttribute('data-awarded', 'true');
     await expect(page.getByTestId('hud-xp')).toHaveText('190 XP');
   });
@@ -99,7 +100,7 @@ test.describe('Era 2 · CSS + Tailwind', () => {
       await page.keyboard.insertText(l.exercise.solution);
       await page.getByTestId('btn-run').click();
       await expect(page.getByTestId('feedback')).toHaveAttribute('data-status', 'pass');
-      await page.getByTestId('btn-continue').click();
+      await clickContinue(page);
       await page.getByTestId('btn-next-lesson').click();
     }
     await expect(page.getByTestId('player')).toHaveAttribute('data-lesson', lesson.id);

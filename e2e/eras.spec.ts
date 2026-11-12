@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { clickContinue } from './helpers';
 import { era1Lessons } from '../src/learning/lessons/era1';
 import { era2Lessons } from '../src/learning/lessons/era2';
 import { era3Lessons } from '../src/learning/lessons/era3';
@@ -66,7 +67,7 @@ async function solveCurrentExercise(page: Page, opts: { useHint?: boolean } = {}
   await typeCode(page, ex.solution);
   await page.getByTestId('btn-run').click();
   await expect(page.getByTestId('feedback')).toHaveAttribute('data-status', 'pass');
-  await page.getByTestId('btn-continue').click();
+  await clickContinue(page);
 }
 
 const hud = async (page: Page) => ({
