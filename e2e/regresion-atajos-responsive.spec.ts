@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { clickContinue } from './helpers';
 import { era1Lessons } from '../src/learning/lessons/era1';
 
 /**
@@ -190,7 +191,7 @@ test.describe('Error 2 · sin desbordamiento horizontal en pantallas angostas', 
     await page.keyboard.insertText(lesson.exercise.solution);
     await page.getByTestId('btn-run').click();
     await expect(page.getByTestId('feedback')).toHaveAttribute('data-status', 'pass');
-    await page.getByTestId('btn-continue').click();
+    await clickContinue(page);
     await expect(page.getByTestId('reward')).toBeVisible();
     await expectNoHorizontalOverflow(page, 'Recompensa 360px');
   });
