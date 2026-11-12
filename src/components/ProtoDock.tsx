@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { drawProto, stageForEra, type ProtoFrame, type ProtoLook } from '../game/proto';
 import { tipFor, useProto } from '../store/proto';
 import { useProgress } from '../store/progress';
@@ -25,18 +25,44 @@ export function ProtoDock() {
   moodRef.current = mood;
   const eraRef = useRef(era);
   eraRef.current = era;
-  const stage = stageForEra(era);
+  // Aspecto: el de la era elegida en el refugio (nunca más allá de lo desbloqueado).
+  const viewEra = useProto((s) => s.viewEra);
+  const setViewEra = useProto((s) => s.setViewEra);
+  const stage = stageForEra(Math.min(viewEra ?? era, era));
+  /** Era que se dibuja; cambia a mitad del destello de la transformación. */
+  const drawnEra = useRef(stage.era);
+  const [morphing, setMorphing] = useState(false);
+  const justUnlocked = useRef(false);
 
   // Cuando se desbloquea la Era 2, Proto-0 anuncia su evolución una sola
   // vez. El ref guarda la era anterior: en el primer render es la misma
   // (cargar ya en Era 2, p. ej. como Administrador, no anuncia nada).
   const prevEra = useRef(era);
   useEffect(() => {
+    if (era > prevEra.current) setViewEra(null); // una era nueva: Proto-0 muestra su etapa más reciente
     if (prevEra.current === 1 && era === 2) {
+      justUnlocked.current = true;
       say('¡Evolucioné! Mira mi gema azul y mi banda dorada.', 'happy', 6000);
     }
     prevEra.current = era;
-  }, [era, say]);
+  }, [era, say, setViewEra]);
+
+  // Cambio de aspecto al cambiar de era: destello, sonido y unas palabras.
+  const shownStage = useRef(stage.era);
+  useEffect(() => {
+    const from = shownStage.current;
+    const to = stage.era;
+    if (from === to) return;
+    shownStage.current = to;
+    setMorphing(true);
+    play(to > from ? 'evolve' : 'hint');
+    if (justUnlocked.current) justUnlocked.current = false;
+    else if (to > from) say('¡Forma Guardián! Bronce pulido, ojos azules y laureles.', 'surprised', 4500);
+    else say('Así me veía en la Prehistoria: gris, oxidado y con ojos naranjas.', 'surprised', 4500);
+    const swap = setTimeout(() => { drawnEra.current = to; }, 280);
+    const end = setTimeout(() => setMorphing(false), 900);
+    return () => { clearTimeout(swap); clearTimeout(end); drawnEra.current = to; };
+  }, [stage.era, say]);
 
   useEffect(() => {
     const ctx = canvas.current!.getContext('2d')!;
@@ -53,7 +79,7 @@ export function ProtoDock() {
       if (now - last < 120) return; // ~8 fps: suficiente para pixel art y ahorra batería
       last = now;
       state.mood = moodRef.current;
-      state.era = eraRef.current;
+      state.era = drawnEra.current;
       state.tick++;
 
       if (!reduced) {
@@ -71,7 +97,8 @@ export function ProtoDock() {
       if (el) {
         el.dataset.mood = state.mood;
         el.dataset.look = state.look;
-        el.dataset.era = String(state.era);
+        el.dataset.era = String(eraRef.current);
+        el.dataset.stage = String(state.era);
       }
     };
     raf = requestAnimationFrame(loop);
@@ -87,8 +114,8 @@ export function ProtoDock() {
       )}
       <button
         type="button"
-        className={`proto-bot mood-${mood}`}
-        aria-label="Proto-0: tócame para un consejo"
+        className={`proto-bot mood-${mood}${morphing ? ' morphing' : ''}`}
+        aria-label={`Proto-0, ${stage.name}: tócame para un consejo`}
         data-testid="proto-bot"
         onClick={() => { play('blip'); say(tipFor(era), 'talking', 5000); }}
       >

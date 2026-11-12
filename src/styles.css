@@ -272,6 +272,15 @@ h3 { font-size: 14px; }
 .proto-bot.mood-happy canvas { animation: proto-hop .5s ease-out 2; }
 .proto-bot.mood-surprised canvas { animation: proto-hop .35s ease-out 3; }
 .proto-bot.mood-sad canvas { animation: none; transform: translateY(3px); }
+/* Cambio de aspecto al cambiar de era: destello y salto. */
+.proto-bot.morphing canvas { animation: proto-morph .9s ease-in-out 1; }
+@keyframes proto-morph {
+  0% { transform: scale(1); filter: drop-shadow(2px 3px 0 #0009) brightness(1); }
+  30% { transform: translateY(-10px) scale(1.25); filter: drop-shadow(0 0 12px #ffd97a) brightness(3); }
+  60% { transform: translateY(-4px) scale(1.1) rotate(4deg); filter: drop-shadow(0 0 10px #ffd97a) brightness(1.6); }
+  100% { transform: scale(1); filter: drop-shadow(2px 3px 0 #0009) brightness(1); }
+}
+@media (prefers-reduced-motion: reduce) { .proto-bot.morphing canvas { animation: none; } }
 @keyframes proto-bob { 50% { transform: translateY(-3px); } }
 @keyframes proto-hop { 40% { transform: translateY(-10px); } }
 .proto-bubble {

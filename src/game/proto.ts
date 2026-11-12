@@ -12,7 +12,7 @@ export interface ProtoFrame {
   antennaOn: boolean;
   /** Alterna para la boca al hablar y el escáner al pensar. */
   tick: number;
-  /** Era actual: Proto-0 evoluciona con el estudiante. */
+  /** Era cuyo aspecto se dibuja: 1 es el Explorador gris y oxidado; 2 o más, el Guardián de bronce. */
   era: number;
 }
 
@@ -23,7 +23,23 @@ const PAL: Record<string, string> = {
   g: '#7bd389', G: '#2a1f35',
   b: '#4aa3d8', B: '#bfe8ff', n: '#c9962e', N: '#ffd97a',
   W: '#f7f2fb', S: '#54446a', F: '#ffb066', // brillo, sombra profunda y resplandor del ojo
+  r: '#a8552e', R: '#d07a3e', q: '#6e3520', // óxido (v1)
+  v: '#3f8a3a', V: '#8fd66a', // laureles (v2)
 };
+
+/**
+ * v2 Guardián: el mismo dibujo con otra paleta. Cuerpo de bronce pulido,
+ * ojos de lapislázuli y rejilla turquesa, para que el cambio se note de lejos.
+ */
+const PAL_V2: Record<string, string> = {
+  L: '#ffe9a8', M: '#d9a441', D: '#a8742a', S: '#6e4a1a', W: '#fff8dc',
+  E: '#4aa3d8', e: '#2f7fb8', F: '#9fd8f0', Y: '#ffffff',
+  g: '#5fe0c8', G: '#16323a',
+  n: '#fff3b0', N: '#ffffff',
+};
+
+/** Paleta con la que se dibuja a Proto-0 en una era. */
+export const protoPalette = (era: number): Record<string, string> => (era >= 2 ? { ...PAL, ...PAL_V2 } : PAL);
 
 const N = 32;
 
@@ -65,7 +81,21 @@ export function buildProtoGrid(f: ProtoFrame): string[][] {
   hline(10, 14, 11, 'W'); put(16, 11, 'W'); put(7, 12, 'W'); put(7, 13, 'W');
   for (const [x, y] of [[8, 11], [23, 11], [8, 26], [23, 26]] as const) put(x, y, 'S');
   for (const [x, y] of [[5, 9], [26, 9], [5, 28], [26, 28]] as const) put(x, y, '.');
-  if (evolved) for (let x = 6; x <= 25; x++) put(x, 10, x % 2 ? 'n' : 'N'); // banda dorada
+  if (evolved) {
+    for (let x = 6; x <= 25; x++) put(x, 10, x % 2 ? 'n' : 'N'); // banda dorada
+    put(15, 12, 'b'); put(16, 12, 'b'); put(15, 11, 'B'); put(16, 11, 'b'); // gema en la frente
+    // laureles a los lados de la cabeza
+    for (const [x, y, c] of [[6, 8, 'v'], [7, 7, 'V'], [8, 8, 'v'], [9, 7, 'V'], [10, 8, 'v'], [5, 7, 'V'], [4, 9, 'v'], [4, 11, 'V'], [3, 12, 'v'],
+      [25, 8, 'v'], [24, 7, 'V'], [23, 8, 'v'], [22, 7, 'V'], [21, 8, 'v'], [26, 7, 'V'], [27, 9, 'v'], [27, 11, 'V'], [28, 12, 'v']] as const) put(x, y, c);
+  } else {
+    // v1: manchas de óxido, una grieta y un remache perdido.
+    for (const [x, y, c] of [[7, 20, 'R'], [6, 21, 'r'], [7, 21, 'r'], [8, 21, 'R'], [6, 22, 'r'], [7, 22, 'q'], [8, 22, 'r'], [7, 23, 'r'], [8, 23, 'r'], [6, 24, 'r'], [7, 24, 'R'],
+      [21, 11, 'r'], [22, 11, 'R'], [23, 12, 'r'], [22, 12, 'q'], [24, 12, 'r'], [24, 13, 'R'],
+      [22, 19, 'R'], [23, 19, 'r'], [23, 20, 'q'], [24, 20, 'r'], [24, 21, 'r'], [22, 25, 'r'], [23, 25, 'R'],
+      [14, 19, 'r'], [15, 20, 'R'], [3, 18, 'r'], [3, 19, 'q'], [28, 16, 'r'], [15, 7, 'r']] as const) put(x, y, c);
+    for (const [x, y] of [[13, 11], [14, 12], [14, 13], [15, 13], [16, 14], [16, 15]] as const) put(x, y, 'S');
+    put(8, 26, 'k');
+  }
   for (const [x, y] of [[6, 10], [25, 10], [6, 27], [25, 27]] as const) put(x, y, 'o');
 
   // Ojos
@@ -158,11 +188,12 @@ function drawMouth(f: ProtoFrame, put: Put, rect: Rect, hline: HLine) {
 export function drawProto(ctx: CanvasRenderingContext2D, f: ProtoFrame): void {
   ctx.clearRect(0, 0, N, N);
   const g = buildProtoGrid(f);
+  const pal = protoPalette(f.era);
   for (let y = 0; y < N; y++) {
     for (let x = 0; x < N; x++) {
       const c = g[y]![x]!;
       if (c === '.') continue;
-      ctx.fillStyle = PAL[c]!;
+      ctx.fillStyle = pal[c]!;
       ctx.fillRect(x, y, 1, 1);
     }
   }
@@ -170,7 +201,9 @@ export function drawProto(ctx: CanvasRenderingContext2D, f: ProtoFrame): void {
 
 /**
  * Etapas de evolución de Proto-0: su aspecto cambia con la era del
- * estudiante (ver buildProtoGrid: era >= 2 cambia la antena y la banda).
+ * estudiante (ver buildProtoGrid y protoPalette). En el refugio se dibuja
+ * la etapa de la era que la persona está viendo, así que al volver a la
+ * Era 1 Proto-0 recupera su aspecto de entonces.
  * Las eras 3-5 aún no tienen lecciones, así que tampoco tienen etapa.
  */
 export interface ProtoStage {
@@ -186,12 +219,12 @@ export const PROTO_STAGES: readonly ProtoStage[] = [
   {
     era: 1,
     name: 'v1 Explorador',
-    description: 'Antena naranja y cuerpo gris: el robot con el que empieza la aventura.',
+    description: 'Cuerpo gris con óxido y grietas, ojos y antena naranja: el robot con el que empieza la aventura.',
   },
   {
     era: 2,
     name: 'v2 Guardián',
-    description: 'Gema azul en la antena y banda dorada en la frente: evoluciona al completar la Era 1.',
+    description: 'Bronce pulido, ojos azules, gema azul en la antena y banda dorada con laureles: evoluciona al completar la Era 1.',
   },
 ] as const;
 
