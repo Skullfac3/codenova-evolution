@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createEmptySave, type Save } from '../services/storage/save';
 import { availableCount, buyItem, equipOutfit, placeObject, removeObjectAt, transferPet, transferablePets, type Result } from './economy';
 import { ITEMS } from './items';
-import { PALETTE, SPRITE_KEYS, spriteRows } from './sprites';
+import { ALL_GRIDS, OUTFIT_COLORS, PALETTE, SPRITE_KEYS, SPRITE_SIZE, spriteRows } from './sprites';
 
 let n = 0;
 const id = () => `pet-${++n}`;
@@ -105,12 +105,35 @@ describe('catálogo y sprites', () => {
     }
   });
 
-  it('los sprites miden 16 de ancho y usan colores de la paleta', () => {
+  it('los sprites miden 32x32 y usan colores de la paleta', () => {
     for (const key of SPRITE_KEYS) {
-      for (const row of spriteRows(key)) {
-        expect(row.length, key).toBe(16);
+      const rows = spriteRows(key);
+      expect(rows.length, key).toBe(SPRITE_SIZE);
+      for (const row of rows) {
+        expect(row.length, key).toBe(SPRITE_SIZE);
         for (const ch of row) if (ch !== '.') expect(PALETTE[ch], `${key}: "${ch}"`).toBeDefined();
       }
+    }
+  });
+
+  it('terrenos y edificios son cuadrados y usan colores de la paleta', () => {
+    for (const [key, rows] of Object.entries(ALL_GRIDS)) {
+      expect([32, 64], key).toContain(rows.length);
+      for (const row of rows) {
+        expect(row.length, key).toBe(rows.length);
+        for (const ch of row) if (ch !== '.') expect(PALETTE[ch], `${key}: "${ch}"`).toBeDefined();
+      }
+    }
+  });
+
+  it('los atuendos recolorean toda la túnica y solo la túnica', () => {
+    const tunic = ['V', 'U', 'T', 't'];
+    for (const colors of Object.values(OUTFIT_COLORS)) expect(Object.keys(colors).sort()).toEqual([...tunic].sort());
+    const used = (key: string) => new Set(ALL_GRIDS[key]!.join(''));
+    for (const ch of tunic) expect(used('explorador1').has(ch), ch).toBe(true);
+    for (const key of Object.keys(ALL_GRIDS)) {
+      if (key.startsWith('explorador')) continue;
+      for (const ch of tunic) expect(used(key).has(ch), `${key}: "${ch}"`).toBe(false);
     }
   });
 });

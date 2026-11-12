@@ -36,7 +36,7 @@ CodeNova Evolution es una plataforma educativa que convierte el aprendizaje de p
 | **Público** | Cualquier edad, sin experiencia previa |
 | **Qué se aprende** | Programación y desarrollo web: HTML → CSS y Tailwind → JavaScript por niveles → React → TypeScript → Next.js |
 | **Lecciones** | Microlecciones de 5, 10 o 15 minutos |
-| **Estilo visual** | Pixel Art 2D de 16 bits, original |
+| **Estilo visual** | Pixel Art 2D original: sprites de 32×32 con sombreado al estilo de los clásicos de 16 bits |
 | **Progreso** | XP, niveles, NovaCoins y eras |
 
 **Pensado para:** niñas, niños y adolescentes que descubren la tecnología; estudiantes; adultos que cambian de profesión; aspirantes a desarrollador web Junior; y cualquiera que quiera construir proyectos propios.

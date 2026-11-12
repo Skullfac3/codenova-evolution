@@ -38,7 +38,8 @@ export const itemById = (id: string) => ITEMS.find((i) => i.id === id);
 // ── Mundo ──
 export const COLS = 10;
 export const ROWS = 9;
-export const TILE = 16;
+/** Lado de una casilla en píxeles: igual al de un sprite (32x32). */
+export const TILE = 32;
 
 /** Eras con mundo dibujado. */
 export const WORLD_ERAS = [1, 2] as const;

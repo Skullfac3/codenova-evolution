@@ -3,7 +3,7 @@ import { useProgress } from '../store/progress';
 import { protoSay } from '../store/proto';
 import { PROTO_FUTURE_NOTE, PROTO_STAGES, stageForEra } from '../game/proto';
 import { COLS, ITEMS, LANDMARK, ROWS, TILE, WORLD_ERAS, isLandmarkTile, itemById } from '../game/items';
-import { OUTFIT_COLORS, drawHut, drawTemple, drawTile, spriteCanvas, type SpriteKey, type TileKind } from '../game/sprites';
+import { OUTFIT_COLORS, drawGrassEdge, drawHut, drawTemple, drawTile, spriteCanvas, type SpriteKey, type TileKind, type TileSide } from '../game/sprites';
 import { availableCount, equipOutfit, placeObject, removeObjectAt, transferPet, transferablePets } from '../game/economy';
 import { ERAS } from '../learning/catalog';
 import { SpriteIcon } from './SpriteIcon';
@@ -48,7 +48,16 @@ function renderBackground(era: number): HTMLCanvasElement {
   const ctx = cv.getContext('2d')!;
   let seed = 1234 + era * 99;
   const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
-  terrainFor(era).forEach((row, y) => row.forEach((kind, x) => drawTile(ctx, kind, x * TILE, y * TILE, rand)));
+  const terrain = terrainFor(era);
+  terrain.forEach((row, y) => row.forEach((kind, x) => drawTile(ctx, kind, x * TILE, y * TILE, rand)));
+  // El pasto invade el borde de los senderos y las losas vecinas.
+  const sides: [TileSide, number, number][] = [['N', 0, -1], ['S', 0, 1], ['O', -1, 0], ['E', 1, 0]];
+  terrain.forEach((row, y) => row.forEach((kind, x) => {
+    if (kind === 'pasto') return;
+    for (const [side, dx, dy] of sides) {
+      if (terrain[y + dy]?.[x + dx] === 'pasto') drawGrassEdge(ctx, side, x * TILE, y * TILE);
+    }
+  }));
   if (era === 1) drawHut(ctx, LANDMARK.x * TILE, LANDMARK.y * TILE);
   else drawTemple(ctx, LANDMARK.x * TILE, LANDMARK.y * TILE);
   return cv;
@@ -69,7 +78,7 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
   const modeRef = useRef(mode);
   modeRef.current = mode;
 
-  const explorer = useRef<Walker>({ x: 4 * TILE, y: 4 * TILE, tx: 4 * TILE, ty: 4 * TILE, speed: 48, frame: 0, nextWander: Infinity });
+  const explorer = useRef<Walker>({ x: 4 * TILE, y: 4 * TILE, tx: 4 * TILE, ty: 4 * TILE, speed: 96, frame: 0, nextWander: Infinity });
   const pets = useRef(new Map<string, Walker>());
 
   const petsHere = save.pets.filter((p) => p.currentEra === era);
@@ -108,7 +117,7 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
         if (!pets.current.has(p.id)) {
           const x = (4 + Math.floor(Math.random() * 5)) * TILE;
           const y = (3 + Math.floor(Math.random() * 5)) * TILE;
-          pets.current.set(p.id, { x, y, tx: x, ty: y, speed: 18, frame: 0, nextWander: now + 500 });
+          pets.current.set(p.id, { x, y, tx: x, ty: y, speed: 36, frame: 0, nextWander: now + 500 });
         }
         const w = pets.current.get(p.id)!;
         if (now > w.nextWander) {
@@ -141,8 +150,9 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
       // Sombra pixelada bajo cada objeto: lo separa del suelo.
       const shadow = (x: number, y: number) => {
         ctx.fillStyle = 'rgba(20,10,30,.28)';
-        ctx.fillRect(x + 4, y + 14, 8, 2);
-        ctx.fillRect(x + 3, y + 15, 10, 1);
+        ctx.fillRect(x + 8, y + 27, 16, 5);
+        ctx.fillRect(x + 6, y + 28, 20, 3);
+        ctx.fillRect(x + 10, y + 26, 12, 1);
       };
       type Drawable = { y: number; draw: () => void };
       const list: Drawable[] = [];
