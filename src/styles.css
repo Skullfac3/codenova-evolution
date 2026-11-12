@@ -72,6 +72,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   font-family: var(--pixel); font-size: 11px;
 }
 .hud .brand { color: var(--fire); margin-right: auto; font-size: 12px; }
+.hud-btn { background: var(--panel); border: 2px solid var(--line); min-width: 40px; min-height: 36px; cursor: pointer; font-size: 16px; }
+.hud-btn:focus-visible { outline: 3px solid var(--fire-2); }
 .hud span:not(.brand) { background: var(--panel); padding: 6px 8px; border: 2px solid var(--line); }
 
 h1, h2, h3 { font-family: var(--pixel); line-height: 1.5; font-weight: 400; }

@@ -3,8 +3,10 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles.css';
 import { startPwa } from './pwa';
+import { unlockAudioOnFirstTouch } from './game/sound';
 
 startPwa();
+unlockAudioOnFirstTouch();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

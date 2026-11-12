@@ -3,6 +3,7 @@ import type { Exercise, RunResult } from '../types/lesson';
 import { validateHtml, validateWithTests, type ValidationResult } from '../learning/validate';
 import { CodeSandbox } from '../editor/sandbox';
 import { protoSay } from '../store/proto';
+import { play } from '../game/sound';
 
 /**
  * El editor (CodeMirror + lenguajes + autocompletado) es el trozo más
@@ -44,6 +45,7 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
       const v = validateHtml(exercise, code);
       setPreviewCode(code);
       setValidation(v);
+      play(v.passed ? 'success' : 'error');
       if (v.passed) protoSay('¡Se ve muy bien! 🎉', 'happy', 3000);
       else protoSay('Casi… revisa lo que te marqué.', 'sad', 3500);
       setRunning(false);
@@ -53,6 +55,7 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
     setResult(r);
     const v = await validateWithTests(exercise, code, r, (c) => sandbox.run(c));
     setValidation(v);
+    play(v.passed ? 'success' : 'error');
     if (v.passed) protoSay('¡Funciona! 🎉', 'happy', 3000);
     else protoSay(r.error || r.timedOut ? '¡Uy! Hubo un error. Lee la explicación.' : 'Casi… revisa lo que te marqué.', 'sad', 3500);
     setRunning(false);
@@ -84,6 +87,7 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
           onClick={() => {
             const n = Math.min(hintsShown + 1, exercise.hints.length);
             setHintsShown(n);
+            play('hint');
             protoSay(exercise.hints[n - 1]!, 'talking', 7000);
           }}
           disabled={hintsShown >= exercise.hints.length}
