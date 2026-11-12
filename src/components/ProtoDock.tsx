@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { drawProto, stageForEra, type ProtoFrame, type ProtoLook } from '../game/proto';
 import { tipFor, useProto } from '../store/proto';
 import { useProgress } from '../store/progress';
+import { play } from '../game/sound';
 
 const LOOKS: ProtoLook[] = ['center', 'left', 'right', 'up', 'center'];
 
@@ -89,7 +90,7 @@ export function ProtoDock() {
         className={`proto-bot mood-${mood}`}
         aria-label="Proto-0: tócame para un consejo"
         data-testid="proto-bot"
-        onClick={() => say(tipFor(era), 'talking', 5000)}
+        onClick={() => { play('blip'); say(tipFor(era), 'talking', 5000); }}
       >
         <canvas ref={canvas} width={32} height={32} />
         <span className="proto-name">Proto-0 · {stage.name}</span>

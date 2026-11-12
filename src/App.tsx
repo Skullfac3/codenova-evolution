@@ -5,6 +5,7 @@ import type { Lesson } from './types/lesson';
 import { levelForXp, useProgress } from './store/progress';
 import { APP_VERSION } from './version';
 import { onUpdateAvailable } from './pwa';
+import { isMuted, play, setMuted } from './game/sound';
 import { Habitat } from './components/Habitat';
 import { ProtoDock } from './components/ProtoDock';
 
@@ -28,6 +29,7 @@ const TABS: Array<{ id: Tab; icon: string; label: string }> = [
 export default function App() {
   const save = useProgress((s) => s.save);
   const isEraComplete = useProgress((s) => s.isEraComplete);
+  const [muted, setMutedState] = useState(isMuted());
   const isEraUnlocked = useProgress((s) => s.isEraUnlocked);
   const resetProgress = useProgress((s) => s.resetProgress);
   const [tab, setTab] = useState<Tab>('refugio');
@@ -78,6 +80,15 @@ export default function App() {
         <span data-testid="hud-level">Nv {levelForXp(save.xp)}</span>
         <span data-testid="hud-xp">{save.xp} XP</span>
         <span data-testid="hud-coins">🪙 {save.novacoins}</span>
+        <button
+          className="hud-btn"
+          onClick={() => { setMuted(!muted); setMutedState(!muted); if (muted) play('blip'); }}
+          aria-label={muted ? 'Activar sonido' : 'Silenciar'}
+          aria-pressed={muted}
+          data-testid="btn-sound"
+        >
+          {muted ? '🔇' : '🔊'}
+        </button>
       </header>
 
       <main>
