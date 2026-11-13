@@ -25,8 +25,8 @@ export const ALL_GRIDS: Record<string, string[]> = { ...RAW_SPRITES, ...RAW_TILE
  * Las letras V, U, T y t están reservadas para la túnica en la paleta.
  */
 export const OUTFIT_COLORS: Record<string, Record<string, string>> = {
-  'outfit-piel': { V: '#4a2f16', U: '#6e4824', T: '#9a6a3a', t: '#c08e58' },
-  'outfit-toga': { V: '#9c917f', U: '#c9bfae', T: '#f2ece0', t: '#ffffff' },
+  'outfit-piel': { V: '#4a2f14', U: '#6e4824', T: '#9a6a3a', t: '#c08a4e' },
+  'outfit-toga': { V: '#a3967f', U: '#c9bfae', T: '#f2ece0', t: '#ffffff' },
 };
 
 const cache = new Map<string, HTMLCanvasElement>();
