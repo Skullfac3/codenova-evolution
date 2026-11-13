@@ -195,10 +195,10 @@ test.describe('Ruta completa: HTML, CSS y luego JavaScript', () => {
     expect(await hud(page)).toEqual({ xp: '530 XP', coins: '🪙 280', level: 'Nv 3' });
     await page.getByTestId('tab-lecciones').click();
 
-    // ── Segunda parte de JavaScript (14 lecciones) ──
+    // ── Segunda parte de JavaScript (18 lecciones) ──
     xp = await completeEra(page, era3Lessons.slice(7), 'era3b', xp, true);
-    expect(xp).toBe(885); // Era 1 (170) + Era 2 (190) + Era 3 primera parte (170) + segunda parte (355)
-    expect(await hud(page)).toEqual({ xp: '885 XP', coins: '🪙 485', level: 'Nv 3' });
+    expect(xp).toBe(965); // Era 1 (170) + Era 2 (190) + Era 3 primera parte (170) + segunda parte (435)
+    expect(await hud(page)).toEqual({ xp: '965 XP', coins: '🪙 525', level: 'Nv 4' });
     await expect(page.getByTestId('era-unlocked')).toHaveAttribute('data-era', '4');
 
     await page.getByTestId('btn-next-lesson').click();
@@ -207,18 +207,18 @@ test.describe('Ruta completa: HTML, CSS y luego JavaScript', () => {
     for (const l of era3Lessons) await expect(page.getByTestId(`lesson-${l.id}`)).toHaveAttribute('data-state', 'done');
     await shot(page, '07-mapa-completo');
 
-    // La partida está lista para sincronizar con Supabase: 36 eventos únicos (7 de HTML + 8 de CSS + 21 de JavaScript).
+    // La partida está lista para sincronizar con Supabase: 40 eventos únicos (7 de HTML + 8 de CSS + 25 de JavaScript).
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('codenova:save')!));
     expect(saved.unlockedEras).toEqual([1, 2, 3, 4]);
-    expect(saved.pendingSync).toHaveLength(36);
-    expect(new Set(saved.pendingSync.map((e: { eventId: string }) => e.eventId)).size).toBe(36);
+    expect(saved.pendingSync).toHaveLength(40);
+    expect(new Set(saved.pendingSync.map((e: { eventId: string }) => e.eventId)).size).toBe(40);
 
     // Repetir una lección no da recompensa doble.
     await page.getByTestId(`lesson-${era3Lessons[7]!.id}`).click();
     await page.getByTestId('btn-start').click();
     await solveCurrentExercise(page);
     await expect(page.getByTestId('reward')).toHaveAttribute('data-awarded', 'false');
-    await expect(page.getByTestId('hud-xp')).toHaveText('885 XP');
+    await expect(page.getByTestId('hud-xp')).toHaveText('965 XP');
   });
 
   test('las pruebas ocultas detectan una función que imprime la respuesta a mano', async ({ page }) => {

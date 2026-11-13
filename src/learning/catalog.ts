@@ -668,12 +668,85 @@ export const ERAS: EraMeta[] = [
           xp: 20,
           coins: 10
         },
+        next: "e3-22-manejo-errores"
+      },
+      {
+        id: "e3-22-manejo-errores",
+        era: 3,
+        order: 21,
+        kind: "lesson",
+        title: "Manejo de errores: que nada se rompa",
+        topics: [
+          "errores",
+          "try-catch",
+          "throw",
+          "depuracion"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
+        next: "e3-23-clases"
+      },
+      {
+        id: "e3-23-clases",
+        era: 3,
+        order: 22,
+        kind: "lesson",
+        title: "Clases: moldes para objetos",
+        topics: [
+          "clases",
+          "constructor",
+          "metodos",
+          "this"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
+        next: "e3-24-modulos"
+      },
+      {
+        id: "e3-24-modulos",
+        era: 3,
+        order: 23,
+        kind: "lesson",
+        title: "Módulos: cada pieza en su archivo",
+        topics: [
+          "modulos",
+          "import",
+          "export",
+          "modularidad"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
+        next: "e3-25-proyecto-final"
+      },
+      {
+        id: "e3-25-proyecto-final",
+        era: 3,
+        order: 24,
+        kind: "lesson",
+        title: "Proyecto final: tu mini app",
+        topics: [
+          "proyecto-final",
+          "html",
+          "css",
+          "javascript",
+          "integradora"
+        ],
+        reward: {
+          xp: 20,
+          coins: 10
+        },
         next: "e3-15-evaluacion"
       },
       {
         id: "e3-15-evaluacion",
         era: 3,
-        order: 21,
+        order: 25,
         kind: "evaluation",
         title: "Evaluación final · JavaScript",
         topics: [

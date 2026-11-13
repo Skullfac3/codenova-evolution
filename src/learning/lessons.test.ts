@@ -85,7 +85,7 @@ describe('estructura de las eras', () => {
   });
 
   it('las 7 microlecciones de HTML están publicadas en la Era 1', () => {
-    expect(allLessons).toHaveLength(36);
+    expect(allLessons).toHaveLength(40);
     expect(ERAS.find((e) => e.id === 1)!.lessons).toHaveLength(7);
   });
 
@@ -93,8 +93,8 @@ describe('estructura de las eras', () => {
     expect(ERAS.find((e) => e.id === 2)!.lessons).toHaveLength(8);
   });
 
-  it('las 21 microlecciones de JavaScript están publicadas en la Era 3', () => {
-    expect(ERAS.find((e) => e.id === 3)!.lessons).toHaveLength(21);
+  it('las 25 microlecciones de JavaScript están publicadas en la Era 3', () => {
+    expect(ERAS.find((e) => e.id === 3)!.lessons).toHaveLength(25);
   });
 
   it('las eras 4 y 5 están anunciadas sin lecciones todavía', () => {
