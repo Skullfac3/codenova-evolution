@@ -19,6 +19,10 @@ import { lesson as l16 } from './08-el-dom';
 import { lesson as l17 } from './09-eventos';
 import { lesson as l18 } from './10-json-fetch';
 import { lesson as l19 } from './11-promesas-async';
+import { lesson as l22 } from './14-manejo-errores';
+import { lesson as l23 } from './15-clases';
+import { lesson as l24 } from './16-modulos';
+import { lesson as l25 } from './17-proyecto-final';
 import { lesson as l15 } from './08-evaluacion';
 
 /**
@@ -30,4 +34,4 @@ import { lesson as l15 } from './08-evaluacion';
  * JSON/fetch, promesas y async/await) van antes de la evaluación
  * final, que sigue cerrando la era por ahora.
  */
-export const era3Lessons: Lesson[] = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l20, l21, l16, l17, l18, l19, l15];
+export const era3Lessons: Lesson[] = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l20, l21, l16, l17, l18, l19, l22, l23, l24, l25, l15];

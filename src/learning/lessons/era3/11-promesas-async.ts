@@ -191,5 +191,5 @@ sumar(3, 4).then(function (r) {
     retry: 'El orden no salió. Revisa que cada await esperar(...) esté antes del mensaje siguiente.',
   },
   reward: { xp: 20, coins: 10 },
-  next: 'e3-15-evaluacion',
+  next: 'e3-22-manejo-errores',
 };

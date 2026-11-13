@@ -55,13 +55,13 @@ test.describe('Era 3 · Medio', () => {
     await expect(page.getByTestId('reward')).toHaveAttribute('data-awarded', 'true');
   }
 
-  test('el mapa muestra la Era 3 con 21 lecciones y Medio bloqueado', async ({ page }) => {
+  test('el mapa muestra la Era 3 con 25 lecciones y Medio bloqueado', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('tab-lecciones').click();
     await expect(page.getByTestId('era-1')).toHaveAttribute('data-state', 'done');
     await expect(page.getByTestId('era-2')).toHaveAttribute('data-state', 'done');
     await expect(page.getByTestId('era-3')).toHaveAttribute('data-state', 'open');
-    await expect(page.getByTestId('era-3')).toContainText('Progreso: 13 de 21');
+    await expect(page.getByTestId('era-3')).toContainText('Progreso: 13 de 25');
     await expect(page.getByTestId(`lesson-${objetos.id}`)).toHaveAttribute('data-state', 'open');
     for (const l of medioLessons) {
       await expect(page.getByTestId(`lesson-${l.id}`)).toBeVisible();
@@ -91,6 +91,6 @@ test.describe('Era 3 · Medio', () => {
     await expect(page.getByTestId('hud-xp')).toHaveText('745 XP');
     await page.getByTestId('btn-exit').click();
     await expect(page.getByTestId(`lesson-${dom.id}`)).toHaveAttribute('data-state', 'open');
-    await expect(page.getByTestId('era-3')).toContainText('Progreso: 16 de 21');
+    await expect(page.getByTestId('era-3')).toContainText('Progreso: 16 de 25');
   });
 });

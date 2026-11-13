@@ -18,6 +18,9 @@ const newLessons = ['e3-16-el-dom', 'e3-17-eventos', 'e3-18-json-fetch', 'e3-19-
 const medioLessons = ['e3-20-metodos-arreglos', 'e3-21-desestructuracion'].map(
   (id) => era3Lessons.find((l) => l.id === id)!,
 );
+const avanzadoLessons = ['e3-22-manejo-errores', 'e3-23-clases', 'e3-24-modulos', 'e3-25-proyecto-final'].map(
+  (id) => era3Lessons.find((l) => l.id === id)!,
+);
 const objetos = era3Lessons.find((l) => l.id === 'e3-14-objetos')!;
 const evaluacion = era3Lessons.find((l) => l.id === 'e3-15-evaluacion')!;
 
@@ -58,13 +61,13 @@ test.describe('Era 3 · Medio avanzado', () => {
     await expect(page.getByTestId('reward')).toHaveAttribute('data-awarded', 'true');
   }
 
-  test('el mapa muestra la Era 3 con 21 lecciones y Medio avanzado bloqueado', async ({ page }) => {
+  test('el mapa muestra la Era 3 con 25 lecciones y Medio avanzado bloqueado', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('tab-lecciones').click();
     await expect(page.getByTestId('era-1')).toHaveAttribute('data-state', 'done');
     await expect(page.getByTestId('era-2')).toHaveAttribute('data-state', 'done');
     await expect(page.getByTestId('era-3')).toHaveAttribute('data-state', 'open');
-    await expect(page.getByTestId('era-3')).toContainText('Progreso: 13 de 21');
+    await expect(page.getByTestId('era-3')).toContainText('Progreso: 13 de 25');
     await expect(page.getByTestId(`lesson-${objetos.id}`)).toHaveAttribute('data-state', 'open');
     for (const l of [...medioLessons, ...newLessons, evaluacion]) {
       await expect(page.getByTestId(`lesson-${l.id}`)).toBeVisible();
@@ -82,7 +85,7 @@ test.describe('Era 3 · Medio avanzado', () => {
     await expect(page.getByTestId(`lesson-${medioLessons[0]!.id}`)).toHaveAttribute('data-state', 'open');
   });
 
-  test('completar Medio y Medio avanzado abre la evaluación final', async ({ page }) => {
+  test('completar Medio, Medio avanzado y Avanzado abre la evaluación final', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('tab-lecciones').click();
     await page.getByTestId(`lesson-${objetos.id}`).click();
@@ -95,9 +98,13 @@ test.describe('Era 3 · Medio avanzado', () => {
       await page.getByTestId('btn-next-lesson').click();
       await solveLesson(page, lesson);
     }
-    await expect(page.getByTestId('hud-xp')).toHaveText('825 XP');
+    for (const lesson of avanzadoLessons) {
+      await page.getByTestId('btn-next-lesson').click();
+      await solveLesson(page, lesson);
+    }
+    await expect(page.getByTestId('hud-xp')).toHaveText('905 XP');
     await page.getByTestId('btn-exit').click();
     await expect(page.getByTestId(`lesson-${evaluacion.id}`)).toHaveAttribute('data-state', 'open');
-    await expect(page.getByTestId('era-3')).toContainText('Progreso: 20 de 21');
+    await expect(page.getByTestId('era-3')).toContainText('Progreso: 24 de 25');
   });
 });
