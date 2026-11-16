@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useProgress } from '../store/progress';
 import { loadAllProfileSaves } from '../services/storage/profiles';
 import { itemById } from '../game/items';
+import { PROTO_FUTURE_NOTE, PROTO_STAGES, stageForEra } from '../game/proto';
 import { ERAS } from '../learning/catalog';
 
 /**
@@ -100,6 +101,35 @@ export function Profiles() {
               </li>
             ))}
           </ul>
+          <h2>Evolución de Proto-0 por perfil</h2>
+          {allSaves.map(({ profile, save: s }) => {
+            // Misma lógica que el Refugio (Habitat.tsx): la era más alta
+            // desbloqueada hasta la 3, que es donde llegan las lecciones.
+            const protoEra = Math.max(...s.unlockedEras.filter((e) => e <= 3));
+            return (
+              <div key={profile.id} data-testid={`admin-proto-${profile.id}`}>
+                <strong>{profile.name}</strong>
+                <ul className="proto-stages">
+                  {PROTO_STAGES.map((stage) => {
+                    const current = stage.era === stageForEra(protoEra).era;
+                    const unlocked = stage.era <= protoEra;
+                    return (
+                      <li
+                        key={stage.era}
+                        data-testid={`admin-proto-${profile.id}-stage-${stage.era}`}
+                        data-state={current ? 'current' : unlocked ? 'unlocked' : 'locked'}
+                      >
+                        <strong>{stage.name}</strong>
+                        {current ? ' · etapa actual' : unlocked ? '' : ' · llega pronto'}
+                        <small>{stage.description}</small>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
+          <p className="muted">{PROTO_FUTURE_NOTE}</p>
         </div>
       ) : (
         <p className="muted">

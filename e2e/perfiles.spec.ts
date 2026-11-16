@@ -25,6 +25,23 @@ test.describe('Perfiles: Administrador y Pruebas', () => {
     }
   });
 
+  test('el Administrador ve la evolución de Proto-0 de cada perfil', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('tab-perfiles').click();
+    await page.getByTestId('btn-switch-admin').click();
+    await expect(page.getByTestId('admin-panel')).toBeVisible();
+
+    // Administrador: todo desbloqueado → v2 Guardián es su etapa actual.
+    await expect(page.getByTestId('admin-proto-admin-stage-2')).toHaveAttribute('data-state', 'current');
+    await expect(page.getByTestId('admin-proto-admin-stage-2')).toContainText('v2 Guardián');
+    await expect(page.getByTestId('admin-proto-admin-stage-2')).toContainText('etapa actual');
+    // Pruebas: recién empieza → v1 Explorador actual, v2 Guardián bloqueada.
+    await expect(page.getByTestId('admin-proto-pruebas-stage-1')).toHaveAttribute('data-state', 'current');
+    await expect(page.getByTestId('admin-proto-pruebas-stage-1')).toContainText('v1 Explorador');
+    await expect(page.getByTestId('admin-proto-pruebas-stage-2')).toHaveAttribute('data-state', 'locked');
+    await expect(page.getByTestId('admin-proto-pruebas-stage-2')).toContainText('llega pronto');
+  });
+
   test('lo que compra el perfil de Pruebas lo ve el Administrador', async ({ page }) => {
     await page.goto('/');
     // Pruebas es el perfil activo al inicio.
