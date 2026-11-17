@@ -31,6 +31,12 @@ export interface SaveV3 {
   admin?: boolean;
   /** Historial de compras en la tienda (lo ve el Administrador). */
   purchases?: Array<{ id: string; itemId: string; price: number; at: string }>;
+  /** Ayudas de Proto-0 pagadas con NovaCoins (Proto escribe la solución de un reto). */
+  helpPurchases?: Array<{ exerciseId: string; price: number; at: string }>;
+  /** Regalos de NovaCoins recibidos por quedarse sin saldo para pedir ayuda. */
+  gifts?: Array<{ coins: number; at: string }>;
+  /** Desde cuándo el saldo no alcanza para la ayuda; el regalo llega 30 min después. */
+  lowCoinsSince?: string;
   /** Recompensas completadas sin conexión, pendientes de enviar a Supabase. */
   pendingSync: Array<{ lessonId: string; score: number; eventId: string }>;
   updatedAt: string;

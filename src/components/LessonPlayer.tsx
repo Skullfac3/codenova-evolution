@@ -124,6 +124,7 @@ export function LessonPlayer({ lesson, onExit, onNext }: Props) {
             label={isEval ? 'Ejercicio práctico' : step.index === 0 ? 'Reto principal' : `Reto extra ${step.index}`}
             messages={lesson.feedback}
             rewardLabel={`+${lesson.reward.xp} XP · +${lesson.reward.coins} NovaCoins`}
+            allowPaidHelp={!isEval}
             onPassed={(h) => {
               const total = hintsUsed + h;
               setHintsUsed(total);

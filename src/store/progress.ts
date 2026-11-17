@@ -10,7 +10,7 @@ import {
   type ProfilesState,
 } from '../services/storage/profiles';
 import { ERAS, findLesson, lessonsOfEra } from '../learning/catalog';
-import type { Result } from '../game/economy';
+import { claimGift, type Result } from '../game/economy';
 
 /** Igual que public.level_for_xp() en Supabase. */
 export const levelForXp = (xp: number) => Math.floor(Math.sqrt(Math.max(xp, 0) / 100)) + 1;
@@ -34,6 +34,8 @@ interface ProgressStore {
   resetProgress: () => void;
   /** Aplica una acción del refugio o la tienda (reglas en game/economy.ts) y guarda si funcionó. */
   act: (action: (save: Save) => Result) => Result;
+  /** Revisa el regalo de NovaCoins; devuelve cuántas se regalaron (0 si ninguna). */
+  tickGift: (now?: Date) => number;
 }
 
 const eraDone = (save: Save, era: number) => {
@@ -141,6 +143,13 @@ export const useProgress = create<ProgressStore>((set, get) => {
       const result = action(get().save);
       if (result.ok) set({ save: persist(result.save) });
       return result;
+    },
+
+    tickGift: (now = new Date()) => {
+      const current = get().save;
+      const { save, granted } = claimGift(current, now);
+      if (save !== current) set({ save: persist(save) });
+      return granted;
     },
   };
 });
