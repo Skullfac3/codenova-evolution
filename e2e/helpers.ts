@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 /**
  * Pulsa «Continuar →» sin perder el clic.
@@ -16,7 +16,20 @@ import type { Page } from '@playwright/test';
  */
 export async function clickContinue(page: Page): Promise<void> {
   const button = page.getByTestId('btn-continue');
-  await button.scrollIntoViewIfNeeded();
-  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
-  await button.click();
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    // En el celular, al tocar «Ejecutar» el editor sale del modo escritura y la
+    // pantalla se reacomoda: se espera a que termine para no tocar a mitad del cambio.
+    await page.waitForFunction(() => !document.body.classList.contains('typing'));
+    await button.scrollIntoViewIfNeeded();
+    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+    await button.click();
+    // Si el clic llegó, el botón desaparece (siguiente reto o recompensa). Si el
+    // navegador se lo dio al iframe por error, el botón sigue ahí: se reintenta.
+    try {
+      await expect(button).toBeHidden({ timeout: 1500 });
+      return;
+    } catch (e) {
+      if (attempt === 3) throw e;
+    }
+  }
 }

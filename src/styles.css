@@ -203,7 +203,7 @@ h3 { font-size: 14px; }
 .snip-bar { display: grid; gap: 6px; }
 .snip-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
 .snip {
-  flex: none; font-family: var(--mono); font-size: 14px; min-height: 36px; padding: 4px 10px;
+  flex: none; font-family: var(--mono); font-size: 15px; min-height: 44px; padding: 4px 12px;
   background: var(--panel-2); border: 2px solid var(--line); color: var(--text); cursor: pointer;
   touch-action: manipulation; user-select: none;
 }
@@ -213,8 +213,12 @@ h3 { font-size: 14px; }
 .snip:focus-visible { outline: 3px solid var(--fire-2); outline-offset: 1px; }
 .snip-tip { margin: 0; font-size: 13px; color: var(--muted); }
 .snip-tip code, .snip-tip kbd { font-family: var(--mono); background: var(--code-bg); padding: 0 4px; }
-.editor .cm-tooltip-autocomplete { font-family: var(--mono); background: #fff; border: 2px solid var(--line); }
-.editor .cm-tooltip-autocomplete li[aria-selected] { background: var(--fire); color: #1b1325; }
+.editor .cm-tooltip-autocomplete { font-family: var(--mono); background: #fff; border: 2px solid var(--line); max-width: calc(100vw - 24px); }
+/* Sugerencias del tamaño de un dedo: ~44px por opción, máximo 5 a la vista. */
+.editor .cm-tooltip-autocomplete > ul { max-height: min(224px, 40vh) !important; }
+.editor .cm-tooltip-autocomplete > ul > li { padding: 10px 12px !important; min-height: 44px; box-sizing: border-box; font-size: 16px; line-height: 24px; }
+.editor .cm-tooltip-autocomplete li[aria-selected] { background: var(--fire) !important; color: #1b1325 !important; }
+.editor .cm-tooltip-autocomplete li[aria-selected] .cm-completionDetail { color: #3a2614; }
 .editor .cm-snippetField { background: #ffe2c4; }
 .editor .cm-completionDetail { margin-left: 8px; color: #6b5a7a; font-style: normal; }
 
@@ -344,3 +348,25 @@ h3 { font-size: 14px; }
 .shop-item { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 2px solid var(--line); padding: 10px; }
 .shop-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .shop-item .btn { flex: none; min-width: 84px; }
+
+/* ── Modo escritura en el celular (CodeEditor activa body.typing) ── */
+.snip.run { background: var(--fire); color: var(--bg); border-color: var(--fire); min-width: 48px; font-weight: 800; }
+body.typing .tabbar,
+body.typing .app-footer,
+body.typing .snip-tip { display: none; }
+body.typing .hud { position: static; }
+body.typing .app { padding-bottom: calc(var(--snip-h, 110px) + 16px + env(safe-area-inset-bottom, 0px)); }
+body.typing .snip-bar {
+  position: fixed; left: 0; right: 0; z-index: 30;
+  bottom: var(--kb-offset, 0px);
+  background: var(--bg); border-top: 2px solid var(--line);
+  padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+}
+/* El editor llena lo que queda entre el borde superior y la barra de atajos. */
+body.typing .editor .cm-editor { height: max(150px, calc(var(--vvh, 100dvh) - var(--snip-h, 110px) - 12px)); }
+body.typing .editor .cm-scroller { overflow: auto; }
+/* Proto-0 sigue a la vista para dar pistas, pero en chico y encima de los atajos. */
+body.typing .proto-dock { bottom: calc(var(--kb-offset, 0px) + var(--snip-h, 110px) + 8px); right: 8px; }
+body.typing .proto-bot canvas { width: 44px; height: 44px; opacity: .92; }
+body.typing .proto-name { display: none; }
+body.typing .proto-bubble { max-width: 200px; margin-bottom: 18px; font-size: 13px; }

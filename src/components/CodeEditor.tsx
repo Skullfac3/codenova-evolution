@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { EditorState } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
@@ -110,6 +110,64 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era, language = '
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey, era, language]);
 
+  // ── Modo escritura en el celular ──
+  // Mientras el editor tiene el foco: se ocultan las pestañas y el pie, el
+  // encabezado deja de quedarse fijo, Proto-0 se encoge, la barra de atajos
+  // se pega justo encima del teclado y el editor ocupa el espacio que queda.
+  const wrap = useRef<HTMLDivElement>(null);
+  const bar = useRef<HTMLDivElement>(null);
+  const [typing, setTyping] = useState(false);
+
+  useEffect(() => {
+    if (!typing) return;
+    const root = document.documentElement;
+    const vv = window.visualViewport;
+    document.body.classList.add('typing');
+    const sync = () => {
+      const h = vv?.height ?? window.innerHeight;
+      const kb = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+      root.style.setProperty('--vvh', `${Math.round(h)}px`);
+      root.style.setProperty('--kb-offset', `${Math.round(kb)}px`);
+      root.style.setProperty('--snip-h', `${bar.current?.offsetHeight ?? 0}px`);
+    };
+    sync();
+    // Cuando el teclado termina de abrir, el editor sube al borde superior.
+    const toTop = setTimeout(() => { sync(); host.current?.scrollIntoView({ block: 'start' }); }, 350);
+    vv?.addEventListener('resize', sync);
+    vv?.addEventListener('scroll', sync);
+    window.addEventListener('resize', sync);
+    return () => {
+      clearTimeout(toTop);
+      vv?.removeEventListener('resize', sync);
+      vv?.removeEventListener('scroll', sync);
+      window.removeEventListener('resize', sync);
+      document.body.classList.remove('typing');
+      for (const v of ['--vvh', '--kb-offset', '--snip-h']) root.style.removeProperty(v);
+    };
+  }, [typing]);
+
+  // Solo en pantallas táctiles: en computadora no hay teclado en pantalla que tape nada.
+  const onFocusIn = () => setTyping(window.matchMedia('(pointer: coarse)').matches);
+  // Al tocar un atajo el foco no se pierde. Si se va a otro lado (p. ej. «Ejecutar»),
+  // se sale del modo DESPUÉS de que ese toque termine: si la pantalla cambiara a
+  // mitad del toque, el clic caería en otro elemento y se perdería.
+  const onFocusOut = (e: React.FocusEvent) => {
+    if (wrap.current?.contains(e.relatedTarget as Node | null)) return;
+    let done = false;
+    const exit = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener('click', afterClick, true);
+      clearTimeout(fallback);
+      requestAnimationFrame(() => {
+        if (!wrap.current?.contains(document.activeElement)) setTyping(false);
+      });
+    };
+    const afterClick = () => setTimeout(exit, 0);
+    window.addEventListener('click', afterClick, true);
+    const fallback = setTimeout(exit, 400); // salió sin tocar nada (p. ej. con Tab)
+  };
+
   const insert = (s: Snippet) => {
     const v = view.current;
     if (!v) return;
@@ -167,9 +225,23 @@ export function CodeEditor({ value, onChange, resetKey, onRun, era, language = '
   );
 
   return (
-    <div className="editor-wrap">
-      <div className="snip-bar" role="toolbar" aria-label="Atajos de código">
-        <div className="snip-row">{codeSnippets.map(chip)}</div>
+    <div className="editor-wrap" ref={wrap} onFocus={onFocusIn} onBlur={onFocusOut} data-typing={typing}>
+      <div className="snip-bar" ref={bar} role="toolbar" aria-label="Atajos de código" data-testid="snip-bar">
+        <div className="snip-row">
+          {onRun && (
+            <button
+              type="button"
+              className="snip run"
+              aria-label="Ejecutar código"
+              data-testid="snip-run"
+              onPointerDown={(e) => e.preventDefault()}
+              onClick={() => onRunRef.current?.()}
+            >
+              ▶
+            </button>
+          )}
+          {codeSnippets.map(chip)}
+        </div>
         <div className="snip-row">{symbols.map(chip)}</div>
       </div>
       <div className="editor" ref={host} data-testid="editor" />
