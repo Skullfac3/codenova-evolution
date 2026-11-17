@@ -25,6 +25,9 @@
       .splash-bar span { display: block; height: 100%; width: 40%; background: #7bd389; animation: splash-carga 1.2s ease-in-out infinite alternate; }
       @keyframes splash-carga { from { margin-left: 0; } to { margin-left: 60%; } }
       .splash-text { color: #b9a9c9; font-size: 15px; margin: 0; }
+      .splash-retry { display: none; text-align: center; max-width: 300px; }
+      .splash-retry p { color: #f3e9dc; font-size: 15px; margin: 0 0 12px; }
+      .splash-retry button { font: inherit; font-weight: 800; background: #ff8a3d; color: #1b1325; border: 2px solid #ff8a3d; padding: 12px 20px; min-height: 48px; cursor: pointer; }
     </style>
   </head>
   <body>
@@ -33,9 +36,30 @@
         <div class="splash-logo">CodeNova</div>
         <div class="splash-bar" aria-hidden="true"><span></span></div>
         <p class="splash-text">Cargando tu aventura…</p>
+        <div class="splash-retry" id="splash-retry">
+          <p>Está tardando más de lo normal. Puede ser una versión vieja guardada en el teléfono.</p>
+          <button type="button" id="splash-retry-btn">Reintentar</button>
+        </div>
       </div>
     </div>
     <noscript><p style="color:#f3e9dc;font-family:system-ui,sans-serif;text-align:center;padding:24px">CodeNova necesita JavaScript para jugar.</p></noscript>
+    <script>
+      // Red de seguridad: si a los 12 s la app no arrancó (JS a medio
+      // actualizar, caché vieja del service worker, red lenta), se ofrece
+      // «Reintentar», que borra la caché de la app y recarga. No toca la
+      // partida guardada (localStorage).
+      setTimeout(function () {
+        var retry = document.getElementById('splash-retry');
+        if (!retry || !document.querySelector('#root .splash')) return;
+        retry.style.display = 'block';
+        document.getElementById('splash-retry-btn').onclick = function () {
+          var jobs = [];
+          if ('serviceWorker' in navigator) jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+          if (window.caches) jobs.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+          Promise.all(jobs).catch(function () {}).then(function () { location.reload(); });
+        };
+      }, 12000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

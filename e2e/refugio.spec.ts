@@ -120,7 +120,8 @@ test.describe('Refugio, tienda y Proto-0', () => {
 
     // Mira hacia distintos lados con el tiempo.
     const looks = new Set<string>();
-    for (let i = 0; i < 24 && looks.size < 2; i++) {
+    // Cambia de mirada al azar cada 1.2-3.7 s (y a veces repite): hasta 24 s de margen.
+    for (let i = 0; i < 60 && looks.size < 2; i++) {
       looks.add((await dock.getAttribute('data-look')) ?? '');
       await page.waitForTimeout(400);
     }

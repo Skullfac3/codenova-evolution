@@ -28,7 +28,7 @@ test.describe('Era 3 · Era industrial', () => {
 
     // Abre en la era más reciente, con la fábrica y el aviso de la siguiente era.
     await expect(page.getByTestId('habitat')).toHaveAttribute('data-era', '3');
-    await expect(page.getByTestId('habitat-sub')).toHaveText('Era industrial · La Era digital llega pronto.');
+    await expect(page.getByTestId('habitat-sub')).toHaveText('Era industrial · Pronto: Era digital.');
     await expect(page.getByTestId('proto-dock')).toHaveAttribute('data-stage', '3');
     await expect(page.getByTestId('proto-dock')).toContainText('v3 Ingeniero de vapor');
     await expect.poll(() => protoPixel(page, 12, 20)).toBe('#d9824a');
