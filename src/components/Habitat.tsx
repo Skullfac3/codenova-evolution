@@ -270,7 +270,7 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
   const eraInfo = ERAS.find((e) => e.id === era)!;
   // Aviso de la siguiente era sin refugio, solo en el refugio más reciente.
   const nextWorld = ERAS.find((e) => e.id === Math.max(...worldEras) + 1);
-  const comingNote = era === Math.max(...worldEras) && nextWorld ? ` · La ${nextWorld.name} llega pronto.` : '';
+  const comingNote = era === Math.max(...worldEras) && nextWorld ? ` · Pronto: ${nextWorld.name}.` : '';
   // Era que ve Proto-0: solo 1 y 2 tienen etapa (las eras 3-5 no existen aún).
   const protoEra = Math.max(...save.unlockedEras.filter((e) => e <= 3));
 
