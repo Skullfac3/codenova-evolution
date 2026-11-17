@@ -91,3 +91,27 @@ describe('guardado versionado', () => {
     expect(() => migrate({ version: 99 })).toThrow();
   });
 });
+
+describe('reparar partidas dañadas', () => {
+  it('rellena campos vacíos sin perder lo que sí es válido', async () => {
+    const { migrate } = await import('./save');
+    const s = migrate({
+      version: 3, explorerName: 'Ana', avatar: 'explorer-01', xp: 120, novacoins: 7, currentEra: 2, unlockedEras: [1, 2],
+      completedLessons: null, worlds: { 1: null, 2: { objects: [{ id: 'deco-fogata', x: 1, y: 3 }] } }, inventory: null, pets: null,
+      pendingSync: null, updatedAt: '2026-11-17T00:00:00Z',
+    });
+    expect(s.completedLessons).toEqual({});
+    expect(s.inventory).toEqual({});
+    expect(s.pets).toEqual([]);
+    expect(s.pendingSync).toEqual([]);
+    expect(s.worlds[1]).toEqual({ objects: [] });
+    expect(s.worlds[2]!.objects).toHaveLength(1);
+    expect([s.explorerName, s.xp, s.novacoins, s.unlockedEras]).toEqual(['Ana', 120, 7, [1, 2]]);
+  });
+
+  it('una partida sana queda igual', async () => {
+    const { migrate, createEmptySave } = await import('./save');
+    const ok = { ...createEmptySave(), xp: 50, novacoins: 9, completedLessons: { a: { score: 90, completedAt: 'x', eventId: 'y' } } };
+    expect(migrate(JSON.parse(JSON.stringify(ok)))).toEqual(ok);
+  });
+});
