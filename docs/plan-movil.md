@@ -1,7 +1,10 @@
 # Plan móvil: CodeNova en Android e iOS con Capacitor
 
-> Estado: plan, sin implementar. La web actual ya es una PWA instalable;
-> este plan la empaqueta como app nativa sin reescribirla.
+> Estado: Fases 1 y 2 completadas el 2026-11-15 en la rama `feat/movil-android`
+> (Capacitor 8.6.2, proyecto `android/` generado y sincronizado, iconos y splash
+> Android generados). Pendiente: probar en dispositivo real y compilar el APK/AAB
+> (no hay Android Studio/SDK en la máquina de desarrollo). iOS queda para después:
+> Erick no tiene Mac.
 
 ## Idea en una línea
 
