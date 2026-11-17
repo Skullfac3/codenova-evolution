@@ -32,7 +32,7 @@ test.describe('Versión y evolución de Proto-0', () => {
     await expect(page.getByTestId('proto-dock')).toContainText('Proto-0 · v1 Explorador');
   });
 
-  test('con el Administrador la etapa es v2 Guardián', async ({ page }) => {
+  test('con el Administrador la etapa es v3 Ingeniero de vapor', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('tab-perfiles').click();
     await page.getByTestId('btn-switch-admin').click();
@@ -40,10 +40,11 @@ test.describe('Versión y evolución de Proto-0', () => {
     await page.getByTestId('tab-refugio').click();
     const panel = page.getByTestId('proto-evolution');
     await expect(panel).toBeVisible();
-    await expect(page.getByTestId('proto-stage-2')).toHaveAttribute('data-state', 'current');
+    await expect(page.getByTestId('proto-stage-2')).toHaveAttribute('data-state', 'unlocked');
     await expect(page.getByTestId('proto-stage-2')).toContainText('v2 Guardián');
-    await expect(page.getByTestId('proto-stage-2')).toContainText(/gema azul/i);
-    await expect(page.getByTestId('proto-stage-2')).toContainText(/banda dorada/i);
-    await expect(page.getByTestId('proto-dock')).toContainText('Proto-0 · v2 Guardián');
+    await expect(page.getByTestId('proto-stage-3')).toHaveAttribute('data-state', 'current');
+    await expect(page.getByTestId('proto-stage-3')).toContainText('v3 Ingeniero de vapor');
+    await expect(page.getByTestId('proto-stage-3')).toContainText(/goggles/i);
+    await expect(page.getByTestId('proto-dock')).toContainText('Proto-0 · v3 Ingeniero de vapor');
   });
 });

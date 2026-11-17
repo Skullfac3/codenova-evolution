@@ -10,6 +10,19 @@ const LOOKS: ProtoLook[] = ['center', 'left', 'right', 'up', 'center'];
  * Proto-0 vive abajo a la derecha: parpadea, mira a su alrededor,
  * reacciona a lo que haces y da consejos al tocarlo.
  */
+/** Lo que dice Proto-0 al evolucionar por desbloquear una era. */
+const UNLOCK_MSG: Record<number, string> = {
+  2: '¡Evolucioné! Mira mi gema azul y mi banda dorada.',
+  3: '¡Evolucioné otra vez! Ahora soy de cobre, con engranes y vapor.',
+};
+
+/** Lo que dice Proto-0 al cambiar de aspecto con el selector de era. */
+const MORPH_MSG: Record<number, string> = {
+  1: 'Así me veía en la Prehistoria: gris, oxidado y con ojos naranjas.',
+  2: '¡Forma Guardián! Bronce pulido, ojos azules y laureles.',
+  3: '¡Forma Ingeniero de vapor! Cobre, goggles y engranes que giran.',
+};
+
 export function ProtoDock() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -40,9 +53,9 @@ export function ProtoDock() {
   const prevEra = useRef(era);
   useEffect(() => {
     if (era > prevEra.current) setViewEra(null); // una era nueva: Proto-0 muestra su etapa más reciente
-    if (prevEra.current === 1 && era === 2) {
+    if (era > prevEra.current && UNLOCK_MSG[era]) {
       justUnlocked.current = true;
-      say('¡Evolucioné! Mira mi gema azul y mi banda dorada.', 'happy', 6000);
+      say(UNLOCK_MSG[era]!, 'happy', 6000);
     }
     prevEra.current = era;
   }, [era, say, setViewEra]);
@@ -57,8 +70,7 @@ export function ProtoDock() {
     setMorphing(true);
     play(to > from ? 'evolve' : 'hint');
     if (justUnlocked.current) justUnlocked.current = false;
-    else if (to > from) say('¡Forma Guardián! Bronce pulido, ojos azules y laureles.', 'surprised', 4500);
-    else say('Así me veía en la Prehistoria: gris, oxidado y con ojos naranjas.', 'surprised', 4500);
+    else say(MORPH_MSG[to] ?? MORPH_MSG[1]!, 'surprised', 4500);
     const swap = setTimeout(() => { drawnEra.current = to; }, 280);
     const end = setTimeout(() => setMorphing(false), 900);
     return () => { clearTimeout(swap); clearTimeout(end); drawnEra.current = to; };

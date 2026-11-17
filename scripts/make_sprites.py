@@ -39,6 +39,11 @@ R = {  # rampas: oscuro -> claro
  'dirt':['#5c3a24','#7a5033','#9c6b43','#b88456','#d4a474'],
  'straw':['#6e5420','#a8822f','#c9a24a','#e2bf5e','#f5dd8a'],
  'dark':['#120b18','#2a1a12','#2f2838'],
+ 'brick':['#4a1a16','#7a2c22','#a8422e','#c86444','#e8936e'],
+ 'iron':['#1f1c26','#3e3948','#5e5868','#8a8496','#b8b2c4'],
+ 'cob': ['#2e2a33','#4e4754','#706776','#958b9a','#bdb3c0'],
+ 'iri': ['#2f6e58','#4f9a7a','#6a4a8a','#9a72b8'],
+ 'tin': ['#4a5560','#6e7a86','#97a3ae','#c2ccd4','#eef3f6'],
 }
 # La túnica usa letras fijas: el atuendo equipado las recolorea (ver OUTFIT_COLORS).
 PINNED = {('tun', 0): 'V', ('tun', 1): 'U', ('tun', 2): 'T', ('tun', 3): 't', ('k', 0): 'k'}
@@ -673,19 +678,293 @@ def templo():
     s.outline()
     return s
 
+# ═════════ Era 3: Era industrial ═════════
+
+def adoquin(seed=4):
+    """Empedrado de piedras redondeadas con juntas oscuras."""
+    rnd = random.Random(seed)
+    s = Spr(); s.rect(0, 0, 31, 31, 'cob', 1)
+    rows = [(0, 5), (5, 5), (10, 6), (16, 5), (21, 5), (26, 6)]
+    for r, (y0, h) in enumerate(rows):
+        x = -rnd.randrange(0, 5) if r % 2 else -2
+        while x < 32:
+            w = rnd.choice((6, 7, 7, 8))
+            base = rnd.choice((2, 3, 3, 2, 3))
+            for yy in range(y0, y0 + h - 1):
+                for xx in range(x, x + w - 1):
+                    if (xx in (x, x + w - 2)) and (yy in (y0, y0 + h - 2)): continue   # esquinas redondeadas
+                    t = base
+                    if yy == y0 or xx == x: t = min(4, base + 1)                      # luz arriba-izquierda
+                    if yy == y0 + h - 2 or xx == x + w - 2: t = max(2, base - 1)
+                    s.put(xx % 32, yy % 32, 'cob', t)
+            x += w
+    for _ in range(4):  # brotes de pasto en las juntas
+        x, y = rnd.randrange(32), rnd.choice((4, 9, 15, 20, 25, 31))
+        s.put(x, y, 'moss', 1); s.put((x + 1) % 32, y, 'moss', 2)
+    return s
+
+def rieles(seed=6):
+    """Vía de tren horizontal sobre adoquín: durmientes de madera y dos rieles de hierro."""
+    s = adoquin(seed)
+    for x0 in range(1, 32, 8):
+        s.rect(x0, 7, x0 + 4, 24, 'wood', 2); s.rect(x0, 7, x0, 24, 'wood', 3); s.rect(x0 + 4, 7, x0 + 4, 24, 'wood', 1)
+        s.rect(x0, 24, x0 + 4, 24, 'wood', 0); s.pts('wood', 1, (x0 + 2, 10), (x0 + 2, 16), (x0 + 1, 21))
+    for y in (10, 20):
+        s.rect(0, y, 31, y, 'iron', 4); s.rect(0, y + 1, 31, y + 1, 'iron', 2); s.rect(0, y + 2, 31, y + 2, 'iron', 0)
+        for x0 in range(1, 32, 8): s.pts('iron', 3, (x0 + 1, y + 1), (x0 + 3, y + 1))   # clavos
+    return s
+
+def fabrica():
+    """Fábrica de ladrillo de 64x64: techo de dientes de sierra, chimenea y ventanales encendidos."""
+    s = Spr(64)
+    # chimenea (detrás del techo)
+    s.rect(46, 4, 54, 30, 'brick', 2); s.rect(46, 4, 47, 30, 'brick', 3); s.rect(53, 4, 54, 30, 'brick', 1)
+    for y in range(6, 30, 3):
+        for x in range(46 + (y // 3) % 2 * 2, 55, 4): s.put(x, y, 'brick', 0)
+    for y in (9, 19): s.rect(45, y, 55, y + 1, 'iron', 3); s.rect(45, y + 1, 55, y + 1, 'iron', 1)
+    s.rect(44, 2, 56, 4, 'iron', 2); s.rect(44, 2, 56, 2, 'iron', 4); s.rect(44, 4, 56, 4, 'iron', 0); s.rect(46, 3, 54, 3, 'dark', 0)
+    # techo de dientes de sierra con vidrio en la cara vertical
+    for i, x0 in enumerate((4, 18, 32)):
+        for k in range(14):
+            top = 22 - k * 10 // 14
+            s.rect(x0 + k, top, x0 + k, 24, 'iron', 3 if k < 7 else 2)
+        s.rect(x0 + 14, 12, x0 + 15, 24, 'iron', 1)
+        s.rect(x0 + 12, 13, x0 + 13, 23, 'wat', 3); s.rect(x0 + 12, 13, x0 + 12, 16, 'wat', 4); s.rect(x0 + 13, 18, x0 + 13, 23, 'wat', 2)
+    s.rect(46, 12, 59, 24, 'iron', 2); s.line(46, 22, 59, 12, 'iron', 3); s.rect(57, 12, 59, 24, 'iron', 1)
+    s.rect(3, 24, 60, 25, 'iron', 0)
+    # muro de ladrillo
+    s.rect(4, 26, 59, 60, 'brick', 2)
+    for y in range(26, 61):
+        row = (y - 26) // 3
+        if (y - 26) % 3 == 2:
+            s.rect(4, y, 59, y, 'brick', 1)
+        else:
+            for x in range(4 + (row % 2) * 3, 60, 6): s.put(x, y, 'brick', 1)
+            if (y - 26) % 3 == 0:
+                for x in range(5 + (row % 2) * 3, 60, 6): s.put(x, y, 'brick', 3)
+    s.rect(4, 26, 5, 60, 'brick', 3); s.rect(58, 26, 59, 60, 'brick', 1); s.rect(4, 26, 59, 27, 'brick', 0)
+    # ventanales arqueados con luz cálida
+    for x0 in (8, 44):
+        s.rows(31, [(x0 + 2, x0 + 9), (x0 + 1, x0 + 10)], 'brick', 4)
+        s.rect(x0, 33, x0 + 11, 47, 'brick', 4)
+        s.rows(32, [(x0 + 3, x0 + 8), (x0 + 2, x0 + 9)], 'fire', 3)
+        s.rect(x0 + 1, 34, x0 + 10, 46, 'fire', 3)
+        s.rect(x0 + 1, 34, x0 + 10, 37, 'fire', 4); s.rect(x0 + 1, 42, x0 + 10, 46, 'fire', 2)
+        for xx in (x0 + 4, x0 + 7): s.rect(xx, 32, xx, 46, 'iron', 1)
+        for yy in (37, 41): s.rect(x0 + 1, yy, x0 + 10, yy, 'iron', 1)
+        s.rect(x0, 47, x0 + 11, 48, 'sto', 3); s.rect(x0, 48, x0 + 11, 48, 'sto', 1)
+    # portón corredizo con refuerzo en X
+    s.rect(24, 36, 39, 60, 'iron', 0)
+    s.rect(25, 38, 38, 60, 'wood', 2); s.rect(25, 38, 38, 38, 'wood', 3); s.rect(25, 38, 25, 60, 'wood', 3); s.rect(38, 38, 38, 60, 'wood', 1)
+    for x in range(28, 38, 3): s.rect(x, 39, x, 60, 'wood', 1)
+    s.line(26, 40, 37, 59, 'wood', 4); s.line(37, 40, 26, 59, 'wood', 0)
+    s.rect(24, 34, 39, 35, 'iron', 2); s.rect(24, 34, 39, 34, 'iron', 4)
+    # engrane emblema sobre el portón
+    for y in range(26, 34):
+        for x in range(27, 37):
+            dx, dy = x - 31.5, y - 29.5; r = math.hypot(dx, dy)
+            tooth = math.cos(6 * math.atan2(dy, dx)) > .3
+            if r <= 2.6 or (r <= 4.2 and (tooth or r <= 3.2)): s.put(x, y, 'gold', 0 if r <= 1.1 else 2 if dx + dy < 0 else 1)
+    # banqueta de piedra
+    s.rect(2, 61, 61, 63, 'sto', 2); s.rect(2, 61, 61, 61, 'sto', 3); s.rect(2, 63, 61, 63, 'sto', 0)
+    s.outline()
+    return s
+
+def humo(frame=0):
+    """Bocanadas de humo para la chimenea (se animan en el juego)."""
+    s = Spr()
+    puffs = [(20, 26, 4.2), (14, 18, 5), (19, 9, 5.6), (11, 3, 4)] if frame == 0 else [(19, 27, 4), (16, 19, 5.2), (21, 10, 5.4), (13, 2, 4.4)]
+    for cx, cy, r in puffs: s.ell(cx, cy, r, r * .85, 'sto', 3)
+    s.round_shade(s.cells('sto'), 'sto', cuts=(-.6, -.1, .5, 1.5), dither=False)
+    for (x, y) in list(s.cells('sto')):
+        if s.g[(x, y)][1] < 2: s.put(x, y, 'sto', 2)
+    return s
+
+def engrane():
+    """Engrane gigante de latón, de pie sobre una base de hierro."""
+    s = Spr()
+    cx, cy = 15.5, 14
+    for y in range(32):
+        for x in range(32):
+            dx, dy = x - cx, y - cy; r = math.hypot(dx, dy); a = math.atan2(dy, dx)
+            tooth = math.cos(10 * a) > .25
+            if r <= 10.2 or (r <= 13 and tooth):
+                if r <= 2.2: continue
+                if r <= 3.6: s.put(x, y, 'iron', 1 if dx + dy > 0 else 3); continue
+                hole = 5.4 <= r <= 8.2 and math.cos(5 * (a + .3)) > .45
+                if hole: continue
+                t = 3 if dx + dy < -6 else 2 if dx + dy < 1 else 1 if dx + dy < 7 else 0
+                if 9.2 <= r <= 10.2: t = max(0, t - 1)
+                s.put(x, y, 'beak', t)
+    s.rect(9, 27, 22, 30, 'iron', 2); s.rect(9, 27, 22, 27, 'iron', 4); s.rect(9, 30, 22, 30, 'iron', 0); s.rect(21, 28, 22, 29, 'iron', 1)
+    s.rect(14, 24, 17, 26, 'iron', 2); s.put(14, 24, 'iron', 3)
+    s.outline()
+    return s
+
+def farol():
+    """Farol de gas de hierro con llama cálida."""
+    s = Spr()
+    s.rect(15, 13, 16, 27, 'iron', 2); s.rect(15, 13, 15, 27, 'iron', 3)
+    s.rows(26, [(13, 18), (12, 19), (11, 20), (11, 20), (10, 21)], 'iron', 2)
+    s.rect(10, 29, 21, 30, 'iron', 1); s.rect(11, 27, 12, 28, 'iron', 3); s.rect(19, 27, 21, 30, 'iron', 0)
+    s.rect(13, 18, 18, 18, 'iron', 3); s.put(12, 18, 'iron', 2); s.put(19, 18, 'iron', 1)   # adorno del poste
+    # linterna
+    s.rows(1, [(15, 16), (14, 17), (12, 19), (10, 21)], 'iron', 2); s.rect(10, 4, 21, 4, 'iron', 4)
+    s.rect(11, 5, 20, 11, 'iron', 1)
+    s.rect(12, 5, 19, 11, 'fire', 4); s.rect(12, 5, 13, 11, 'fire', 5); s.rect(18, 8, 19, 11, 'fire', 3)
+    s.rect(15, 7, 16, 10, 'fire', 2); s.put(15, 7, 'fire', 3); s.put(16, 6, 'fire', 3)
+    s.rect(15, 5, 16, 11, 'iron', 1); s.put(15, 9, 'fire', 2)
+    s.rows(12, [(10, 21)], 'iron', 2); s.rect(13, 13, 18, 13, 'iron', 1)
+    s.outline()
+    # resplandor
+    for (x, y) in ((8, 6), (23, 6), (8, 9), (23, 9), (9, 3), (22, 3), (9, 12), (22, 12)): s.put(x, y, 'fire', 4)
+    return s
+
+def yunque():
+    """Yunque de hierro sobre un tronco, con martillo recargado."""
+    s = Spr()
+    s.ell(15.5, 27, 9, 3.6, 'wood', 1)
+    s.rect(7, 19, 24, 27, 'wood', 2); s.ell(15.5, 19, 8.5, 3, 'wood', 4)
+    s.round_shade({p for p in s.cells('wood') if p[1] >= 20}, 'wood', cuts=(-.6, -.1, .4, .9))
+    for (x, y) in s.cells('wood'):
+        if y < 20 and math.hypot((x - 15.5) / 8.5, (y - 19) / 3) < .55: s.put(x, y, 'wood', 3)
+    for x in range(9, 23, 3): s.line(x, 22, x, 27, 'wood', 0)
+    # yunque
+    s.rows(9, [(4, 24), (2, 25), (3, 25), (6, 25)], 'iron', 2)
+    s.rect(10, 13, 21, 16, 'iron', 1); s.rect(8, 17, 23, 18, 'iron', 2)
+    s.rect(4, 9, 24, 9, 'iron', 4); s.rect(2, 10, 18, 10, 'iron', 3); s.rect(20, 10, 25, 12, 'iron', 1); s.rect(10, 13, 11, 16, 'iron', 2)
+    s.rect(8, 17, 23, 17, 'iron', 3); s.rect(21, 13, 21, 16, 'iron', 0); s.rect(8, 18, 23, 18, 'iron', 0)
+    s.pts('iron', 4, (6, 10), (7, 10))
+    # martillo
+    s.line(25, 6, 29, 17, 'wood', 2); s.line(26, 6, 30, 17, 'wood', 3)
+    s.rect(22, 2, 28, 5, 'iron', 2); s.rect(22, 2, 28, 2, 'iron', 4); s.rect(22, 5, 28, 5, 'iron', 0); s.rect(28, 3, 28, 4, 'iron', 1)
+    s.outline()
+    s.pts('fire', 4, (5, 6), (8, 5)); s.put(6, 7, 'fire', 3)   # chispas
+    return s
+
+def paloma():
+    """Paloma mensajera de perfil, con cuello tornasol."""
+    s = Spr()
+    s.rows(15, [(2, 5), (2, 6), (2, 7), (3, 8), (4, 9)], 'dodo', 1)            # cola
+    s.pts('dark', 2, (2, 15), (2, 16), (2, 17), (3, 18))
+    s.ell(14, 19.5, 9, 6.2, 'dodo', 2)
+    s.ell(22.5, 10.5, 4.3, 4.3, 'dodo', 3)
+    s.rows(12, [(19, 25), (18, 25), (17, 24), (16, 23)], 'dodo', 2)
+    s.round_shade(s.cells('dodo'), 'dodo', cuts=(-.75, -.3, .3, .8))
+    for (x, y) in s.cells('dodo'):                                                  # cuello tornasol
+        if 13 <= y <= 16 and 17 <= x <= 25: s.put(x, y, 'iri', 1 if (x + y) % 3 else 3)
+    s.pts('iri', 0, (18, 16), (19, 16), (24, 15)); s.pts('iri', 2, (20, 13), (22, 14), (23, 13))
+    # ala con dos franjas oscuras
+    s.rows(17, [(8, 17), (7, 19), (7, 19), (8, 19), (9, 18), (11, 16)], 'dodo', 3)
+    s.rect(9, 19, 17, 19, 'dark', 2); s.rect(10, 21, 18, 21, 'dark', 2)
+    s.pts('dodo', 4, (9, 17), (10, 17), (8, 18))
+    # cabeza: ojo naranja, pico con cera blanca
+    s.rect(23, 9, 24, 10, 'fire', 2); s.put(24, 10, 'dark', 0); s.put(23, 9, 'wh', 0)
+    s.rect(27, 11, 29, 11, 'dark', 2); s.put(27, 10, 'cream', 2); s.put(28, 10, 'cream', 1); s.put(27, 12, 'dark', 2)
+    # patas rojas
+    for x0 in (12, 16):
+        s.rect(x0, 26, x0, 28, 'red', 1); s.rect(x0 - 1, 29, x0 + 2, 29, 'red', 2); s.put(x0 + 2, 29, 'red', 1)
+    s.outline()
+    return s
+
+def perro():
+    """Perro de taller sentado, con pañuelo rojo. Formas simples."""
+    s = Spr()
+    s.ell(14, 22, 7.5, 7, 'owl', 2)                                   # cuerpo sentado
+    s.rows(26, [(5, 9), (5, 10), (6, 10), (7, 9)], 'owl', 2)          # cola
+    s.ell(20, 11, 6.5, 6, 'owl', 2)                                   # cabeza
+    s.rows(12, [(24, 29), (24, 30), (24, 30), (25, 29)], 'owl', 3)    # hocico
+    s.round_shade(s.cells('owl'), 'owl', cuts=(-.7, -.25, .3, .75))
+    s.rows(4, [(13, 15), (12, 15), (12, 15), (12, 14), (13, 14), (13, 13)], 'owl', 0)   # oreja caída
+    s.ell(16, 22, 3.4, 5, 'cream', 1); s.pts('cream', 2, (15, 19), (15, 20), (16, 19))    # pecho
+    s.rows(12, [(25, 29), (25, 30), (25, 30)], 'cream', 1); s.pts('cream', 2, (25, 12), (26, 12))
+    s.rect(29, 11, 30, 12, 'dark', 0); s.put(29, 11, 'wh', 0)         # nariz
+    s.rect(21, 9, 22, 10, 'dark', 0); s.put(21, 9, 'wh', 0)           # ojo
+    s.rect(26, 15, 28, 15, 'owl', 0)                                  # boca
+    s.rows(16, [(14, 24), (15, 23), (17, 21)], 'red', 1)              # pañuelo
+    s.pts('red', 2, (15, 16), (16, 16), (17, 16)); s.pts('red', 0, (23, 16), (22, 17), (20, 18))
+    for x0 in (13, 19):                                               # patas delanteras
+        s.rect(x0, 25, x0 + 2, 29, 'owl', 3); s.rect(x0 + 2, 25, x0 + 2, 29, 'owl', 2)
+        s.rect(x0, 29, x0 + 3, 29, 'cream', 1)
+    s.outline()
+    return s
+
+def _rueda(s, cx, cy, r, rot=0):
+    """Rueda roja con rayos de hierro; `rot` alterna la posición de los rayos."""
+    for y in range(int(cy - r) - 1, int(cy + r) + 2):
+        for x in range(int(cx - r) - 1, int(cx + r) + 2):
+            d = math.hypot(x - cx, y - cy)
+            if d <= r:
+                if d >= r - 1.2: s.put(x, y, 'red', 2 if (x - cx) + (y - cy) < 0 else 0)
+                elif d <= 1.2: s.put(x, y, 'beak', 2)
+                else:
+                    a = math.atan2(y - cy, x - cx) + rot
+                    s.put(x, y, 'iron', 1 if abs(math.sin(2 * a)) < .35 or abs(math.cos(2 * a)) < .35 else 0)
+
+def locomotora(frame=0):
+    """Locomotora de vapor de 64x64 (ocupa la mitad de abajo), mirando a la derecha."""
+    s = Spr(64)
+    rot = frame * math.pi / 4
+    # chasis
+    s.rect(2, 50, 61, 53, 'iron', 1); s.rect(2, 50, 61, 50, 'iron', 3); s.rect(2, 53, 61, 53, 'iron', 0)
+    # caldera verde con bandas de latón
+    s.rect(24, 34, 57, 49, 'leaf', 1)
+    for y in range(34, 50):
+        t = 3 if y < 37 else 2 if y < 42 else 1 if y < 47 else 0
+        s.rect(24, y, 57, y, 'leaf', t)
+    for x in (31, 42, 52): s.rect(x, 34, x + 1, 49, 'beak', 2); s.rect(x, 34, x + 1, 36, 'beak', 3); s.rect(x + 1, 45, x + 1, 49, 'beak', 0)
+    s.rect(57, 33, 61, 50, 'iron', 1); s.rect(58, 34, 61, 36, 'iron', 3); s.rect(61, 37, 61, 49, 'iron', 0)   # caja de humo
+    s.rect(58, 38, 60, 40, 'fire', 4); s.put(58, 38, 'fire', 5)                                              # farol
+    # chimenea y domo
+    s.rect(49, 22, 55, 33, 'iron', 1); s.rect(49, 22, 50, 33, 'iron', 3)
+    s.rect(47, 19, 57, 22, 'iron', 2); s.rect(47, 19, 57, 19, 'iron', 4); s.rect(48, 20, 56, 20, 'dark', 0)
+    s.ell(38, 33, 4, 3.2, 'beak', 2); s.pts('beak', 3, (36, 31), (37, 31), (35, 32)); s.pts('beak', 0, (41, 34), (40, 35))
+    # cabina roja
+    s.rect(4, 27, 24, 49, 'brick', 2); s.rect(4, 27, 5, 49, 'brick', 3); s.rect(23, 27, 24, 49, 'brick', 1)
+    s.rect(2, 23, 26, 26, 'iron', 2); s.rect(2, 23, 26, 23, 'iron', 4); s.rect(2, 26, 26, 26, 'iron', 0)
+    s.rect(9, 30, 19, 38, 'iron', 0); s.rect(10, 31, 18, 37, 'fire', 3); s.rect(10, 31, 13, 33, 'fire', 4)
+    s.rect(4, 41, 24, 42, 'beak', 2)
+    # quitapiedras
+    for i in range(6): s.rect(58 + i, 51 + i, 63, 51 + i, 'iron', 2 if i % 2 else 1)
+    # ruedas y biela
+    for cx in (21, 35, 49): _rueda(s, cx, 56.5, 6.5, rot)
+    _rueda(s, 59, 59.5, 3.5, rot)
+    oy = round(56.5 + 3 * math.sin(rot)); ox = round(3 * math.cos(rot))
+    s.rect(21 + ox, oy, 49 + ox, oy + 1, 'sto', 3); s.rect(21 + ox, oy + 1, 49 + ox, oy + 1, 'sto', 1)
+    s.outline()
+    return s
+
+def tender():
+    """Vagón de carbón (ténder) que va detrás de la locomotora."""
+    s = Spr()
+    s.rect(1, 13, 30, 25, 'leaf', 2)
+    for y in range(13, 26): s.rect(1, y, 30, y, 'leaf', 3 if y < 16 else 2 if y < 21 else 1)
+    s.rect(1, 13, 30, 13, 'beak', 2); s.rect(1, 25, 30, 25, 'beak', 1); s.rect(15, 14, 16, 24, 'beak', 1)
+    for x0, x1, y in ((3, 28, 12), (5, 26, 11), (8, 22, 10), (11, 18, 9)):
+        s.rect(x0, y, x1, y, 'dark', 2)
+    s.pts('iron', 2, (6, 11), (12, 10), (19, 11), (24, 12), (14, 9))
+    s.rect(0, 26, 31, 26, 'iron', 1)
+    for cx in (8, 23): _rueda(s, cx, 28.5, 3.4)
+    s.outline()
+    return s
+
 # ───────── Exportar ─────────
 SPRITES = {
     'fogata1': lambda: fogata(0), 'fogata2': lambda: fogata(1), 'roca': roca, 'helecho': helecho,
     'columna': columna, 'anfora': anfora, 'fuente': fuente, 'dodo': dodo, 'lagartija': lagartija,
     'buho': buho, 'gato': gato, 'explorador1': lambda: explorador(0), 'explorador2': lambda: explorador(1),
+    'engrane': engrane, 'farol': farol, 'yunque': yunque, 'paloma': paloma, 'perro': perro,
+    'humo1': lambda: humo(0), 'humo2': lambda: humo(1), 'tender': tender,
 }
 TILES = {
     'pasto1': lambda: pasto(7), 'pasto2': lambda: pasto(8), 'pasto3': lambda: pasto(9),
     'tierra1': lambda: tierra(3), 'tierra2': lambda: tierra(5), 'losa1': lambda: losa(1), 'losa2': lambda: losa(2),
+    'adoquin1': lambda: adoquin(4), 'adoquin2': lambda: adoquin(9), 'rieles': lambda: rieles(6),
     'bordeN': lambda: borde('n'), 'bordeS': lambda: borde('s'), 'bordeE': lambda: borde('e'), 'bordeO': lambda: borde('o'),
 }
-BUILDINGS = {'choza': choza, 'templo': templo}
-POOL = [c for c in 'abcdefghijlmnopqrsuvwxyzABCDEFGHIJKLMNOPQRSWXYZ0123456789+-*=!?@#$%&_~^:;<>|/()[]{},`' if c not in PINNED.values()]
+BUILDINGS = {'choza': choza, 'templo': templo, 'fabrica': fabrica,
+             'locomotora1': lambda: locomotora(0), 'locomotora2': lambda: locomotora(1)}
+POOL = [c for c in 'abcdefghijlmnopqrsuvwxyzABCDEFGHIJKLMNOPQRSWXYZ0123456789+-*=!?@#$%&_~^:;<>|/()[]{},`' if c not in PINNED.values()] + list('ÁÉÍÓÚáéíóúÑñÜüÇçÀÈÌÒÙàèìòùÂÊÎÔÛâêîôûÄËÏÖäëïöÃÕãõ¡¿°±×÷§¶ßØøÅåÆæ')
 
 def build():
     groups = {name: {k: f() for k, f in grp.items()} for name, grp in (('SPRITES', SPRITES), ('TILES', TILES), ('BUILDINGS', BUILDINGS))}

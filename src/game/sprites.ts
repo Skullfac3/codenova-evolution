@@ -27,6 +27,7 @@ export const ALL_GRIDS: Record<string, string[]> = { ...RAW_SPRITES, ...RAW_TILE
 export const OUTFIT_COLORS: Record<string, Record<string, string>> = {
   'outfit-piel': { V: '#4a2f16', U: '#6e4824', T: '#9a6a3a', t: '#c08e58' },
   'outfit-toga': { V: '#9c917f', U: '#c9bfae', T: '#f2ece0', t: '#ffffff' },
+  'outfit-overol': { V: '#2e3a16', U: '#4a5c22', T: '#6b8232', t: '#9ab354' },
 };
 
 const cache = new Map<string, HTMLCanvasElement>();
@@ -60,11 +61,13 @@ const buildingCanvas = (key: BuildingKey) => gridCanvas('building:' + key, RAW_B
 
 // ── Terreno y edificios ──
 
-export type TileKind = 'pasto' | 'tierra' | 'losa';
+export type TileKind = 'pasto' | 'tierra' | 'losa' | 'adoquin' | 'rieles';
 
 const TILE_VARIANTS: Record<TileKind, TileSprite[]> = {
   pasto: ['pasto1', 'pasto2', 'pasto3'],
   tierra: ['tierra1', 'tierra2'],
+  adoquin: ['adoquin1', 'adoquin2'],
+  rieles: ['rieles'],
   losa: ['losa1', 'losa2'],
 };
 
@@ -89,4 +92,14 @@ export function drawHut(ctx: CanvasRenderingContext2D, x: number, y: number) {
 /** Templo de las Civilizaciones antiguas: 64x64 (2x2 casillas). */
 export function drawTemple(ctx: CanvasRenderingContext2D, x: number, y: number) {
   ctx.drawImage(buildingCanvas('templo'), x, y);
+}
+
+/** Locomotora de vapor de 64x64 (el dibujo ocupa la mitad de abajo); `frame` gira las ruedas. */
+export function drawLocomotive(ctx: CanvasRenderingContext2D, frame: number, x: number, y: number) {
+  ctx.drawImage(buildingCanvas(frame % 2 ? 'locomotora2' : 'locomotora1'), x, y);
+}
+
+/** Fábrica de la Era industrial: 64x64 (2x2 casillas). */
+export function drawFactory(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  ctx.drawImage(buildingCanvas('fabrica'), x, y);
 }

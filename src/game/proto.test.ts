@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { PROTO_FUTURE_NOTE, PROTO_STAGES, buildProtoGrid, protoPalette, stageForEra, type ProtoFrame } from './proto';
 
 describe('etapas de Proto-0', () => {
-  it('tiene una etapa por era con contenido (1 y 2)', () => {
-    expect(PROTO_STAGES.map((s) => s.era)).toEqual([1, 2]);
+  it('tiene una etapa por era con contenido (1, 2 y 3)', () => {
+    expect(PROTO_STAGES.map((s) => s.era)).toEqual([1, 2, 3]);
     for (const stage of PROTO_STAGES) {
       expect(stage.name).toMatch(/^v\d+ \S+/);
       expect(stage.description.length).toBeGreaterThan(10);
@@ -23,15 +23,23 @@ describe('etapas de Proto-0', () => {
     expect(v2.description).toMatch(/banda dorada/i);
   });
 
-  it('avisa que vendrán más evoluciones con las eras 3-5', () => {
-    expect(PROTO_FUTURE_NOTE).toMatch(/eras 3, 4 y 5/);
+  it('la v3 es el Ingeniero de vapor con goggles y engranes', () => {
+    const v3 = PROTO_STAGES[2]!;
+    expect(v3.name).toBe('v3 Ingeniero de vapor');
+    expect(v3.description).toMatch(/goggles/i);
+    expect(v3.description).toMatch(/engrane/i);
+  });
+
+  it('avisa que vendrán más evoluciones con las eras 4 y 5', () => {
+    expect(PROTO_FUTURE_NOTE).toMatch(/eras 4 y 5/);
   });
 
   it('stageForEra devuelve la etapa de la era y no pasa de la última', () => {
     expect(stageForEra(1).name).toBe('v1 Explorador');
     expect(stageForEra(2).name).toBe('v2 Guardián');
-    // Las eras 3-5 aún no tienen etapa: se queda en la v2.
-    expect(stageForEra(5).name).toBe('v2 Guardián');
+    expect(stageForEra(3).name).toBe('v3 Ingeniero de vapor');
+    // Las eras 4 y 5 aún no tienen etapa: se queda en la v3.
+    expect(stageForEra(5).name).toBe('v3 Ingeniero de vapor');
     expect(stageForEra(0).name).toBe('v1 Explorador');
   });
 
@@ -59,7 +67,15 @@ describe('etapas de Proto-0', () => {
       if (v1[y]![x] !== v2[y]![x]) changed++;
     }
     expect(changed / filled).toBeGreaterThan(0.25);
-    // Las eras sin etapa propia conservan el aspecto de la v2.
-    expect(colors(3)).toEqual(v2);
+    // v3 Ingeniero de vapor: cobre y ojos verdes, distinto de las otras dos.
+    const v3 = colors(3);
+    expect(v3[20]![12]).toBe('#d9824a');
+    expect(v3[16]![9]).toBe('#5ff09a');
+    let diff2 = 0;
+    for (let y = 0; y < 32; y++) for (let x = 0; x < 32; x++) if (v3[y]![x] !== v2[y]![x]) diff2++;
+    expect(diff2).toBeGreaterThan(200);
+    for (const row of v3) for (const c of row) expect(c).toBeDefined();
+    // Las eras sin etapa propia conservan el aspecto de la v3.
+    expect(colors(4)).toEqual(v3);
   });
 });

@@ -7,7 +7,7 @@ async function seed(page: Page, unlockedEras: number[]) {
     localStorage.setItem(
       'codenova:save',
       JSON.stringify({
-        version: 2, explorerName: 'Explorador', avatar: 'explorer-01', xp: 170, novacoins: 90, currentEra: Math.max(...unlockedEras),
+        version: 3, explorerName: 'Explorador', avatar: 'explorer-01', xp: 170, novacoins: 90, currentEra: Math.max(...unlockedEras),
         unlockedEras, completedLessons: {},
         worlds: { 1: { objects: [] }, 2: { objects: [] } }, inventory: {}, pets: [], pendingSync: [], updatedAt: '2026-11-05T00:00:00Z',
       }),
