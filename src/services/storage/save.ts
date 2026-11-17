@@ -150,7 +150,41 @@ export function migrate(raw: unknown): Save {
   if (version < 1) data = migrateFromLegacy(data);
   if (version < 2) data = migrateV1toV2(data) as unknown as Record<string, unknown>;
   if (version < 3) data = migrateV2toV3(data as unknown as SaveV3) as unknown as Record<string, unknown>;
-  return data as unknown as Save;
+  return repair(data);
+}
+
+const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
+
+/**
+ * Repara una partida con campos vacíos o de otro tipo (guardado a medias,
+ * versión vieja, edición a mano). Antes, un `null` en un campo hacía que la
+ * app tronara al arrancar y se quedara en «Cargando tu aventura…». Conserva
+ * todo lo que sí es válido: no borra progreso.
+ */
+export function repair(data: Record<string, unknown>): Save {
+  const base = createEmptySave();
+  const eras = Array.isArray(data.unlockedEras) ? data.unlockedEras.filter((e): e is number => typeof e === 'number' && e >= 1) : [];
+  const worlds = isObj(data.worlds) ? (data.worlds as Save['worlds']) : base.worlds;
+  for (const key of Object.keys(worlds)) {
+    const w = (worlds as Record<string, unknown>)[key];
+    if (!isObj(w) || !Array.isArray(w.objects)) (worlds as Record<string, unknown>)[key] = { objects: [] };
+  }
+  return {
+    ...(data as unknown as Save),
+    version: 3,
+    explorerName: str(data.explorerName, base.explorerName),
+    avatar: typeof data.avatar === 'string' ? data.avatar : base.avatar,
+    xp: num(data.xp),
+    novacoins: num(data.novacoins),
+    unlockedEras: eras.length ? eras : base.unlockedEras,
+    currentEra: num(data.currentEra, 1) || 1,
+    completedLessons: isObj(data.completedLessons) ? (data.completedLessons as Save['completedLessons']) : {},
+    worlds,
+    inventory: isObj(data.inventory) ? (data.inventory as Save['inventory']) : {},
+    pets: Array.isArray(data.pets) ? (data.pets as Save['pets']) : [],
+    pendingSync: Array.isArray(data.pendingSync) ? (data.pendingSync as Save['pendingSync']) : [],
+    updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : base.updatedAt,
+  };
 }
 
 /** localStorage puede no existir o lanzar error (modo privado, sitio bloqueado). */

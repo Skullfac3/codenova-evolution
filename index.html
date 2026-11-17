@@ -44,21 +44,63 @@
     </div>
     <noscript><p style="color:#f3e9dc;font-family:system-ui,sans-serif;text-align:center;padding:24px">CodeNova necesita JavaScript para jugar.</p></noscript>
     <script>
-      // Red de seguridad: si a los 12 s la app no arrancó (JS a medio
-      // actualizar, caché vieja del service worker, red lenta), se ofrece
-      // «Reintentar», que borra la caché de la app y recarga. No toca la
-      // partida guardada (localStorage).
-      setTimeout(function () {
-        var retry = document.getElementById('splash-retry');
-        if (!retry || !document.querySelector('#root .splash')) return;
-        retry.style.display = 'block';
-        document.getElementById('splash-retry-btn').onclick = function () {
+      // Red de seguridad, antes de que arranque la app:
+      // 1) guarda los errores de JavaScript para poder mostrarlos;
+      // 2) si a los 12 s sigue la pantalla de carga, ofrece «Reintentar»;
+      // 3) si la pantalla queda vacía (la app tronó al dibujarse), muestra
+      //    el error y «Reintentar» en vez de dejarla en blanco.
+      // «Reintentar» borra la caché de la app y recarga; no toca la partida.
+      (function () {
+        var errors = [];
+        window.addEventListener('error', function (e) {
+          errors.push((e.message || 'Error') + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : ''));
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          var r = e.reason;
+          errors.push('Promesa rechazada: ' + (r && r.message ? r.message : String(r)));
+        });
+        function clearAndReload() {
           var jobs = [];
           if ('serviceWorker' in navigator) jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
           if (window.caches) jobs.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
           Promise.all(jobs).catch(function () {}).then(function () { location.reload(); });
-        };
-      }, 12000);
+        }
+        function showDetail(box) {
+          if (!errors.length) return;
+          var pre = document.createElement('pre');
+          pre.textContent = errors.slice(-3).join('\n');
+          pre.setAttribute('style', 'white-space:pre-wrap;word-break:break-word;color:#ffb3a6;font-size:12px;text-align:left;margin:12px 0 0');
+          box.appendChild(pre);
+        }
+        setTimeout(function () {
+          var retry = document.getElementById('splash-retry');
+          if (!retry || !document.querySelector('#root .splash')) return;
+          retry.style.display = 'block';
+          document.getElementById('splash-retry-btn').onclick = clearAndReload;
+          showDetail(retry);
+        }, 12000);
+        var checks = 0;
+        var timer = setInterval(function () {
+          checks++;
+          var root = document.getElementById('root');
+          if (root && root.childElementCount === 0 && !document.getElementById('rescate')) {
+            var box = document.createElement('div');
+            box.id = 'rescate';
+            box.setAttribute('role', 'alert');
+            box.setAttribute('style', 'position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;background:#1b1325;color:#f3e9dc;font-family:system-ui,sans-serif');
+            box.innerHTML = '<div class="splash-logo">CodeNova</div><p style="margin:0;max-width:320px">Algo falló al abrir la app. Toca «Reintentar»: tu partida está a salvo.</p>';
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = 'Reintentar';
+            btn.setAttribute('style', 'font:inherit;font-weight:800;background:#ff8a3d;color:#1b1325;border:2px solid #ff8a3d;padding:12px 20px;min-height:48px');
+            btn.onclick = clearAndReload;
+            box.appendChild(btn);
+            showDetail(box);
+            document.body.appendChild(box);
+          }
+          if (checks >= 60) clearInterval(timer);
+        }, 1000);
+      })();
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
