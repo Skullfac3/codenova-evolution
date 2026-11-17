@@ -31,10 +31,11 @@ test.describe('Perfiles: Administrador y Pruebas', () => {
     await page.getByTestId('btn-switch-admin').click();
     await expect(page.getByTestId('admin-panel')).toBeVisible();
 
-    // Administrador: todo desbloqueado → v2 Guardián es su etapa actual.
-    await expect(page.getByTestId('admin-proto-admin-stage-2')).toHaveAttribute('data-state', 'current');
-    await expect(page.getByTestId('admin-proto-admin-stage-2')).toContainText('v2 Guardián');
-    await expect(page.getByTestId('admin-proto-admin-stage-2')).toContainText('etapa actual');
+    // Administrador: todo desbloqueado → v3 Ingeniero de vapor es su etapa actual.
+    await expect(page.getByTestId('admin-proto-admin-stage-2')).toHaveAttribute('data-state', 'unlocked');
+    await expect(page.getByTestId('admin-proto-admin-stage-3')).toHaveAttribute('data-state', 'current');
+    await expect(page.getByTestId('admin-proto-admin-stage-3')).toContainText('v3 Ingeniero de vapor');
+    await expect(page.getByTestId('admin-proto-admin-stage-3')).toContainText('etapa actual');
     // Pruebas: recién empieza → v1 Explorador actual, v2 Guardián bloqueada.
     await expect(page.getByTestId('admin-proto-pruebas-stage-1')).toHaveAttribute('data-state', 'current');
     await expect(page.getByTestId('admin-proto-pruebas-stage-1')).toContainText('v1 Explorador');

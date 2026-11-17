@@ -31,6 +31,13 @@ export const ITEMS: ShopItem[] = [
   { id: 'outfit-toga', kind: 'outfit', name: 'Túnica de escriba', price: 45, era: 2, sprite: 'explorador1', description: 'Vestimenta de quienes saben escribir.' },
   { id: 'pet-buho', kind: 'pet', name: 'Búho sabio', price: 60, era: 2, sprite: 'buho', description: 'Observa todo con sus grandes ojos.' },
   { id: 'pet-gato-sagrado', kind: 'pet', name: 'Gato del templo', price: 60, era: 2, sprite: 'gato', description: 'Protege los almacenes de los ratones.' },
+  // Era 3 · Era industrial
+  { id: 'deco-farol', kind: 'decoration', name: 'Farol de gas', price: 25, era: 3, sprite: 'farol', description: 'Ilumina la calle cuando cae la noche.' },
+  { id: 'deco-engrane', kind: 'decoration', name: 'Engrane gigante', price: 30, era: 3, sprite: 'engrane', description: 'Pieza de latón de una máquina de vapor.' },
+  { id: 'deco-yunque', kind: 'decoration', name: 'Yunque y martillo', price: 40, era: 3, sprite: 'yunque', description: 'Aquí se forjan las piezas del taller.' },
+  { id: 'outfit-overol', kind: 'outfit', name: 'Overol de mecánico', price: 55, era: 3, sprite: 'explorador1', description: 'Resistente a la grasa y al hollín.' },
+  { id: 'pet-paloma', kind: 'pet', name: 'Paloma mensajera', price: 70, era: 3, sprite: 'paloma', description: 'Lleva tus mensajes de fábrica en fábrica.' },
+  { id: 'pet-perro', kind: 'pet', name: 'Perro de taller', price: 90, era: 3, sprite: 'perro', description: 'Fiel compañero de las y los mecánicos.' },
 ];
 
 export const itemById = (id: string) => ITEMS.find((i) => i.id === id);
@@ -42,9 +49,9 @@ export const ROWS = 9;
 export const TILE = 32;
 
 /** Eras con mundo dibujado. */
-export const WORLD_ERAS = [1, 2] as const;
+export const WORLD_ERAS = [1, 2, 3] as const;
 
-/** Casillas ocupadas por el edificio principal (choza o templo). */
+/** Casillas ocupadas por el edificio principal (choza, templo o fábrica). */
 export const LANDMARK = { x: 1, y: 1, w: 2, h: 2 };
 export const isLandmarkTile = (x: number, y: number) =>
   x >= LANDMARK.x && x < LANDMARK.x + LANDMARK.w && y >= LANDMARK.y && y < LANDMARK.y + LANDMARK.h;

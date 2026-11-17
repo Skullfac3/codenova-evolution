@@ -35,11 +35,12 @@ test.describe('Refugio, tienda y Proto-0', () => {
     await seedEra1Done(page);
     await page.goto('/');
     await expect(page.getByTestId('habitat')).toBeVisible();
-    await expect(page.getByTestId('habitat')).toHaveAttribute('data-era', '2');
+    // La partida guardada se migra con la Era 3 desbloqueada: abre en el refugio más reciente.
+    await expect(page.getByTestId('habitat')).toHaveAttribute('data-era', '3');
     await expect(page.getByTestId('proto-dock')).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
-    await shot(page, 'r01-refugio-era2');
+    await shot(page, 'r01-refugio-era3');
   });
 
   test('comprar, decorar, vestir y llevar una mascota a la Era 2', async ({ page }) => {

@@ -12,7 +12,7 @@ export interface ProtoFrame {
   antennaOn: boolean;
   /** Alterna para la boca al hablar y el escáner al pensar. */
   tick: number;
-  /** Era cuyo aspecto se dibuja: 1 es el Explorador gris y oxidado; 2 o más, el Guardián de bronce. */
+  /** Era cuyo aspecto se dibuja: 1 Explorador gris y oxidado, 2 Guardián de bronce, 3 o más Ingeniero de vapor. */
   era: number;
 }
 
@@ -38,8 +38,25 @@ const PAL_V2: Record<string, string> = {
   n: '#fff3b0', N: '#ffffff',
 };
 
+/**
+ * v3 Ingeniero de vapor: cobre con remaches y pátina verde, ojos verde
+ * esmeralda, rejilla ámbar, orejas de engrane, goggles de latón y una
+ * chimenea con vapor en lugar de antena.
+ */
+const PAL_V3: Record<string, string> = {
+  L: '#ffc49a', M: '#d9824a', D: '#a8522a', S: '#5e2a14', W: '#ffe6d0',
+  E: '#5ff09a', e: '#2aa864', F: '#c8ffd8', Y: '#ffffff',
+  g: '#ffbf3d', G: '#2a1a12',
+  n: '#c9962e', N: '#ffd97a', h: '#8a6420', // latón
+  p: '#4fb0a0', P: '#2f7a70', // pátina
+  c: '#9fd8f0', C: '#3e70b6', // cristal de los goggles
+  i: '#3e3948', I: '#6e6878', // hierro de la chimenea
+  w: '#e6e6ee', Z: '#ffffff', // vapor
+};
+
 /** Paleta con la que se dibuja a Proto-0 en una era. */
-export const protoPalette = (era: number): Record<string, string> => (era >= 2 ? { ...PAL, ...PAL_V2 } : PAL);
+export const protoPalette = (era: number): Record<string, string> =>
+  era >= 3 ? { ...PAL, ...PAL_V3 } : era >= 2 ? { ...PAL, ...PAL_V2 } : PAL;
 
 const N = 32;
 
@@ -49,8 +66,19 @@ export function buildProtoGrid(f: ProtoFrame): string[][] {
   const hline = (x0: number, x1: number, y: number, c: string) => { for (let x = x0; x <= x1; x++) put(x, y, c); };
   const rect = (x0: number, y0: number, x1: number, y1: number, c: string) => { for (let y = y0; y <= y1; y++) hline(x0, x1, y, c); };
   const evolved = f.era >= 2;
+  const steam = f.era >= 3;
 
-  // Antena (en la Era 2 es una gema azul)
+  // Antena (en la Era 2 es una gema azul; en la 3, una chimenea con vapor)
+  if (steam) {
+    rect(12, 2, 19, 3, 'o'); rect(13, 4, 18, 8, 'o');
+    hline(13, 18, 2, 'I'); hline(13, 18, 3, 'i'); put(13, 2, 'W');
+    rect(14, 4, 17, 8, 'i'); put(14, 4, 'I'); put(14, 5, 'I'); put(14, 6, 'I');
+    hline(14, 17, 6, 'n'); put(14, 6, 'N');
+    if (f.antennaOn) {
+      const d = f.tick % 2;
+      for (const [x, y, c] of [[15, 1, 'w'], [16, 1, 'Z'], [14 + d, 0, 'w'], [17 - d, 0, 'Z'], [18 + d, 1, 'w']] as const) put(x, y, c);
+    }
+  } else {
   hline(14, 17, 2, 'o'); rect(13, 3, 18, 4, 'o');
   if (f.antennaOn) {
     rect(14, 3, 17, 4, evolved ? 'b' : 'A');
@@ -60,11 +88,15 @@ export function buildProtoGrid(f: ProtoFrame): string[][] {
   }
   hline(14, 17, 5, 'o');
   for (const y of [6, 7, 8]) { put(14, y, 'o'); put(15, y, 'L'); put(16, y, 'D'); put(17, y, 'o'); }
+  }
 
-  // Orejas
+  // Orejas (de engrane en la Era 3)
+  if (steam) for (const cx of [4.5, 26.5]) drawGear(cx, 17.5, f.tick, put);
+  else {
   rect(2, 14, 4, 21, 'o'); rect(3, 15, 4, 20, 'M'); for (let y = 15; y < 21; y++) put(4, y, 'D');
   rect(27, 14, 29, 21, 'o'); rect(27, 15, 28, 20, 'M'); for (let y = 15; y < 21; y++) put(28, y, 'D');
   put(3, 15, 'L'); put(27, 15, 'L'); hline(3, 4, 20, 'S'); hline(27, 28, 20, 'S');
+  }
 
   // Cabeza
   rect(5, 9, 26, 28, 'o');
@@ -81,7 +113,22 @@ export function buildProtoGrid(f: ProtoFrame): string[][] {
   hline(10, 14, 11, 'W'); put(16, 11, 'W'); put(7, 12, 'W'); put(7, 13, 'W');
   for (const [x, y] of [[8, 11], [23, 11], [8, 26], [23, 26]] as const) put(x, y, 'S');
   for (const [x, y] of [[5, 9], [26, 9], [5, 28], [26, 28]] as const) put(x, y, '.');
-  if (evolved) {
+  if (steam) {
+    // goggles de latón subidos a la frente
+    hline(6, 25, 11, 'n'); hline(6, 25, 12, 'S');
+    for (const cx of [11, 20]) {
+      rect(cx - 2, 9, cx + 2, 13, 'o');
+      rect(cx - 1, 10, cx + 1, 12, 'C'); put(cx - 1, 10, 'c'); put(cx, 10, 'c'); put(cx - 1, 11, 'c');
+      for (const [x, y] of [[cx - 2, 10], [cx + 2, 10], [cx - 2, 12], [cx + 2, 12]] as const) put(x, y, 'N');
+      put(cx - 2, 9, '.'); put(cx + 2, 9, '.');
+    }
+    // remaches en el borde de la cabeza
+    for (let x = 8; x <= 23; x += 3) put(x, 26, 'N');
+    for (let y = 15; y <= 24; y += 3) { put(7, y, 'N'); put(24, y, 'S'); }
+    // pátina verde en las orillas
+    for (const [x, y, c] of [[6, 22, 'p'], [6, 23, 'P'], [7, 23, 'p'], [6, 24, 'p'], [7, 25, 'P'], [8, 25, 'p'],
+      [25, 13, 'P'], [24, 14, 'p'], [25, 14, 'p'], [23, 25, 'p'], [24, 25, 'P'], [22, 26, 'p']] as const) put(x, y, c);
+  } else if (evolved) {
     for (let x = 6; x <= 25; x++) put(x, 10, x % 2 ? 'n' : 'N'); // banda dorada
     put(15, 12, 'b'); put(16, 12, 'b'); put(15, 11, 'B'); put(16, 11, 'b'); // gema en la frente
     // laureles a los lados de la cabeza
@@ -110,6 +157,33 @@ export function buildProtoGrid(f: ProtoFrame): string[][] {
 }
 
 type Put = (x: number, y: number, c: string) => void;
+
+/** Oreja de engrane de la v3, en latón: gira medio diente con cada `tick`. */
+function drawGear(cx: number, cy: number, tick: number, put: Put) {
+  const rot = (tick % 2) * (Math.PI / 6);
+  const filled = new Map<string, string>();
+  for (let y = Math.floor(cy - 6); y <= Math.ceil(cy + 6); y++) {
+    for (let x = Math.floor(cx - 6); x <= Math.ceil(cx + 6); x++) {
+      const dx = x - cx, dy = y - cy;
+      const r = Math.hypot(dx, dy);
+      const tooth = Math.cos(6 * (Math.atan2(dy, dx) - rot)) > 0.35;
+      if (r <= 1.4) filled.set(`${x},${y}`, 'o');
+      else if (r <= 3.4 || (r <= 4.9 && tooth)) filled.set(`${x},${y}`, dx + dy < -1.5 ? 'N' : dx + dy > 1.5 ? 'h' : 'n');
+    }
+  }
+  for (const key of filled.keys()) {
+    const [x, y] = key.split(',').map(Number) as [number, number];
+    for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+      const k = `${x + ox},${y + oy}`;
+      if (!filled.has(k) && x + ox >= 0 && x + ox <= 31) put(x + ox, y + oy, 'o');
+    }
+  }
+  for (const [key, c] of filled) {
+    const [x, y] = key.split(',').map(Number) as [number, number];
+    if (x >= 0 && x <= 31) put(x, y, c);
+  }
+}
+
 type Rect = (x0: number, y0: number, x1: number, y1: number, c: string) => void;
 type HLine = (x0: number, x1: number, y: number, c: string) => void;
 
@@ -226,10 +300,15 @@ export const PROTO_STAGES: readonly ProtoStage[] = [
     name: 'v2 Guardián',
     description: 'Bronce pulido, ojos azules, gema azul en la antena y banda dorada con laureles: evoluciona al completar la Era 1.',
   },
+  {
+    era: 3,
+    name: 'v3 Ingeniero de vapor',
+    description: 'Cobre con remaches y pátina, ojos verdes, goggles de latón, orejas de engrane y una chimenea con vapor: evoluciona al completar la Era 2.',
+  },
 ] as const;
 
 export const PROTO_FUTURE_NOTE =
-  'Vendrán más evoluciones con las eras 3, 4 y 5, cuando lleguen sus lecciones.';
+  'Vendrán más evoluciones con las eras 4 y 5, cuando lleguen sus lecciones.';
 
 /** Etapa de Proto-0 para una era: la más alta disponible sin pasarla. */
 export function stageForEra(era: number): ProtoStage {

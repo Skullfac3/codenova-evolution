@@ -3,7 +3,7 @@ import { useProgress } from '../store/progress';
 import { protoSay, useProto } from '../store/proto';
 import { PROTO_FUTURE_NOTE, PROTO_STAGES, stageForEra } from '../game/proto';
 import { COLS, ITEMS, LANDMARK, ROWS, TILE, WORLD_ERAS, isLandmarkTile, itemById } from '../game/items';
-import { OUTFIT_COLORS, drawGrassEdge, drawHut, drawTemple, drawTile, spriteCanvas, type SpriteKey, type TileKind, type TileSide } from '../game/sprites';
+import { OUTFIT_COLORS, drawFactory, drawGrassEdge, drawHut, drawTemple, drawTile, spriteCanvas, type SpriteKey, type TileKind, type TileSide } from '../game/sprites';
 import { availableCount, equipOutfit, placeObject, removeObjectAt, transferPet, transferablePets } from '../game/economy';
 import { ERAS } from '../learning/catalog';
 import { SpriteIcon } from './SpriteIcon';
@@ -34,6 +34,12 @@ function terrainFor(era: number): TileKind[][] {
         if (y === 6 && x >= 2) return 'tierra';
         return 'pasto';
       }
+      if (era >= 3) {
+        // Era 3: calle empedrada frente a la fábrica, cruzada por una vía de tren.
+        if (y === 6) return 'rieles';
+        if (y >= 3) return 'adoquin';
+        return 'pasto';
+      }
       // Era 2: plaza de losas rodeada de pasto.
       if (x >= 1 && x <= 8 && y >= 3 && y <= 7) return 'losa';
       if (x === 2 && y === 3) return 'losa';
@@ -60,7 +66,8 @@ function renderBackground(era: number): HTMLCanvasElement {
     }
   }));
   if (era === 1) drawHut(ctx, LANDMARK.x * TILE, LANDMARK.y * TILE);
-  else drawTemple(ctx, LANDMARK.x * TILE, LANDMARK.y * TILE);
+  else if (era === 2) drawTemple(ctx, LANDMARK.x * TILE, LANDMARK.y * TILE);
+  else drawFactory(ctx, LANDMARK.x * TILE, LANDMARK.y * TILE);
   return cv;
 }
 
@@ -161,6 +168,11 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
       };
       type Drawable = { y: number; draw: () => void };
       const list: Drawable[] = [];
+      // Humo de la chimenea de la fábrica: alterna dos cuadros.
+      if (era >= 3) {
+        const puff: SpriteKey = Math.floor(now / 650) % 2 ? 'humo2' : 'humo1';
+        list.push({ y: -1, draw: () => ctx.drawImage(spriteCanvas(puff), LANDMARK.x * TILE + 34, LANDMARK.y * TILE - TILE) });
+      }
       for (const o of s.worlds[era]?.objects ?? []) {
         const item = itemById(o.id);
         if (!item) continue;
@@ -199,7 +211,8 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
     const { x, y } = tileFromEvent(e);
     if (mode === 'explorar') {
       if (isLandmarkTile(x, y)) {
-        protoSay(era === 1 ? 'Nuestra choza. Aquí empezó todo.' : 'El templo de la ciudad. ¡Qué columnas!', 'talking', 3000);
+        const msg = era === 1 ? 'Nuestra choza. Aquí empezó todo.' : era === 2 ? 'El templo de la ciudad. ¡Qué columnas!' : '¡La fábrica! Aquí el vapor mueve todas las máquinas.';
+        protoSay(msg, 'talking', 3000);
         return;
       }
       explorer.current.tx = x * TILE;
@@ -228,7 +241,9 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
   };
 
   const eraInfo = ERAS.find((e) => e.id === era)!;
-  const nextLessonEra = Math.max(...save.unlockedEras);
+  // Aviso de la siguiente era sin refugio, solo en el refugio más reciente.
+  const nextWorld = ERAS.find((e) => e.id === Math.max(...worldEras) + 1);
+  const comingNote = era === Math.max(...worldEras) && nextWorld ? ` · La ${nextWorld.name} llega pronto.` : '';
   // Era que ve Proto-0: solo 1 y 2 tienen etapa (las eras 3-5 no existen aún).
   const protoEra = Math.max(...save.unlockedEras.filter((e) => e <= 3));
 
@@ -246,7 +261,7 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
           </div>
         )}
       </div>
-      <p className="muted habitat-sub">{eraInfo.name}{nextLessonEra > 2 ? ' · La Era digital llega pronto.' : ''}</p>
+      <p className="muted habitat-sub" data-testid="habitat-sub">{eraInfo.name}{comingNote}</p>
 
       <div className="world-frame">
         <canvas
