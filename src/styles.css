@@ -168,6 +168,9 @@ h3 { font-size: 14px; }
 .preview .console-title { color: var(--muted); }
 .html-preview { display: block; width: 100%; min-height: 180px; border: 1px solid #d8cbb7; background: #fff; }
 .hints { background: #2e2a1f; border: 2px dashed var(--fire-2); padding: 10px 12px 10px 28px; margin: 0 0 12px; }
+/* Ayuda pagada de Proto-0 (tras gastar las pistas gratis). */
+.paid-help { background: #232a3a; border: 2px dashed var(--fire-2); padding: 10px 12px; margin: 0 0 12px; display: grid; gap: 8px; }
+.paid-help p { margin: 0; }
 
 .feedback { display: flex; gap: 12px; margin-top: 12px; padding: 12px; border: 2px solid; }
 .feedback p { margin: 0 0 6px; }

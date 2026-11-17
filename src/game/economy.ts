@@ -90,3 +90,57 @@ export function transferablePets(save: Save, toEra: number) {
   if (already) return [];
   return save.pets.filter((p) => p.currentEra !== toEra && p.originEra < toEra);
 }
+
+// ── Ayuda de Proto-0 y regalo de NovaCoins ──
+
+/** Lo que cuesta que Proto-0 escriba la solución de un reto (tras gastar las pistas gratis). */
+export const HELP_COST = 3;
+/** NovaCoins que se regalan a quien no tiene suficientes para pedir ayuda. */
+export const GIFT_COINS = 5;
+/** Espera para el regalo: tiempo para pensar, descansar y retomar el reto. */
+export const GIFT_EVERY_MS = 30 * 60 * 1000;
+
+/** Empieza la espera del regalo cuando el saldo no alcanza para la ayuda, y la borra cuando sí alcanza. */
+function trackLowCoins(save: Save, now: Date): Save {
+  if (save.novacoins >= HELP_COST) {
+    if (!save.lowCoinsSince) return save;
+    const { lowCoinsSince: _, ...rest } = save;
+    return rest;
+  }
+  return save.lowCoinsSince ? save : { ...save, lowCoinsSince: now.toISOString() };
+}
+
+/** Paga la ayuda de Proto-0 para un reto. */
+export function buyHelp(save: Save, exerciseId: string, now: Date = new Date()): Result {
+  if (save.novacoins < HELP_COST) return fail(`La ayuda cuesta ${HELP_COST} NovaCoins y tienes ${save.novacoins}.`);
+  const next: Save = {
+    ...save,
+    novacoins: save.novacoins - HELP_COST,
+    helpPurchases: [...(save.helpPurchases ?? []), { exerciseId, price: HELP_COST, at: now.toISOString() }],
+  };
+  return { ok: true, save: trackLowCoins(next, now) };
+}
+
+/**
+ * Revisa el regalo: si el saldo no alcanza para la ayuda y ya pasaron 30 minutos,
+ * suma 5 NovaCoins. La espera cuenta aunque la app esté cerrada.
+ */
+export function claimGift(save: Save, now: Date = new Date()): { save: Save; granted: number } {
+  const tracked = trackLowCoins(save, now);
+  if (!tracked.lowCoinsSince || now.getTime() - Date.parse(tracked.lowCoinsSince) < GIFT_EVERY_MS) {
+    return { save: tracked, granted: 0 };
+  }
+  const next: Save = {
+    ...tracked,
+    novacoins: tracked.novacoins + GIFT_COINS,
+    gifts: [...(tracked.gifts ?? []), { coins: GIFT_COINS, at: now.toISOString() }],
+  };
+  return { save: trackLowCoins(next, now), granted: GIFT_COINS };
+}
+
+/** Milisegundos que faltan para el regalo, o null si el saldo ya alcanza para la ayuda. */
+export function msUntilGift(save: Pick<Save, 'novacoins' | 'lowCoinsSince'>, now: Date = new Date()): number | null {
+  if (save.novacoins >= HELP_COST) return null;
+  const since = save.lowCoinsSince ? Date.parse(save.lowCoinsSince) : now.getTime();
+  return Math.max(0, since + GIFT_EVERY_MS - now.getTime());
+}

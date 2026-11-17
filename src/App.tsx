@@ -6,6 +6,7 @@ import { levelForXp, useProgress } from './store/progress';
 import { APP_VERSION } from './version';
 import { onUpdateAvailable } from './pwa';
 import { isMuted, play, setMuted } from './game/sound';
+import { protoSay } from './store/proto';
 import { Habitat } from './components/Habitat';
 import { ProtoDock } from './components/ProtoDock';
 
@@ -65,6 +66,27 @@ export default function App() {
   // Sin esto, la app instalada se quedaba en silencio con el JS viejo.
   const [updateAvailable, setUpdateAvailable] = useState(false);
   useEffect(() => onUpdateAvailable(() => setUpdateAvailable(true)), []);
+
+  // Regalo de NovaCoins: si el saldo no alcanza para pedir ayuda a Proto-0,
+  // cada 30 minutos llegan 5. Se revisa al abrir, al volver a la app y cada 20 s.
+  const tickGift = useProgress((s) => s.tickGift);
+  useEffect(() => {
+    const check = () => {
+      const granted = tickGift();
+      if (granted > 0) {
+        play('coin');
+        protoSay(`¡Te regalé ${granted} NovaCoins! Descansaste: ahora vuelve al reto con calma.`, 'happy', 7000);
+      }
+    };
+    check();
+    const id = setInterval(check, 20_000);
+    const onVisible = () => document.visibilityState === 'visible' && check();
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [tickGift]);
 
   // Muestra todas las eras: las que tienen lecciones y, como anuncio,
   // las que aún no tienen (HTML y CSS van primero en el mapa). El banner

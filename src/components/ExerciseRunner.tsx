@@ -1,9 +1,11 @@
-import { Suspense, lazy, useCallback, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import type { Exercise, RunResult } from '../types/lesson';
 import { validateHtml, validateWithTests, type ValidationResult } from '../learning/validate';
 import { CodeSandbox } from '../editor/sandbox';
 import { protoSay } from '../store/proto';
 import { play } from '../game/sound';
+import { HELP_COST, GIFT_COINS, buyHelp, msUntilGift } from '../game/economy';
+import { useProgress } from '../store/progress';
 
 /**
  * El editor (CodeMirror + lenguajes + autocompletado) es el trozo más
@@ -23,9 +25,11 @@ interface Props {
   /** Recompensa que se suma al completar la lección (se muestra al aprobar). */
   rewardLabel?: string;
   onPassed: (hintsUsed: number) => void;
+  /** Permite pagar la ayuda de Proto-0 (no en las evaluaciones). */
+  allowPaidHelp?: boolean;
 }
 
-export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, onPassed }: Props) {
+export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, onPassed, allowPaidHelp = false }: Props) {
   const isHtml = exercise.language === 'html';
   const [code, setCode] = useState(exercise.starterCode);
   const [resetCount, setResetCount] = useState(0);
@@ -35,6 +39,35 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
   const [previewCode, setPreviewCode] = useState<string | null>(null);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [hintsShown, setHintsShown] = useState(0);
+
+  // ── Ayuda pagada: tras las pistas gratis, Proto-0 escribe la solución por 3 NovaCoins ──
+  const coins = useProgress((s) => s.save.novacoins);
+  const lowSince = useProgress((s) => s.save.lowCoinsSince);
+  const act = useProgress((s) => s.act);
+  const [helpUsed, setHelpUsed] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+  const waiting = coins < HELP_COST;
+  useEffect(() => {
+    if (!waiting) return;
+    const id = setInterval(() => setNow(Date.now()), 15_000);
+    return () => clearInterval(id);
+  }, [waiting]);
+  const minutesToGift = waiting
+    ? Math.max(1, Math.ceil((msUntilGift({ novacoins: coins, lowCoinsSince: lowSince }, new Date(now)) ?? 0) / 60_000))
+    : 0;
+  const buyProtoHelp = () => {
+    const r = act((s) => buyHelp(s, exercise.id));
+    if (!r.ok) {
+      play('alert');
+      protoSay(r.reason, 'sad', 3500);
+      return;
+    }
+    setCode(exercise.solution);
+    setResetCount((c) => c + 1);
+    setHelpUsed(true);
+    play('coin');
+    protoSay('Listo: escribí la solución en el editor. Ejecútala y lee cada línea para entenderla.', 'happy', 7000);
+  };
 
   const run = useCallback(async () => {
     setRunning(true);
@@ -106,6 +139,26 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
         </ul>
       )}
 
+      {allowPaidHelp && hintsShown >= exercise.hints.length && !validation?.passed && (
+        <div className="paid-help" data-testid="paid-help">
+          {helpUsed ? (
+            <p data-testid="help-done">🤖 Proto escribió la solución. Ejecútala y lee cada línea para entenderla.</p>
+          ) : !waiting ? (
+            <>
+              <p>¿Sigues atorado? Proto-0 puede escribir la solución por ti.</p>
+              <button className="btn" onClick={buyProtoHelp} data-testid="btn-help">
+                🤖 Que Proto lo resuelva · {HELP_COST} 🪙
+              </button>
+            </>
+          ) : (
+            <p data-testid="help-wait">
+              La ayuda cuesta {HELP_COST} 🪙 y tienes {coins}. Proto te regala {GIFT_COINS} 🪙 en {minutesToGift} min:
+              descansa, piensa con calma y vuelve al reto.
+            </p>
+          )}
+        </div>
+      )}
+
       {isHtml ? (
         <div className="preview" data-testid="html-preview-wrap">
           <span className="console-title">Vista previa</span>
@@ -150,7 +203,7 @@ export function ExerciseRunner({ exercise, label, era, messages, rewardLabel, on
             {validation.passed && (
               <>
                 {rewardLabel && <p className="muted">Recompensa al completar la lección: {rewardLabel}.</p>}
-                <button className="btn primary" onClick={() => onPassed(hintsShown)} data-testid="btn-continue">
+                <button className="btn primary" onClick={() => onPassed(hintsShown + (helpUsed ? 1 : 0))} data-testid="btn-continue">
                   Continuar →
                 </button>
               </>
