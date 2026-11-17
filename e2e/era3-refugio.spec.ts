@@ -32,6 +32,8 @@ test.describe('Era 3 · Era industrial', () => {
     await expect(page.getByTestId('proto-dock')).toHaveAttribute('data-stage', '3');
     await expect(page.getByTestId('proto-dock')).toContainText('v3 Ingeniero de vapor');
     await expect.poll(() => protoPixel(page, 12, 20)).toBe('#d9824a');
+    // El tren de vapor cruza las vías (pasa nada más abrir el refugio).
+    await expect(page.getByTestId('world')).toHaveAttribute('data-train', 'si');
 
     // En la Era 2 no se repite el aviso.
     await page.getByTestId('world-era-2').click();

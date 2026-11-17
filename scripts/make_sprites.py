@@ -889,13 +889,72 @@ def perro():
     s.outline()
     return s
 
+def _rueda(s, cx, cy, r, rot=0):
+    """Rueda roja con rayos de hierro; `rot` alterna la posición de los rayos."""
+    for y in range(int(cy - r) - 1, int(cy + r) + 2):
+        for x in range(int(cx - r) - 1, int(cx + r) + 2):
+            d = math.hypot(x - cx, y - cy)
+            if d <= r:
+                if d >= r - 1.2: s.put(x, y, 'red', 2 if (x - cx) + (y - cy) < 0 else 0)
+                elif d <= 1.2: s.put(x, y, 'beak', 2)
+                else:
+                    a = math.atan2(y - cy, x - cx) + rot
+                    s.put(x, y, 'iron', 1 if abs(math.sin(2 * a)) < .35 or abs(math.cos(2 * a)) < .35 else 0)
+
+def locomotora(frame=0):
+    """Locomotora de vapor de 64x64 (ocupa la mitad de abajo), mirando a la derecha."""
+    s = Spr(64)
+    rot = frame * math.pi / 4
+    # chasis
+    s.rect(2, 50, 61, 53, 'iron', 1); s.rect(2, 50, 61, 50, 'iron', 3); s.rect(2, 53, 61, 53, 'iron', 0)
+    # caldera verde con bandas de latón
+    s.rect(24, 34, 57, 49, 'leaf', 1)
+    for y in range(34, 50):
+        t = 3 if y < 37 else 2 if y < 42 else 1 if y < 47 else 0
+        s.rect(24, y, 57, y, 'leaf', t)
+    for x in (31, 42, 52): s.rect(x, 34, x + 1, 49, 'beak', 2); s.rect(x, 34, x + 1, 36, 'beak', 3); s.rect(x + 1, 45, x + 1, 49, 'beak', 0)
+    s.rect(57, 33, 61, 50, 'iron', 1); s.rect(58, 34, 61, 36, 'iron', 3); s.rect(61, 37, 61, 49, 'iron', 0)   # caja de humo
+    s.rect(58, 38, 60, 40, 'fire', 4); s.put(58, 38, 'fire', 5)                                              # farol
+    # chimenea y domo
+    s.rect(49, 22, 55, 33, 'iron', 1); s.rect(49, 22, 50, 33, 'iron', 3)
+    s.rect(47, 19, 57, 22, 'iron', 2); s.rect(47, 19, 57, 19, 'iron', 4); s.rect(48, 20, 56, 20, 'dark', 0)
+    s.ell(38, 33, 4, 3.2, 'beak', 2); s.pts('beak', 3, (36, 31), (37, 31), (35, 32)); s.pts('beak', 0, (41, 34), (40, 35))
+    # cabina roja
+    s.rect(4, 27, 24, 49, 'brick', 2); s.rect(4, 27, 5, 49, 'brick', 3); s.rect(23, 27, 24, 49, 'brick', 1)
+    s.rect(2, 23, 26, 26, 'iron', 2); s.rect(2, 23, 26, 23, 'iron', 4); s.rect(2, 26, 26, 26, 'iron', 0)
+    s.rect(9, 30, 19, 38, 'iron', 0); s.rect(10, 31, 18, 37, 'fire', 3); s.rect(10, 31, 13, 33, 'fire', 4)
+    s.rect(4, 41, 24, 42, 'beak', 2)
+    # quitapiedras
+    for i in range(6): s.rect(58 + i, 51 + i, 63, 51 + i, 'iron', 2 if i % 2 else 1)
+    # ruedas y biela
+    for cx in (21, 35, 49): _rueda(s, cx, 56.5, 6.5, rot)
+    _rueda(s, 59, 59.5, 3.5, rot)
+    oy = round(56.5 + 3 * math.sin(rot)); ox = round(3 * math.cos(rot))
+    s.rect(21 + ox, oy, 49 + ox, oy + 1, 'sto', 3); s.rect(21 + ox, oy + 1, 49 + ox, oy + 1, 'sto', 1)
+    s.outline()
+    return s
+
+def tender():
+    """Vagón de carbón (ténder) que va detrás de la locomotora."""
+    s = Spr()
+    s.rect(1, 13, 30, 25, 'leaf', 2)
+    for y in range(13, 26): s.rect(1, y, 30, y, 'leaf', 3 if y < 16 else 2 if y < 21 else 1)
+    s.rect(1, 13, 30, 13, 'beak', 2); s.rect(1, 25, 30, 25, 'beak', 1); s.rect(15, 14, 16, 24, 'beak', 1)
+    for x0, x1, y in ((3, 28, 12), (5, 26, 11), (8, 22, 10), (11, 18, 9)):
+        s.rect(x0, y, x1, y, 'dark', 2)
+    s.pts('iron', 2, (6, 11), (12, 10), (19, 11), (24, 12), (14, 9))
+    s.rect(0, 26, 31, 26, 'iron', 1)
+    for cx in (8, 23): _rueda(s, cx, 28.5, 3.4)
+    s.outline()
+    return s
+
 # ───────── Exportar ─────────
 SPRITES = {
     'fogata1': lambda: fogata(0), 'fogata2': lambda: fogata(1), 'roca': roca, 'helecho': helecho,
     'columna': columna, 'anfora': anfora, 'fuente': fuente, 'dodo': dodo, 'lagartija': lagartija,
     'buho': buho, 'gato': gato, 'explorador1': lambda: explorador(0), 'explorador2': lambda: explorador(1),
     'engrane': engrane, 'farol': farol, 'yunque': yunque, 'paloma': paloma, 'perro': perro,
-    'humo1': lambda: humo(0), 'humo2': lambda: humo(1),
+    'humo1': lambda: humo(0), 'humo2': lambda: humo(1), 'tender': tender,
 }
 TILES = {
     'pasto1': lambda: pasto(7), 'pasto2': lambda: pasto(8), 'pasto3': lambda: pasto(9),
@@ -903,7 +962,8 @@ TILES = {
     'adoquin1': lambda: adoquin(4), 'adoquin2': lambda: adoquin(9), 'rieles': lambda: rieles(6),
     'bordeN': lambda: borde('n'), 'bordeS': lambda: borde('s'), 'bordeE': lambda: borde('e'), 'bordeO': lambda: borde('o'),
 }
-BUILDINGS = {'choza': choza, 'templo': templo, 'fabrica': fabrica}
+BUILDINGS = {'choza': choza, 'templo': templo, 'fabrica': fabrica,
+             'locomotora1': lambda: locomotora(0), 'locomotora2': lambda: locomotora(1)}
 POOL = [c for c in 'abcdefghijlmnopqrsuvwxyzABCDEFGHIJKLMNOPQRSWXYZ0123456789+-*=!?@#$%&_~^:;<>|/()[]{},`' if c not in PINNED.values()] + list('ÁÉÍÓÚáéíóúÑñÜüÇçÀÈÌÒÙàèìòùÂÊÎÔÛâêîôûÄËÏÖäëïöÃÕãõ¡¿°±×÷§¶ßØøÅåÆæ')
 
 def build():

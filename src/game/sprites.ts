@@ -94,6 +94,11 @@ export function drawTemple(ctx: CanvasRenderingContext2D, x: number, y: number) 
   ctx.drawImage(buildingCanvas('templo'), x, y);
 }
 
+/** Locomotora de vapor de 64x64 (el dibujo ocupa la mitad de abajo); `frame` gira las ruedas. */
+export function drawLocomotive(ctx: CanvasRenderingContext2D, frame: number, x: number, y: number) {
+  ctx.drawImage(buildingCanvas(frame % 2 ? 'locomotora2' : 'locomotora1'), x, y);
+}
+
 /** Fábrica de la Era industrial: 64x64 (2x2 casillas). */
 export function drawFactory(ctx: CanvasRenderingContext2D, x: number, y: number) {
   ctx.drawImage(buildingCanvas('fabrica'), x, y);

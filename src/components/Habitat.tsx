@@ -3,7 +3,7 @@ import { useProgress } from '../store/progress';
 import { protoSay, useProto } from '../store/proto';
 import { PROTO_FUTURE_NOTE, PROTO_STAGES, stageForEra } from '../game/proto';
 import { COLS, ITEMS, LANDMARK, ROWS, TILE, WORLD_ERAS, isLandmarkTile, itemById } from '../game/items';
-import { OUTFIT_COLORS, drawFactory, drawGrassEdge, drawHut, drawTemple, drawTile, spriteCanvas, type SpriteKey, type TileKind, type TileSide } from '../game/sprites';
+import { OUTFIT_COLORS, drawFactory, drawGrassEdge, drawLocomotive, drawHut, drawTemple, drawTile, spriteCanvas, type SpriteKey, type TileKind, type TileSide } from '../game/sprites';
 import { availableCount, equipOutfit, placeObject, removeObjectAt, transferPet, transferablePets } from '../game/economy';
 import { ERAS } from '../learning/catalog';
 import { SpriteIcon } from './SpriteIcon';
@@ -25,6 +25,11 @@ interface Walker {
 }
 
 /** Terreno de cada era (determinista: siempre se ve igual). */
+/** Tren de la Era 3: fila de las vías, cada cuánto pasa y cuánto tarda en cruzar. */
+const TRAIN_ROW = 6;
+const TRAIN_EVERY_MS = 24_000;
+const TRAIN_CROSS_MS = 8_000;
+
 function terrainFor(era: number): TileKind[][] {
   return Array.from({ length: ROWS }, (_, y) =>
     Array.from({ length: COLS }, (_, x): TileKind => {
@@ -36,7 +41,7 @@ function terrainFor(era: number): TileKind[][] {
       }
       if (era >= 3) {
         // Era 3: calle empedrada frente a la fábrica, cruzada por una vía de tren.
-        if (y === 6) return 'rieles';
+        if (y === TRAIN_ROW) return 'rieles';
         if (y >= 3) return 'adoquin';
         return 'pasto';
       }
@@ -168,6 +173,28 @@ export function Habitat({ onGoToLessons, onGoToShop }: { onGoToLessons: () => vo
       };
       type Drawable = { y: number; draw: () => void };
       const list: Drawable[] = [];
+      // Tren de vapor: cruza las vías de izquierda a derecha cada 24 s (tarda 8 s).
+      let trainVisible = false;
+      if (era >= 3) {
+        const progress = (now % TRAIN_EVERY_MS) / TRAIN_CROSS_MS;
+        if (progress < 1) {
+          trainVisible = true;
+          const len = 96; // ténder (32) + locomotora (64)
+          const x = Math.round(-len + progress * (W + len));
+          const rail = TRAIN_ROW * TILE + 22; // altura de los rieles dentro de la casilla
+          const wheel = Math.floor(now / 110);
+          const puff: SpriteKey = Math.floor(now / 300) % 2 ? 'humo2' : 'humo1';
+          list.push({
+            y: TRAIN_ROW * TILE,
+            draw: () => {
+              ctx.drawImage(spriteCanvas('tender'), x, rail - 31);
+              drawLocomotive(ctx, wheel, x + 32, rail - 63);
+              ctx.drawImage(spriteCanvas(puff), x + 32 + 52 - 20, rail - 63 + 19 - 29); // sale de la chimenea y se queda atrás
+            },
+          });
+        }
+      }
+      if (canvas.current) canvas.current.dataset.train = trainVisible ? 'si' : 'no';
       // Humo de la chimenea de la fábrica: alterna dos cuadros.
       if (era >= 3) {
         const puff: SpriteKey = Math.floor(now / 650) % 2 ? 'humo2' : 'humo1';
